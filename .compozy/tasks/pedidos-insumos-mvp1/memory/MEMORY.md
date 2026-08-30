@@ -2,8 +2,7 @@
 
 ## Current State
 
-- Phase D rodada 2 SHIP (incremental). Próximo detect esperado: Phase E `await_ci`.
-- `origin/mvp-1` ainda em `39b2a31` até o checkpoint desta rodada; Phase E exige auth da API GitHub para draft PR.
+- Phase E: workflow `gate` adicionado para o check nomeado que `--ci-pass` exige. Draft PR ainda depende de `gh auth` / `GH_TOKEN`.
 - Branch de trabalho: `mvp-1` (tracking `origin/mvp-1`). Sem `--frontend` e sem `--stacked`.
 
 ## Shared Decisions
@@ -33,10 +32,11 @@
 - Aurora não cabe no primeiro bloco de 10 do recorte Todos.
 - `make gate` sem `SLUG=` precisa defaultar o slug do loop ativo (MVP1).
 - Select vazio “Propriedade” no checkout colide com “Nome da propriedade”.
+- Phase E sem URL de PR: não usar `--verify-fail` — isso anula SHIP e o detect volta para a Phase D.
 
 ## Open Risks
 
-- Phase E: sem credencial da API GitHub (`gh` sem login; `GH_TOKEN`/`GITHUB_TOKEN` unset; sem `~/.config/gh`, netrc ou credential helper). `git push -u origin HEAD` via SSH criou `origin/mvp-1` em `39b2a3186d27fd6639e768a17fd3a33d0c3c6460`. `gh pr create` pede `gh auth login`. POST anônimo em `/repos/vicentepf78/pedido-produtor-rural/pulls` retornou 401. `gh auth login` é interativo e não cabe no loop. Sem URL de PR, `update-state --ci-pending/--ci-pass` não fecha. Retomar com `gh auth login` ou `GH_TOKEN` e criar o draft `mvp-1` → `main`.
+- Phase E: sem credencial da API GitHub. `origin/mvp-1` tinha zero check-runs; `.github/workflows/gate.yml` passa a rodar `make gate` em `pull_request` e `push` de `main`/`mvp-1`. Sem URL de PR, `--ci-pending`/`--ci-pass` ainda não grava. Compare: https://github.com/vicentepf78/pedido-produtor-rural/compare/main...mvp-1
 
 ## Open Questions
 
