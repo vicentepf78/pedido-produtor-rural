@@ -164,6 +164,154 @@ export async function mockarApis(page: Page) {
     await rota.fulfill({ json: visao(linhas) });
   });
 
+  const propriedadesAlfa = [
+    { id: "55555555-5555-5555-5555-555555555555", nome: "Fazenda Boa Vista — 420 ha" },
+    { id: "66666666-6666-6666-6666-666666666666", nome: "Sítio São João — 85 ha" },
+  ];
+  const propriedadesBeta = [{ id: "99999999-9999-9999-9999-999999999999", nome: "Fazenda Sul" }];
+  type PedidoMock = {
+    idPedido: string;
+    dono: string;
+    situacao: string;
+    confirmacao: string;
+    nomePropriedade: string;
+    preferenciaRetirada: string;
+    total: string;
+    criadoEm: string;
+    itens: Array<{ nome: string; unidade: string; quantidade: number; precoUnitario: string; totalLinha: string }>;
+  };
+  const pedidos: PedidoMock[] = [];
+  const negados = new Set<string>();
+  let usuarioAtual = "alfa";
+
+  let sessaoAtiva = false;
+
+  await page.route("**/api/v1/autenticacao/cadastro", async (rota) => {
+    sessaoAtiva = true;
+    usuarioAtual = "novo";
+    await rota.fulfill({
+      json: { idUsuario: "usr-novo", nome: "Produtor Novo", papeis: ["PRODUTOR"] },
+    });
+  });
+
+  await page.route("**/api/v1/autenticacao/entrada", async (rota) => {
+    const corpo = rota.request().postDataJSON() as { email?: string; senha?: string };
+    if (!corpo.email || !corpo.senha) {
+      await rota.fulfill({
+        status: 401,
+        json: { codigo: "CREDENCIAIS_INVALIDAS", mensagem: "E-mail ou senha inválidos." },
+      });
+      return;
+    }
+    if (corpo.senha === "errada") {
+      await rota.fulfill({
+        status: 401,
+        json: { codigo: "CREDENCIAIS_INVALIDAS", mensagem: "E-mail ou senha inválidos." },
+      });
+      return;
+    }
+    sessaoAtiva = true;
+    usuarioAtual = corpo.email.includes("beta") ? "beta" : "alfa";
+    await rota.fulfill({
+      json: {
+        idUsuario: usuarioAtual === "beta" ? "usr-beta" : "usr-alfa",
+        nome: usuarioAtual === "beta" ? "Produtor Beta" : "Produtor Alfa",
+        papeis: ["PRODUTOR"],
+      },
+    });
+  });
+
+  await page.route("**/api/v1/produtor/propriedades", async (rota) => {
+    if (!sessaoAtiva) {
+      await rota.fulfill({
+        status: 401,
+        json: { codigo: "NAO_AUTENTICADO", mensagem: "Entre ou crie uma conta para continuar." },
+      });
+      return;
+    }
+    const itens = usuarioAtual === "beta" ? propriedadesBeta : propriedadesAlfa;
+    await rota.fulfill({ json: { itens } });
+  });
+
+  await page.route(/\/api\/v1\/pedidos(\/[^/?]+)?(\?|$)/, async (rota) => {
+    const url = new URL(rota.request().url());
+    const id = url.pathname.split("/").filter(Boolean)[3];
+    if (rota.request().method() === "POST") {
+      if (linhas.length === 0) {
+        await rota.fulfill({
+          status: 400,
+          json: { codigo: "CARRINHO_VAZIO", mensagem: "Adicione ao menos um produto antes do checkout." },
+        });
+        return;
+      }
+      const corpo = rota.request().postDataJSON() as { idPropriedade?: string; preferenciaRetirada?: string };
+      if (!corpo.idPropriedade || !corpo.preferenciaRetirada) {
+        await rota.fulfill({
+          status: 400,
+          json: {
+            codigo: "DADOS_CHECKOUT_OBRIGATORIOS",
+            mensagem: "Escolha uma propriedade e a preferência de retirada.",
+          },
+        });
+        return;
+      }
+      const propriedade =
+        [...propriedadesAlfa, ...propriedadesBeta].find((p) => p.id === corpo.idPropriedade)?.nome ?? "Propriedade";
+      const total = visao(linhas).total;
+      const idPedido = `ord-${pedidos.length + 1}`;
+      const pedido: PedidoMock = {
+        idPedido,
+        dono: usuarioAtual,
+        situacao: "RECEBIDO",
+        confirmacao: "PENDENTE",
+        nomePropriedade: propriedade,
+        preferenciaRetirada: corpo.preferenciaRetirada,
+        total,
+        criadoEm: "2026-08-30T13:55:00Z",
+        itens: linhas.map((linha) => ({
+          nome: linha.nome,
+          unidade: "Saco",
+          quantidade: linha.quantidade,
+          precoUnitario: linha.precoUnitario,
+          totalLinha: linha.totalLinha,
+        })),
+      };
+      pedidos.push(pedido);
+      linhas.length = 0;
+      await rota.fulfill({
+        json: { idPedido, situacao: "RECEBIDO", confirmacao: "PENDENTE", mensagem: "Pedido recebido" },
+      });
+      return;
+    }
+    if (rota.request().method() !== "GET") {
+      await rota.fallback();
+      return;
+    }
+    if (!id) {
+      const doUsuario = pedidos.filter((p) => p.dono === usuarioAtual);
+      await rota.fulfill({
+        json: { itens: doUsuario, pagina: 1, tamanhoPagina: 10, total: doUsuario.length },
+      });
+      return;
+    }
+    if (negados.has(id) || (usuarioAtual === "beta" && pedidos.some((p) => p.idPedido === id && p.dono !== "beta"))) {
+      await rota.fulfill({
+        status: 403,
+        json: { codigo: "ACESSO_PEDIDO_NEGADO", mensagem: "Você não pode visualizar este pedido." },
+      });
+      return;
+    }
+    const pedido = pedidos.find((p) => p.idPedido === id);
+    if (!pedido) {
+      await rota.fulfill({
+        status: 403,
+        json: { codigo: "ACESSO_PEDIDO_NEGADO", mensagem: "Você não pode visualizar este pedido." },
+      });
+      return;
+    }
+    await rota.fulfill({ json: pedido });
+  });
+
   return {
     povoarCemLinhas() {
       linhas.length = 0;
@@ -177,6 +325,37 @@ export async function mockarApis(page: Page) {
           totalLinha: dinheiro(preco),
         });
       }
+    },
+    povoarPedidoDemo() {
+      pedidos.push({
+        idPedido: "ord-demo",
+        dono: "alfa",
+        situacao: "RECEBIDO",
+        confirmacao: "PENDENTE",
+        nomePropriedade: "Fazenda Boa Vista — 420 ha",
+        preferenciaRetirada: "DEPOSITO_PRINCIPAL",
+        total: "1240.00",
+        criadoEm: "2026-08-28T17:32:00Z",
+        itens: [
+          {
+            nome: AURORA.nome,
+            unidade: "Saco",
+            quantidade: 2,
+            precoUnitario: "620.00",
+            totalLinha: "1240.00",
+          },
+        ],
+      });
+    },
+    negarPedido(id: string) {
+      negados.add(id);
+    },
+    autenticarComo(papel: "alfa" | "beta") {
+      sessaoAtiva = true;
+      usuarioAtual = papel;
+    },
+    ultimoPedido() {
+      return pedidos.at(-1);
     },
   };
 }

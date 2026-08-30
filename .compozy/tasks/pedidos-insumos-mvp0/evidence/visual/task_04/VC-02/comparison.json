@@ -1,0 +1,11 @@
+{
+  "contract_id": "VC-02",
+  "viewport_reference": { "width": 390, "height": 844 },
+  "viewport_implementation": { "width": 390, "height": 844 },
+  "pixel_diff_ratio": 0.1954,
+  "pixel_threshold": 0.28,
+  "blocking_divergences": 0,
+  "validator": "manual-playwright-pillow (eng-ui-screenshot ausente)",
+  "verdict": "PASS",
+  "reviewed": true
+}

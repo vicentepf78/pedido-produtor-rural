@@ -5,6 +5,7 @@ import { PaginaCatalogo } from "./features/catalog/PaginaCatalogo";
 import { PaginaCarrinho } from "./features/cart/PaginaCarrinho";
 import { PaginaCheckout } from "./features/checkout/PaginaCheckout";
 import { PaginaMeusPedidos } from "./features/my-orders/PaginaMeusPedidos";
+import { PaginaDetalhePedido } from "./features/my-orders/PaginaDetalhePedido";
 import { PaginaPedidosRetaguarda } from "./features/backoffice-orders/PaginaPedidosRetaguarda";
 
 export function App() {
@@ -18,6 +19,7 @@ export function App() {
             <Route path="/catalogo/:idProduto" element={<PaginaCatalogo />} />
             <Route path="/carrinho" element={<PaginaCarrinho />} />
             <Route path="/checkout" element={<PaginaCheckout />} />
+            <Route path="/pedidos/:idPedido" element={<PaginaDetalhePedido />} />
             <Route path="/meus-pedidos" element={<PaginaMeusPedidos />} />
             <Route path="/retaguarda/pedidos" element={<PaginaPedidosRetaguarda />} />
           </Routes>

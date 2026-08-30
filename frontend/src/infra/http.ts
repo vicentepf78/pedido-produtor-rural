@@ -16,6 +16,10 @@ export class FalhaApi extends Error {
 
 let tokenCsrf: string | undefined;
 
+export function invalidarCsrf() {
+  tokenCsrf = undefined;
+}
+
 async function csrf(): Promise<string> {
   if (tokenCsrf) {
     return tokenCsrf;
@@ -31,7 +35,12 @@ export async function getJson<T>(caminho: string): Promise<T> {
   return ler(resposta);
 }
 
-export async function mutarJson<T>(caminho: string, metodo: string, corpo?: unknown): Promise<T> {
+export async function mutarJson<T>(
+  caminho: string,
+  metodo: string,
+  corpo?: unknown,
+  cabecalhos?: Record<string, string>,
+): Promise<T> {
   const token = await csrf();
   const resposta = await fetch(caminho, {
     method: metodo,
@@ -39,6 +48,7 @@ export async function mutarJson<T>(caminho: string, metodo: string, corpo?: unkn
     headers: {
       "Content-Type": "application/json",
       "X-XSRF-TOKEN": token,
+      ...cabecalhos,
     },
     body: corpo === undefined ? undefined : JSON.stringify(corpo),
   });

@@ -2,7 +2,7 @@
 
 ## Current State
 
-- `task_01`–`task_03` concluídas. Próxima: `task_04` (checkout e pedido).
+- `task_01`–`task_04` concluídas. Próxima: `task_05` (Mock ERP + backoffice).
 - Frontend pinado em Vite 6 (Node do host é 20.17).
 
 ## Shared Decisions
@@ -24,6 +24,8 @@
 - Cookie de convidado: `chaveCarrinhoConvidado` (HttpOnly, SameSite=Lax, Secure fora de `local`, Max-Age 30d), gravado na primeira mutação do carrinho.
 - Seed: 30 produtos não regulamentados + 1 regulamentado `10000000-0000-4000-8000-000000000099` (fora da listagem). Aurora: `10000000-0000-4000-8000-000000000001` a R$ 620,00.
 - Detalhe: `GET /api/v1/catalogo/produtos/{id}`. Mutações extras do carrinho: GET/PATCH/DELETE em `/api/v1/carrinhos/convidado`.
+- Pedido: `POST /api/v1/pedidos` + `GET /api/v1/pedidos` e `GET /api/v1/pedidos/{id}` (papel `PRODUTOR`). Header `Idempotency-Key`. `confirmacao` permanece `PENDENTE` até a task_05.
+- Módulo `order` lê o carrinho só pela porta `application` (não o inverso) para não fechar ciclo Modulith.
 
 ## Shared Learnings
 
@@ -34,7 +36,7 @@
 - O remoto `vicentepf78/pedido-produtor-rural` estava vazio no bootstrap.
 - O app desktop CompozyOS não está instalado; acompanhamento pela UI web do daemon.
 - O dock Tasks do CompozyOS não lista `task_NN.md`.
-- `eng-ui-screenshot` ausente: bundles visuais via Playwright (`VISUAL_TASK03=1`) + Pillow; revisão humana dos pares.
+- `eng-ui-screenshot` ausente: bundles visuais via Playwright (`VISUAL_TASK03=1` / `VISUAL_TASK04=1`) + Pillow; revisão humana dos pares.
 - Abas do catálogo vêm do catálogo sem filtro e não desaparecem na busca vazia.
 
 ## Open Risks
@@ -47,4 +49,4 @@
 
 ## Handoffs
 
-- `task_04`: checkout + pedido idempotente + Meus pedidos. Reutilizar `chaveCarrinhoConvidado` e CSRF.
+- `task_05`: implementar `GatewayErpSimulado` e lista do operador; não reabrir checkout/Meus pedidos do produtor. Pedido local já é a fonte de autoridade; `confirmacao` ainda `PENDENTE`.

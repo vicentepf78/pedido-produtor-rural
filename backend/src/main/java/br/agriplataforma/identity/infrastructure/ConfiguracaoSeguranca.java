@@ -56,6 +56,8 @@ public class ConfiguracaoSeguranca {
 						.permitAll()
 						.requestMatchers("/api/v1/produtor/**")
 						.hasAuthority("PRODUTOR")
+						.requestMatchers("/api/v1/pedidos", "/api/v1/pedidos/**")
+						.hasAuthority("PRODUTOR")
 						.anyRequest()
 						.authenticated())
 				.exceptionHandling(ex -> ex.authenticationEntryPoint(entradaNaoAutenticada())

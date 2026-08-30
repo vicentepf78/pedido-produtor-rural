@@ -8,6 +8,8 @@ import br.agriplataforma.producer.domain.Propriedade;
 import br.agriplataforma.producer.infrastructure.RepositorioProdutor;
 import br.agriplataforma.producer.infrastructure.RepositorioPropriedade;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,18 +33,39 @@ public class ServicoProdutor implements ConsultaPropriedades {
 	@Override
 	@Transactional
 	public List<ResumoPropriedade> listarDoAutenticado() {
+		Produtor produtor = exigirProdutor();
+		return repositorioPropriedade
+				.findByIdTenantAndIdProdutorOrderByNome(produtor.idTenant(), produtor.id())
+				.stream()
+				.map(ServicoProdutor::resumo)
+				.toList();
+	}
+
+	@Override
+	@Transactional
+	public Optional<ResumoPropriedade> buscarPropria(UUID idPropriedade) {
+		if (idPropriedade == null) {
+			return Optional.empty();
+		}
+		return listarDoAutenticado().stream()
+				.filter(propriedade -> propriedade.id().equals(idPropriedade))
+				.findFirst();
+	}
+
+	@Override
+	@Transactional
+	public UUID idProdutorDoAutenticado() {
+		return exigirProdutor().id();
+	}
+
+	private Produtor exigirProdutor() {
 		UsuarioAutenticado usuario = consultaIdentidade.exigirAutenticado();
 		if (usuario.papel() != Papel.PRODUTOR) {
 			throw new AccessDeniedException("Somente o produtor pode listar propriedades.");
 		}
-		Produtor produtor = repositorioProdutor
+		return repositorioProdutor
 				.findByIdTenantAndIdUsuario(usuario.idTenant(), usuario.id())
 				.orElseGet(() -> repositorioProdutor.save(Produtor.novo(usuario.idTenant(), usuario.id())));
-		return repositorioPropriedade
-				.findByIdTenantAndIdProdutorOrderByNome(usuario.idTenant(), produtor.id())
-				.stream()
-				.map(ServicoProdutor::resumo)
-				.toList();
 	}
 
 	private static ResumoPropriedade resumo(Propriedade propriedade) {

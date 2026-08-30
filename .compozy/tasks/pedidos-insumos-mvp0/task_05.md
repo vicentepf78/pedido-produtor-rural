@@ -1,5 +1,5 @@
 ---
-status: pending
+status: in_progress
 title: Mock ERP e backoffice somente leitura
 type: fullstack
 complexity: high

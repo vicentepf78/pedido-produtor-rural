@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class ServicoCarrinho {
+public class ServicoCarrinho implements ConsultaCarrinho {
 
 	private final RepositorioCarrinho repositorioCarrinho;
 	private final RepositorioItemCarrinho repositorioItens;
@@ -34,6 +34,7 @@ public class ServicoCarrinho {
 		this.consultaTenant = consultaTenant;
 	}
 
+	@Override
 	@Transactional(readOnly = true)
 	public VisaoCarrinho obter(String chaveProprietario) {
 		return repositorioCarrinho
@@ -71,6 +72,14 @@ public class ServicoCarrinho {
 		item.definirQuantidade(quantidade, produto.precoUnitario());
 		repositorioItens.save(item);
 		return visao(carrinho);
+	}
+
+	@Override
+	@Transactional
+	public void esvaziar(String chaveProprietario) {
+		repositorioCarrinho
+				.findByIdTenantAndChaveProprietario(consultaTenant.idTenantConfigurado(), chaveProprietario)
+				.ifPresent(carrinho -> repositorioItens.deleteByIdCarrinho(carrinho.id()));
 	}
 
 	@Transactional
