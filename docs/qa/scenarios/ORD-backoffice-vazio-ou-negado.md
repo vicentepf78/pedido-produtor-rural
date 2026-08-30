@@ -6,13 +6,13 @@ persona: Operador da revenda
 journey: J-operador-retaguarda
 expected: Operador sem pedidos vê estado vazio explícito; produtor autenticado em /retaguarda/pedidos recebe ACESSO_NEGADO e não vê a lista
 entry_points: /retaguarda/pedidos; GET /api/v1/retaguarda/pedidos; GET /api/v1/retaguarda/pedidos/{idPedido}; ACESSO_NEGADO
-qa_status: untested
+qa_status: pass
 bug_ids:
 fix_status:
 retest_status:
 fix_commits:
-evidence: docs/qa/evidence/2026-08-30-pedidos-insumos-mvp0/CH-operador-lista-retaguarda-04-produtor-negado.png
-last_report: docs/qa/reports/2026-08-30-pedidos-insumos-mvp0.md
+evidence: docs/qa/evidence/2026-08-30-pedidos-insumos-mvp1/23-alfa-retaguarda-negado.png
+last_report: docs/qa/reports/2026-08-30-pedidos-insumos-mvp1.md
 overlaps: ORD-backoffice-lista; ORD-acesso-negado
 ---
 

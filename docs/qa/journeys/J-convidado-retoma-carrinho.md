@@ -12,7 +12,7 @@ flowchart TD
     C -->|fecha a aba| D[Abandono]
     C -->|recarrega| E1[GET /api/v1/carrinhos/convidado]
     C -->|rede cai na mutação| E2[Último estado confirmado preservado]
-    C -->|POST autenticacao/saida| E3[Sessão some; cookie do carrinho fica]
+    C -->|Sair no TopoLoja ou POST autenticacao/saida| E3[Sessão some; cookie do carrinho fica]
     D --> F[Volta no mesmo navegador]
     F --> E1
     E2 --> B

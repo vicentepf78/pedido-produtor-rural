@@ -1,6 +1,6 @@
 # BUG-20260830-sem-sair-na-interface: produtor não encontra como encerrar a sessão
 
-- **Status:** resolved
+- **Status:** verified
 - **Impact (user-side):** Friction
 - **Severity:** Medium · **Priority:** P2
 - **Persona Affected:** Produtor após falha
@@ -39,5 +39,10 @@ carrinho.
 
 <!-- filled when status moves to fixed -->
 - **Root cause:** a casca do SPA não expõe a rota de saída já existente na API.
-- **Fix commit:**
-- **Regression test:**
+- **Fix commit:** (Sair no TopoLoja, entregue na task_02 / d87389f)
+- **Regression test:** walk 2026-08-30 — dois toques em Sair no topo; cookie do carrinho permanece (`16-apos-sair.png`)
+
+## Verification
+
+- **Retested:** 2026-08-30, Produtor rural / J-produtor-pedido-rapido · **Report:** docs/qa/reports/2026-08-30-pedidos-insumos-mvp1.md
+- **Result:** Sair no `TopoLoja` exige dois toques; após sair o atalho Entrar volta e `chaveCarrinhoConvidado` permanece.

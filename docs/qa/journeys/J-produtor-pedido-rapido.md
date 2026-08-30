@@ -5,9 +5,17 @@ com identificação tardia e confirmação imediata.
 
 ```mermaid
 flowchart TD
-    E[Entrada: / ou /catalogo] --> A[Navega ou pesquisa o catálogo]
+    E[Entrada: / ou /catalogo] --> T[TopoLoja: Catálogo Carrinho Checkout Pedido]
+    T -->|convidado| T1[Atalho Entrar abre /entrar com origem]
+    T1 -->|sucesso produtor| T2[Volta à origem; GET /sessao com email e papeis]
+    T1 -->|operador| T3[Ignora origem da loja; vai a /retaguarda/pedidos]
+    T1 -->|cancela| T
+    T --> A[Carrossel fechado + busca composta + tamanhoPagina]
+    A -->|card categoria| A0[Recorte Sementes Fertilizantes Correção ou Todos]
+    A -->|consulta + categoria| A0
+    A -->|Carregar mais| A4[Próximo bloco sem duplicar; query sem pagina]
     A -->|resultados| B[Vê nome, preço, unidade e imagem ou placeholder]
-    A -->|busca vazia ou sem correspondência| A1[Estado vazio + Limpar busca]
+    A -->|busca vazia ou sem correspondência| A1[Estado vazio + Limpar filtros]
     A1 --> A
     A -->|item indisponível| A2[Visível sem ação de compra]
     A -->|link direto a regulamentado| A3[PRODUTO_NAO_ELEGIVEL sem revelar conteúdo]
@@ -16,16 +24,19 @@ flowchart TD
     C -->|quantidade inválida| C1[QUANTIDADE_INVALIDA + carrinho anterior intacto]
     C1 --> C
     C --> D[Ajusta ou remove no /carrinho]
-    D -->|carrinho vazio| D1[Checkout bloqueado: CARRINHO_VAZIO]
+    D -->|carrinho vazio| D1[Checkout bloqueado: CARRINHO_VAZIO; atalho Checkout permanece no topo]
     D1 -->|abandona a aba| X1[Abandono: volta depois; cookie chaveCarrinhoConvidado]
     X1 -->|retoma| D
     D --> F[Inicia /checkout]
-    F --> G[Entra ou cria conta]
+    F -->|já PRODUTOR| H[Pula Entrar; propriedade e retirada]
+    F -->|convidado| G[Entra ou cria conta no próprio checkout]
     G -->|EMAIL_DUPLICADO ou CREDENCIAIS_INVALIDAS| G1[Erro em foco; dados e carrinho preservados]
     G1 --> G
-    G -->|sessão expirada| G2[NAO_AUTENTICADO; carrinho de convidado intacto]
+    G -->|sessão expirada| G2[NAO_AUTENTICADO; GET /sessao; carrinho de convidado intacto]
     G2 --> G
-    G --> H[Escolhe propriedade própria e retirada]
+    G --> H
+    H -->|sem propriedade| H0[Cadastra nome só no checkout]
+    H0 --> I
     H -->|campo ausente| H1[DADOS_CHECKOUT_OBRIGATORIOS]
     H1 --> H
     H --> I[Confirma POST /api/v1/pedidos com Idempotency-Key]
@@ -50,20 +61,26 @@ journey:
       origin: direct
     - url: /catalogo
       origin: in-app-nav
-    - url: GET /api/v1/catalogo/produtos
+    - url: /entrar?origem=/checkout
+      origin: in-app-nav
+    - url: /cadastro
+      origin: in-app-nav
+    - url: GET /api/v1/autenticacao/sessao
+      origin: in-app-nav
+    - url: GET /api/v1/catalogo/produtos?categoria=&consulta=&tamanhoPagina=10
       origin: in-app-nav
     - url: POST /api/v1/pedidos
       origin: in-app-nav
   actions:
     - step: 1
-      verb: Abre a loja e encontra um produto disponível
-      expected_observable: Nome, preço, unidade e imagem ou placeholder em até 3s
+      verb: Abre a loja pelo topo, recorta no carrossel e encontra um produto disponível
+      expected_observable: Cards Todos/Sementes/Fertilizantes/Correção; nome, preço, unidade e imagem ou placeholder em até 3s
     - step: 2
       verb: Adiciona e ajusta quantidades no carrinho
       expected_observable: Totais de linha e pedido batem com o preço unitário atual
     - step: 3
-      verb: Identifica-se só no checkout
-      expected_observable: Cookie sessao HttpOnly; propriedades só as próprias
+      verb: Identifica-se no checkout ou, se já for produtor, pula Entrar
+      expected_observable: Cookie sessao HttpOnly; GET /sessao com papeis; propriedades só as próprias; Sair no topo em dois toques
     - step: 4
       verb: Escolhe propriedade e retirada e confirma
       expected_observable: Pedido recebido e identificador visíveis

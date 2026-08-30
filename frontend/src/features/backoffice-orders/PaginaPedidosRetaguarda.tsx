@@ -99,7 +99,14 @@ export function PaginaPedidosRetaguarda() {
                   <tr
                     key={pedido.idPedido}
                     data-od-id={`bo-order-${pedido.idPedido}`}
+                    tabIndex={0}
                     onClick={() => navegar(`/retaguarda/pedidos/${pedido.idPedido}`)}
+                    onKeyDown={(evento) => {
+                      if (evento.key === "Enter" || evento.key === " ") {
+                        evento.preventDefault();
+                        navegar(`/retaguarda/pedidos/${pedido.idPedido}`);
+                      }
+                    }}
                   >
                     <td className="order-id">{pedido.idPedido}</td>
                     <td>{pedido.nomeProdutor}</td>

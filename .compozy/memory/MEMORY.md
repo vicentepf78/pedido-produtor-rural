@@ -1,2 +1,7 @@
+- [memory-extractor what-not-to-save-ephemeral-plan](feedback_memory_extractor.md) - seq 4313: assistant anuncia subir backend/frontend e escrever script Playwright walk contra stack real, sem decisão ou preferência estável.
+- [cy-loop-tasks phase-detection-protocol](feedback_cy_loop_tasks.md) - seq 4048: assistant declara carregar skills canônicas, rodar detect-phase.py e executar só a ação impressa
+- [qa-report worker-dispatch-limitation](feedback_qa_report.md) - seq 3934: assistant planeja registrar que o worker Fable 5 não pôde ser despachado após make gate passar
+- [qa-phase-c sem-substituto-inventado](feedback_qa_phase_c.md) - seq 3623: assistant reporta conclusão com nota explícita "sem substituto inventado" no verdict PASS.
+- [checkout-e2e campo-propriedade-pos-identificacao](feedback_checkout_e2e.md) - seq 3622: e2e fecharam após corrigir labels ambíguos; propriedade só no checkout
 - [checkout campo-nome-propriedade-timing-e2e](feedback_checkout.md) - seq 3360: assistant explica que o campo batia nos rótulos do Playwright e que passará a ser mostrado só depois da identificação
 - [pedidos-insumos-mvp1 estrutura-do-grafo-de-tarefas](project_pedidos_insumos_mvp1.md) - seq 229-231: bootstrap da spec pedidos-insumos-mvp1 concluído na branch mvp-1; grafo com 6 tarefas sem worker frontend e sem stacked PRs

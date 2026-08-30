@@ -1,5 +1,5 @@
 ---
-status: pending
+status: completed
 title: Real-User QA Execution
 type: qa-execution
 complexity: critical
@@ -53,19 +53,19 @@ descoberta rápida ou login no topo vale.
 
 ## Subtasks
 
-- [ ] 6.1 Ler README, cenários, bugs abertos e charters; criar o
+- [x] 6.1 Ler README, cenários, bugs abertos e charters; criar o
       relatório com a matriz `Pending`.
-- [ ] 6.2 Confirmar precondições: suíte automática verde e app
+- [x] 6.2 Confirmar precondições: suíte automática verde e app
       alcançável com perfil `local`.
-- [ ] 6.3 Caminhar a jornada do produtor em viewport móvel: carrossel,
+- [x] 6.3 Caminhar a jornada do produtor em viewport móvel: carrossel,
       busca composta, tamanho 10, Carregar mais, Entrar, origem,
       Pedido recebido.
-- [ ] 6.4 Caminhar operador: Entrar pela loja → retaguarda, topo
+- [x] 6.4 Caminhar operador: Entrar pela loja → retaguarda, topo
       próprio, lista e detalhe; produtor recusado.
-- [ ] 6.5 Rodar o tour de cada charter, bordas e lentes experienciais.
-- [ ] 6.6 Arquivar bugs, aplicar só fixes do governor, reandar
+- [x] 6.5 Rodar o tour de cada charter, bordas e lentes experienciais.
+- [x] 6.6 Arquivar bugs, aplicar só fixes do governor, reandar
       jornadas impactadas.
-- [ ] 6.7 Fechar o relatório datado e rodar `make gate`.
+- [x] 6.7 Fechar o relatório datado e rodar `make gate`.
 
 ## Implementation Details
 

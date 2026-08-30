@@ -2,9 +2,8 @@
 
 ## Current State
 
-- Phase B `task_04` concluída (carrinho, checkout, pedidos, retaguarda).
+- Phase D rodada 1 SHIP. Próximo detect: Phase E `await_ci`.
 - Branch de trabalho: `mvp-1`. Sem `--frontend` e sem `--stacked`.
-- Próxima ação esperada: `task_05` (qa-report).
 
 ## Shared Decisions
 
@@ -28,6 +27,11 @@
 - `init-state.py` detectou `mode=tasks` pelo grafo `_tasks.md` + `task_*.md`.
 - Jackson databind não entra no compile de teste; ITs HTTP devem parsear o corpo sem `ObjectMapper`.
 - `Paginacao` da loja recusa 24; retaguarda continua com 25.
+- E2E-019 no `make gate` paralelo: dois `click()` Playwright no botão que some após o 1º bloco; usar `dispatchEvent("click")`.
+- Playwright `waitForURL(/catalogo/)` casa `?origem=/catalogo` em `/entrar`.
+- Aurora não cabe no primeiro bloco de 10 do recorte Todos.
+- `make gate` sem `SLUG=` precisa defaultar o slug do loop ativo (MVP1).
+- Select vazio “Propriedade” no checkout colide com “Nome da propriedade”.
 
 ## Open Risks
 
@@ -35,7 +39,8 @@
 
 ## Open Questions
 
-- Nenhuma no bootstrap.
+- Worker Fable 5 (`claude --permission-mode auto --model claude-fable-5` via herdr) não está instalado neste host. O `qa-report` foi produzido na sessão do orquestrador com a skill canônica, depois do `make gate` verde. Confirmar se rodadas futuras devem exigir o worker.
+- Phase D rodada 1: herdr/`claude` ausentes; lane `codex` via Task (`gpt-5.6-sol-medium`) + síntese local. Confirmar se rodadas seguintes exigem o worker.
 
 ## Handoffs
 
@@ -49,3 +54,6 @@
 - Checkout pula Entrar quando `papeis` já inclui `PRODUTOR`; retaguarda sem sessão vai para `/entrar?origem=…`.
 - Mock de propriedades de Alfa usa Fazenda Norte (não Sul). Cadastro novo começa sem propriedade.
 - Título da retaguarda: “Pedidos da revenda”. GET `/pedidos` mock exige sessão e isola o dono.
+- `task_05` / `qa_report`: jornadas atualizadas; charters `CH-descoberta-carrossel` e `CH-entrar-e-topo-loja`.
+- `task_06` / `qa_execution`: 6 charters andados no stack real; 18 cenários `pass`; Sair verified.
+- Phase D r1: nits de URL `pagina`, checkout propriedade, teclado da retaguarda, encode de `origem`, `SLUG` default.

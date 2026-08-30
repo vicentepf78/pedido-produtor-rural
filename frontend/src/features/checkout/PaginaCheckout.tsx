@@ -64,6 +64,14 @@ export function PaginaCheckout() {
   }, [rascunho]);
 
   useEffect(() => {
+    if (!erros.propertyId) {
+      return;
+    }
+    const alvo = propriedades.length > 0 ? "checkout-property" : "checkout-property-nome";
+    document.getElementById(alvo)?.focus();
+  }, [erros.propertyId, propriedades.length]);
+
+  useEffect(() => {
     if (!pronta || !produtorIdentificado) {
       setPropriedades([]);
       return;
@@ -342,34 +350,40 @@ export function PaginaCheckout() {
             <div className="checkout-section">
               <h2 className="section-title">Propriedade e retirada</h2>
               <div className="field">
-                <label htmlFor="checkout-property">Propriedade</label>
-                <select
-                  id="checkout-property"
-                  value={rascunho.idPropriedade}
-                  aria-invalid={Boolean(erros.propertyId) && propriedades.length > 0}
-                  aria-describedby={erros.propertyId ? "checkout-property-erro" : undefined}
-                  onChange={(evento) => atualizar({ idPropriedade: evento.target.value })}
-                  data-od-id="checkout-property"
-                >
-                  <option value="">Selecione…</option>
-                  {propriedades.map((propriedade) => (
-                    <option key={propriedade.id} value={propriedade.id}>
-                      {propriedade.nome}
-                    </option>
-                  ))}
-                </select>
+                {propriedades.length > 0 && (
+                  <>
+                    <label htmlFor="checkout-property">Propriedade</label>
+                    <select
+                      id="checkout-property"
+                      value={rascunho.idPropriedade}
+                      aria-invalid={Boolean(erros.propertyId)}
+                      aria-describedby={erros.propertyId ? "checkout-property-erro" : undefined}
+                      onChange={(evento) => atualizar({ idPropriedade: evento.target.value })}
+                      data-od-id="checkout-property"
+                    >
+                      <option value="">Selecione…</option>
+                      {propriedades.map((propriedade) => (
+                        <option key={propriedade.id} value={propriedade.id}>
+                          {propriedade.nome}
+                        </option>
+                      ))}
+                    </select>
+                  </>
+                )}
                 {produtorIdentificado && propriedades.length === 0 && (
-                  <input
-                    id="checkout-property-nome"
-                    type="text"
-                    aria-label="Nome da propriedade"
-                    placeholder="Nome da propriedade"
-                    value={rascunho.nomePropriedade}
-                    aria-invalid={Boolean(erros.propertyId)}
-                    aria-describedby={erros.propertyId ? "checkout-property-erro" : undefined}
-                    onChange={(evento) => atualizar({ nomePropriedade: evento.target.value })}
-                    data-od-id="checkout-property-nome"
-                  />
+                  <>
+                    <label htmlFor="checkout-property-nome">Nome da propriedade</label>
+                    <input
+                      id="checkout-property-nome"
+                      type="text"
+                      placeholder="Nome da propriedade"
+                      value={rascunho.nomePropriedade}
+                      aria-invalid={Boolean(erros.propertyId)}
+                      aria-describedby={erros.propertyId ? "checkout-property-erro" : undefined}
+                      onChange={(evento) => atualizar({ nomePropriedade: evento.target.value })}
+                      data-od-id="checkout-property-nome"
+                    />
+                  </>
                 )}
                 {erros.propertyId && (
                   <p id="checkout-property-erro" className="inline-error" role="alert">

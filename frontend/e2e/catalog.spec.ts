@@ -253,8 +253,9 @@ test.describe("Catálogo S1", () => {
     await expect(page.locator('[data-od-id="category-fertilizantes"]')).toHaveClass(/selected/);
     await page.getByLabel("Buscar por nome").fill("");
     await expect(page.getByRole("heading", { name: UREIA.nome })).toBeVisible();
-    const botao = page.getByRole("button", { name: "Carregar mais" });
-    await Promise.all([botao.click(), botao.click()]);
+    const botao = page.locator('[data-od-id="btn-carregar-mais"]');
+    await expect(botao).toBeVisible();
+    await Promise.all([botao.dispatchEvent("click"), botao.dispatchEvent("click")]);
     await expect(page.locator(".product-card")).toHaveCount(NOMES_FERTILIZANTES.length);
     const ids = await page.locator(".product-card").evaluateAll((els) => els.map((el) => el.getAttribute("data-od-id")));
     expect(new Set(ids).size).toBe(ids.length);
@@ -343,10 +344,12 @@ test.describe("Catálogo S1", () => {
         pedidos.push(req.url());
       }
     });
-    await page.goto("/catalogo?tamanhoPagina=24");
+    await page.goto("/catalogo?tamanhoPagina=24&pagina=2");
     await expect(page.locator(".product-card")).toHaveCount(10);
     await expect(page.getByLabel("Itens por página")).toHaveValue("10");
     await expect(page.getByLabel("Itens por página").locator("option[value='24']")).toHaveCount(0);
+    await expect(page).not.toHaveURL(/[?&]pagina=/);
+    await expect(page).not.toHaveURL(/tamanhoPagina=24/);
     expect(pedidos.every((url) => !url.includes("tamanhoPagina=24"))).toBeTruthy();
   });
 

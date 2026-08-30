@@ -65,7 +65,7 @@ export function TopoLoja() {
             <button
               type="button"
               data-od-id="btn-entrar"
-              onClick={() => navegar(`/entrar?origem=${origem}`)}
+              onClick={() => navegar(`/entrar?origem=${encodeURIComponent(origem)}`)}
             >
               Entrar
             </button>

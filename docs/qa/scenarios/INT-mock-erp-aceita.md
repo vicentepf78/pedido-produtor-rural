@@ -11,9 +11,9 @@ bug_ids:
 fix_status:
 retest_status:
 fix_commits:
-evidence: docs/qa/evidence/2026-08-30-pedidos-insumos-mvp0/CH-pedido-rapido-money-05-pedido-recebido.png; docs/qa/evidence/2026-08-30-pedidos-insumos-mvp0/CH-operador-lista-retaguarda-02-detalhe.png
-last_report: docs/qa/reports/2026-08-30-pedidos-insumos-mvp0.md
+evidence: docs/qa/evidence/2026-08-30-pedidos-insumos-mvp1/14-pedido-recebido.png; docs/qa/evidence/2026-08-30-pedidos-insumos-mvp1/21-operador-detalhe.png
+last_report: docs/qa/reports/2026-08-30-pedidos-insumos-mvp1.md
 overlaps: ORD-confirma-e-revisita; ORD-backoffice-lista
 ---
 
-O adaptador simulado aceita de forma síncrona, sem rede, segredo, retry ou broker. Pedido local permanece se o adaptador na porta for substituído. Hot spot: mock não muta pedido. Planejado para CH-pedido-rapido-money.
+Walk 2026-08-30 MVP1: UI e HTTP devolveram ACEITA após persistir; replay da mesma chave não criou segundo id.

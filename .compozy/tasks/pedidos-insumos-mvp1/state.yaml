@@ -1,34 +1,34 @@
 # cy-loop-tasks state.yaml -- managed by .agents/skills/cy-loop-tasks/scripts/update-state.py. Do not hand-edit.
 slug: "pedidos-insumos-mvp1"
 created_at: "2026-08-30T21:00:38Z"
-last_updated: "2026-08-30T22:18:28Z"
+last_updated: "2026-08-30T23:04:12Z"
 mode: "tasks"
-iteration: 5
+iteration: 8
 goal_signature: "ship pedidos-insumos-mvp1 end-to-end via cy-loop-tasks: every iteration runs .agents/skills/cy-loop-tasks/scripts/detect-phase.py and executes the printed action; every Phase B checkpoint runs its focused task validation then cy-final-verify before commit; continue until qa-report and qa-execution are complete, consecutive deep-review rounds reach SHIP, and required PR CI is green at the exact head"
 frontend_agent: null
 stacked: false
 
 tasks:
   total: 6
-  completed: ["task_01", "task_02", "task_03", "task_04"]
+  completed: ["task_01", "task_02", "task_03", "task_04", "task_05", "task_06"]
   current: null
-  pending: ["task_05", "task_06"]
+  pending: []
 
 progress:
   deliverables_complete: false
   checklist: []
 
 qa:
-  report_done: false
-  execution_done: false
+  report_done: true
+  execution_done: true
 
 review:
-  rounds: 0
-  last_verdict: null
-  ship: false
+  rounds: 1
+  last_verdict: "SHIP"
+  ship: true
 
 verify:
-  last_run: "2026-08-30T22:18:28Z"
+  last_run: "2026-08-30T23:04:12Z"
   last_status: "PASS"
 
 delivery:
@@ -73,4 +73,25 @@ iterations:
     action: "executed task_04"
     outcome: "completed"
     memory_written: ["memory/task_04.md", "memory/MEMORY.md"]
+    blockers: []
+  - n: 6
+    timestamp: "2026-08-30T22:33:08Z"
+    phase: "C"
+    action: "qa-report produced"
+    outcome: "completed"
+    memory_written: ["memory/qa-report.md", "memory/MEMORY.md"]
+    blockers: []
+  - n: 7
+    timestamp: "2026-08-30T22:55:24Z"
+    phase: "C"
+    action: "qa-execution produced"
+    outcome: "completed"
+    memory_written: ["memory/qa-execution.md", "memory/MEMORY.md"]
+    blockers: []
+  - n: 8
+    timestamp: "2026-08-30T23:04:12Z"
+    phase: "D"
+    action: "peer-review round 1 (SHIP)"
+    outcome: "completed"
+    memory_written: ["memory/peer-review.md", "memory/MEMORY.md"]
     blockers: []

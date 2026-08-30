@@ -54,7 +54,7 @@ test.describe("Identidade e TopoLoja", () => {
     for (const passo of origens) {
       await page.goto(passo.abrir);
       await page.locator('[data-od-id="btn-entrar"]').click();
-      await expect(page).toHaveURL(new RegExp(`/entrar\\?origem=${passo.origem.replace("/", "\\/")}`));
+      await expect(page).toHaveURL(new RegExp(`/entrar\\?origem=${encodeURIComponent(passo.origem).replaceAll("%", "\\%")}`));
       await expect(page.getByRole("heading", { name: "Entrar" })).toBeVisible();
       await expect(page.locator('[data-od-id="link-criar-conta"]')).toBeVisible();
       await entrarComoAlfa(page);

@@ -70,6 +70,10 @@ export function PaginaCatalogo() {
     const categoriaBruta = params.get("categoria");
     let sujo = false;
     const proximo = new URLSearchParams(params);
+    if (proximo.has("pagina")) {
+      proximo.delete("pagina");
+      sujo = true;
+    }
     if (bruto !== null && !ehTamanhoPagina(Number(bruto))) {
       proximo.delete("tamanhoPagina");
       sujo = true;

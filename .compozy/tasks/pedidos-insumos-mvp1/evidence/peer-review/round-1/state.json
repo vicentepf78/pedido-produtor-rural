@@ -1,0 +1,7 @@
+{
+  "round": 1,
+  "verdict": "SHIP",
+  "base": "66e004c",
+  "spec": ".compozy/tasks/pedidos-insumos-mvp1",
+  "subagent": "codex"
+}

@@ -1,5 +1,5 @@
 ---
-status: pending
+status: completed
 title: QA Plan and Session Charters
 type: qa-report
 complexity: high
@@ -42,16 +42,16 @@ tem persona nem superfície de entrada.
 
 ## Subtasks
 
-- [ ] 5.1 Ler `docs/qa/README.md`, templates, bugs abertos e cenários do
+- [x] 5.1 Ler `docs/qa/README.md`, templates, bugs abertos e cenários do
       MVP 0; anotar o que resetar.
-- [ ] 5.2 Atualizar jornadas do produtor (carrossel, Entrar no topo,
+- [x] 5.2 Atualizar jornadas do produtor (carrossel, Entrar no topo,
       retorno à origem) e do operador (topo próprio).
-- [ ] 5.3 Mintar ou resetar os cenários em Deliverables, com
+- [x] 5.3 Mintar ou resetar os cenários em Deliverables, com
       `entry_points` HTTP e web.
-- [ ] 5.4 Escrever charters em `docs/qa/charters/` (targeted + canário).
-- [ ] 5.5 Mapear hot spots das invariantes da Parte II e ADR-003 / ADR-007
+- [x] 5.4 Escrever charters em `docs/qa/charters/` (targeted + canário).
+- [x] 5.5 Mapear hot spots das invariantes da Parte II e ADR-003 / ADR-007
       para a seleção de charters.
-- [ ] 5.6 Validar completeza do ciclo (jornada com charter, cenário com
+- [x] 5.6 Validar completeza do ciclo (jornada com charter, cenário com
       id, taxonomia considerada).
 
 ## Implementation Details

@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-SLUG ?= pedidos-insumos-mvp0
+SLUG ?= pedidos-insumos-mvp1
 SPEC := .compozy/tasks/$(SLUG)/_spec.md
 
 .PHONY: gate check-spec test test-integration test-e2e-web

@@ -946,7 +946,8 @@ a.btn {
   cursor: pointer;
 }
 
-.backoffice-table tbody tr:hover {
+.backoffice-table tbody tr:hover,
+.backoffice-table tbody tr:focus-visible {
   background: oklch(97% 0 0);
 }
 
