@@ -31,7 +31,7 @@ class PedidosIT {
 	private final HttpClient cliente = HttpClient.newHttpClient();
 
 	@Test
-	void it006_postDuplicadoComMesmaChaveDevolveConfirmacaoOriginal() throws Exception {
+	void it016_postDuplicadoComMesmaChaveDevolveConfirmacaoOriginal() throws Exception {
 		Sessao sessao = autenticar("produtor.alfa@example.com");
 		String cookieCarrinho = adicionarAurora(sessao);
 		String chave = UUID.randomUUID().toString();
@@ -54,7 +54,7 @@ class PedidosIT {
 	}
 
 	@Test
-	void it008_getNegaOutroProdutorERefreshNaoCriaPedido() throws Exception {
+	void it017_getNegaOutroProdutorERefreshNaoCriaPedido() throws Exception {
 		Sessao alfa = autenticar("produtor.alfa@example.com");
 		String cookieCarrinho = adicionarAurora(alfa);
 		String chave = UUID.randomUUID().toString();
@@ -101,7 +101,7 @@ class PedidosIT {
 	}
 
 	@Test
-	void it004_carrinhoVazioRecusaCheckout() throws Exception {
+	void it026_carrinhoVazioRecusaCheckout() throws Exception {
 		Sessao sessao = autenticar("produtor.alfa@example.com");
 		HttpResponse<String> vazio = postPedido(
 				sessao,
@@ -113,6 +113,91 @@ class PedidosIT {
 		assertThat(vazio.body()).contains("\"codigo\":\"CARRINHO_VAZIO\"");
 	}
 
+
+	@Test
+	void it029_checkoutSemPropriedade() throws Exception {
+		Sessao sessao = autenticar("produtor.alfa@example.com");
+		String cookieCarrinho = adicionarAurora(sessao);
+		HttpResponse<String> semPropriedade = postPedido(
+				sessao,
+				cookieCarrinho,
+				UUID.randomUUID().toString(),
+				"{\"preferenciaRetirada\":\"DEPOSITO_PRINCIPAL\"}");
+		assertThat(semPropriedade.body()).contains("DADOS_CHECKOUT_OBRIGATORIOS");
+	}
+
+	@Test
+	void it030_operadorNaoCriaPedido() throws Exception {
+		Sessao operador = autenticar("operador.revenda@example.com");
+		HttpResponse<String> resposta = postPedido(
+				operador,
+				"chaveCarrinhoConvidado=op-it030",
+				UUID.randomUUID().toString(),
+				"{\"idPropriedade\":\"%s\",\"preferenciaRetirada\":\"DEPOSITO_PRINCIPAL\"}"
+						.formatted(FAZENDA_NORTE));
+		assertThat(resposta.body()).contains("ACESSO_NEGADO");
+	}
+
+	@Test
+	void it039_pedidoInexistente() throws Exception {
+		Sessao sessao = autenticar("produtor.alfa@example.com");
+		HttpResponse<String> resposta = get(sessao, "/api/v1/pedidos/" + UUID.randomUUID());
+		assertThat(resposta.body()).contains("ACESSO_PEDIDO_NEGADO");
+		assertThat(resposta.body()).doesNotContain("Fazenda Norte");
+	}
+
+	@Test
+	void it045_sessaoInvalidaPreservaCarrinho() throws Exception {
+		HttpResponse<String> adicao = postJsonPublico(
+				"/api/v1/carrinhos/convidado/itens",
+				"{\"idProduto\":\"%s\",\"quantidade\":2}".formatted(AURORA));
+		assertThat(adicao.statusCode()).isEqualTo(200);
+		String cookieCarrinho = cookieNome(adicao.headers().allValues("Set-Cookie"), "chaveCarrinhoConvidado");
+		Sessao sessao = autenticar("produtor.alfa@example.com");
+		Csrf csrf = csrf(sessao.cookie() + "; " + cookieCarrinho);
+		HttpResponse<String> saida = cliente.send(
+				HttpRequest.newBuilder(uri("/api/v1/autenticacao/saida"))
+						.header("X-XSRF-TOKEN", csrf.token())
+						.header("Cookie", csrf.cookie() + "; " + sessao.cookie() + "; " + cookieCarrinho)
+						.POST(HttpRequest.BodyPublishers.noBody())
+						.build(),
+				HttpResponse.BodyHandlers.ofString());
+		assertThat(saida.statusCode()).isEqualTo(204);
+		HttpResponse<String> pedido = postPedido(
+				new Sessao("sessao=invalida"),
+				cookieCarrinho,
+				UUID.randomUUID().toString(),
+				"{\"idPropriedade\":\"%s\",\"preferenciaRetirada\":\"DEPOSITO_PRINCIPAL\"}"
+						.formatted(FAZENDA_NORTE));
+		assertThat(pedido.body()).contains("NAO_AUTENTICADO");
+		HttpResponse<String> carrinho = cliente.send(
+				HttpRequest.newBuilder(uri("/api/v1/carrinhos/convidado"))
+						.header("Cookie", cookieCarrinho)
+						.GET()
+						.build(),
+				HttpResponse.BodyHandlers.ofString());
+		assertThat(carrinho.body()).contains("Semente de milho Aurora 20 kg");
+	}
+
+	@Test
+	void it048_listaVaziaQuandoNaoHaPedidosDoAlfaIsolado() throws Exception {
+		Sessao sessao = autenticar("produtor.alfa@example.com");
+		HttpResponse<String> lista = get(sessao, "/api/v1/pedidos?pagina=1&tamanhoPagina=10");
+		assertThat(lista.statusCode()).isEqualTo(200);
+		assertThat(lista.body()).contains("\"itens\"");
+	}
+
+	private HttpResponse<String> postJsonPublico(String caminho, String json) throws Exception {
+		Csrf csrf = csrf(null);
+		return cliente.send(
+				HttpRequest.newBuilder(uri(caminho))
+						.header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+						.header("X-XSRF-TOKEN", csrf.token())
+						.header("Cookie", csrf.cookie())
+						.POST(HttpRequest.BodyPublishers.ofString(json))
+						.build(),
+				HttpResponse.BodyHandlers.ofString());
+	}
 
 	private String adicionarAurora(Sessao sessao) throws Exception {
 		Csrf csrf = csrf(sessao.cookie());

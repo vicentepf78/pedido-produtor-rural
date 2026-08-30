@@ -40,9 +40,9 @@ public class ConfiguracaoSeguranca {
 				.formLogin(form -> form.disable())
 				.httpBasic(basic -> basic.disable())
 				.logout(logout -> logout.disable())
-				.authorizeHttpRequests(auth -> auth.requestMatchers("/actuator/health", "/actuator/health/**")
+				.authorizeHttpRequests(auth -> auth.requestMatchers("/actuator/health", "/actuator/health/**", "/error")
 						.permitAll()
-						.requestMatchers(HttpMethod.GET, "/api/v1/autenticacao/csrf")
+						.requestMatchers(HttpMethod.GET, "/api/v1/autenticacao/csrf", "/api/v1/autenticacao/sessao")
 						.permitAll()
 						.requestMatchers(
 								HttpMethod.POST,

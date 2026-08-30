@@ -6,7 +6,7 @@ persona: Produtor rural
 journey: J-produtor-pedido-rapido
 expected: Item indisponível aparece sem ação de compra ativa; acesso direto a produto regulamentado é negado sem revelar o conteúdo; imagem ausente não quebra a tela
 entry_points: /catalogo; /catalogo/{idProduto}; GET /api/v1/catalogo/produtos/{idProduto}; POST /api/v1/carrinhos/convidado/itens; PRODUTO_NAO_ELEGIVEL; PRODUTO_INDISPONIVEL
-qa_status: pass
+qa_status: untested
 bug_ids:
 fix_status:
 retest_status:

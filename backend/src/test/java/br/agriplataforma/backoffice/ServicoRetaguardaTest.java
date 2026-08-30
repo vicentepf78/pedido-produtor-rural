@@ -17,6 +17,8 @@ import br.agriplataforma.identity.application.UsuarioAutenticado;
 import br.agriplataforma.order.application.ConsultaPedidoRetaguarda;
 import br.agriplataforma.order.application.PaginaPedido;
 import br.agriplataforma.order.application.ResumoPedidoRetaguarda;
+import br.agriplataforma.order.application.VisaoPedido;
+import br.agriplataforma.order.application.VisaoPedidoRetaguarda;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
@@ -49,7 +51,7 @@ class ServicoRetaguardaTest {
 	}
 
 	@Test
-	void ut024_resumoDoOperadorIncluiPedidoProdutorTotalCriacaoEConfirmacaoAceita() {
+	void ut065_resumoDoOperadorIncluiPedidoProdutorTotalCriacaoEConfirmacaoAceita() {
 		when(consultaIdentidade.exigirAutenticado())
 				.thenReturn(new UsuarioAutenticado(
 						OPERADOR, TENANT, "Operador Demonstracao", "operador.revenda@example.com", Papel.OPERADOR_REVENDA));
@@ -80,7 +82,7 @@ class ServicoRetaguardaTest {
 	}
 
 	@Test
-	void ut025_papelProdutorNaoObtemListaDaRetaguarda() {
+	void ut066_papelProdutorNaoObtemListaDaRetaguarda() {
 		when(consultaIdentidade.exigirAutenticado())
 				.thenReturn(new UsuarioAutenticado(
 						PRODUTOR, TENANT, "Produtor Alfa", "produtor.alfa@example.com", Papel.PRODUTOR));
@@ -94,5 +96,84 @@ class ServicoRetaguardaTest {
 							.isEqualTo("Somente o operador da revenda pode inspecionar os pedidos da retaguarda.");
 				});
 		verify(consultaPedidoRetaguarda, never()).listarPorTenant(any(), anyInt(), anyInt());
+	}
+
+	@Test
+	void ut067_semSessaoNaoLista() {
+		when(consultaIdentidade.exigirAutenticado())
+				.thenThrow(new br.agriplataforma.identity.application.ExcecaoAutenticacao(
+						"NAO_AUTENTICADO", "Entre ou crie uma conta para continuar."));
+		assertThatThrownBy(() -> servico.listar(1, 25))
+				.isInstanceOf(br.agriplataforma.identity.application.ExcecaoAutenticacao.class);
+	}
+
+	@Test
+	void ut068_relerDetalheNaoMudaConfirmacao() {
+		operadorAutenticado();
+		Instant criado = Instant.parse("2026-08-30T13:55:00Z");
+		when(consultaPedidoRetaguarda.obterPorTenant(eq(TENANT), eq(PEDIDO)))
+				.thenReturn(new VisaoPedidoRetaguarda(
+						PEDIDO,
+						"Produtor Alfa",
+						"RECEBIDO",
+						"ACEITA",
+						"Fazenda Norte",
+						"DEPOSITO_PRINCIPAL",
+						new BigDecimal("1240.00"),
+						criado,
+						List.of()));
+		var primeira = servico.obter(PEDIDO);
+		var segunda = servico.obter(PEDIDO);
+		assertThat(segunda.confirmacao()).isEqualTo(primeira.confirmacao());
+		assertThat(segunda.total()).isEqualByComparingTo(primeira.total());
+	}
+
+	@Test
+	void ut069_outroTenantNaoAparece() {
+		operadorAutenticado();
+		when(consultaPedidoRetaguarda.listarPorTenant(eq(TENANT), eq(1), eq(25)))
+				.thenReturn(new PaginaPedido<>(List.of(), 1, 25, 0));
+		assertThat(servico.listar(1, 25).itens()).isEmpty();
+	}
+
+	@Test
+	void ut070_obterDevolveSnapshot() {
+		operadorAutenticado();
+		when(consultaPedidoRetaguarda.obterPorTenant(eq(TENANT), eq(PEDIDO)))
+				.thenReturn(new VisaoPedidoRetaguarda(
+						PEDIDO,
+						"Produtor Alfa",
+						"RECEBIDO",
+						"ACEITA",
+						"Fazenda Norte",
+						"DEPOSITO_PRINCIPAL",
+						new BigDecimal("1240.00"),
+						Instant.parse("2026-08-30T13:55:00Z"),
+						List.of(new VisaoPedido.ItemVisaoPedido(
+								"Semente de milho Aurora 20 kg",
+								"Saco",
+								2,
+								new BigDecimal("620.00"),
+								new BigDecimal("1240.00")))));
+		var visao = servico.obter(PEDIDO);
+		assertThat(visao.itens()).hasSize(1);
+		assertThat(visao.nomePropriedade()).isEqualTo("Fazenda Norte");
+		assertThat(visao.preferenciaRetirada()).isEqualTo("DEPOSITO_PRINCIPAL");
+	}
+
+	@Test
+	void ut074_listaVazia() {
+		operadorAutenticado();
+		when(consultaPedidoRetaguarda.listarPorTenant(eq(TENANT), eq(1), eq(25)))
+				.thenReturn(new PaginaPedido<>(List.of(), 1, 25, 0));
+		var pagina = servico.listar(1, 25);
+		assertThat(pagina.itens()).isEmpty();
+		assertThat(pagina.total()).isZero();
+	}
+
+	private void operadorAutenticado() {
+		when(consultaIdentidade.exigirAutenticado())
+				.thenReturn(new UsuarioAutenticado(
+						OPERADOR, TENANT, "Operador Demonstracao", "operador.revenda@example.com", Papel.OPERADOR_REVENDA));
 	}
 }

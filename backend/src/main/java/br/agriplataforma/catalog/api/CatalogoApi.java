@@ -31,9 +31,11 @@ public class CatalogoApi {
 	@GetMapping
 	public RespostaPaginaProdutos listar(
 			@RequestParam(required = false) String consulta,
+			@RequestParam(required = false) String categoria,
 			@RequestParam(required = false) Integer pagina,
 			@RequestParam(required = false) Integer tamanhoPagina) {
-		var resultado = consultaCatalogo.listarProdutosVisiveis(new BuscaProduto(consulta), Paginacao.de(pagina, tamanhoPagina));
+		var resultado = consultaCatalogo.listarProdutosVisiveis(
+				new BuscaProduto(consulta, categoria), Paginacao.de(pagina, tamanhoPagina));
 		return new RespostaPaginaProdutos(
 				resultado.itens().stream().map(CatalogoApi::item).toList(),
 				resultado.pagina(),
@@ -47,7 +49,7 @@ public class CatalogoApi {
 				.obterProdutoVisivel(consultaTenant.idTenantConfigurado(), idProduto)
 				.map(CatalogoApi::item)
 				.orElseThrow(() -> new ExcecaoCatalogo(
-						"PRODUTO_NAO_ELEGIVEL", "Este produto não pode ser pedido no MVP0."));
+						"PRODUTO_NAO_ELEGIVEL", "Este produto não pode ser pedido nesta loja."));
 	}
 
 	private static ItemProduto item(ResumoProduto produto) {

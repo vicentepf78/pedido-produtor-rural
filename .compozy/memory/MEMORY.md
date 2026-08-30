@@ -1,0 +1,1 @@
+- [pedidos-insumos-mvp1 estrutura-do-grafo-de-tarefas](project_pedidos_insumos_mvp1.md) - seq 229-231: bootstrap da spec pedidos-insumos-mvp1 concluído na branch mvp-1; grafo com 6 tarefas sem worker frontend e sem stacked PRs

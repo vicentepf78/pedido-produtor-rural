@@ -6,7 +6,7 @@ persona: Produtor rural
 journey: J-produtor-pedido-rapido
 expected: O produtor cria ou entra na conta no checkout, recebe sessão por cookie HttpOnly, lista só as próprias propriedades e, se a sessão expirar, volta a se identificar sem perder o carrinho de convidado
 entry_points: /checkout; GET /api/v1/autenticacao/csrf; POST /api/v1/autenticacao/cadastro; POST /api/v1/autenticacao/entrada; POST /api/v1/autenticacao/saida; GET /api/v1/produtor/propriedades; GET /actuator/health; cookie sessao; server.servlet.session.cookie.name; server.servlet.session.timeout; SPRING_DATASOURCE_URL; SPRING_DATASOURCE_USERNAME; SPRING_DATASOURCE_PASSWORD
-qa_status: pass
+qa_status: untested
 bug_ids: BUG-20260830-sem-sair-na-interface
 fix_status: pending
 retest_status:

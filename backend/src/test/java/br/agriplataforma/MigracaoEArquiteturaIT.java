@@ -38,7 +38,7 @@ class MigracaoEArquiteturaIT {
 	int porta;
 
 	@Test
-	void it011_migracoesEmPostgresVazioELimitesModulith() throws Exception {
+	void it023_migracoesEmPostgresVazioELimitesModulith() throws Exception {
 		ApplicationModules.of(AgriPlatformApplication.class).verify();
 
 		for (String schema : SCHEMAS) {

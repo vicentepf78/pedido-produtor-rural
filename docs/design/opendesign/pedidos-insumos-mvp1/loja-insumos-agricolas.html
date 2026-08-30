@@ -1,0 +1,1811 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Insumos Agro — Loja da Revenda</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Nunito+Sans:wght@500;600;700&family=Source+Sans+3:wght@400;450;550;600&display=swap" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+  <style>
+    :root {
+      --bg: oklch(0.94 0.004 260);
+      --surface: oklch(1 0 0);
+      --fg: oklch(0.28 0.02 260);
+      --muted: oklch(0.52 0.02 260);
+      --border: oklch(0.88 0.01 260);
+      --accent: oklch(0.58 0.19 252);
+      --accent-hover: oklch(0.52 0.19 252);
+      --header: oklch(0.91 0.17 95);
+      --header-fg: oklch(0.28 0.04 260);
+      --success: oklch(0.62 0.17 145);
+      --danger: oklch(0.55 0.2 25);
+      --font-display: "Nunito Sans", "Helvetica Neue", Arial, sans-serif;
+      --font-body: "Source Sans 3", "Segoe UI", sans-serif;
+      --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+      --radius: 8px;
+      --shadow: 0 1px 2px oklch(0 0 0 / 0.06), 0 4px 12px oklch(0 0 0 / 0.04);
+      --focus-ring: 0 0 0 3px oklch(0.58 0.19 252 / 0.35);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: oklch(0.82 0.01 260);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.5;
+      color: var(--fg);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    #root { min-height: 100dvh; display: flex; justify-content: center; }
+
+    .app-frame {
+      width: 100%;
+      max-width: 1200px;
+      min-height: 100dvh;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 0 1px var(--border);
+    }
+
+    @media (min-width: 768px) {
+      .app-frame {
+        margin: 24px 16px;
+        min-height: calc(100dvh - 48px);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: var(--shadow), 0 24px 48px oklch(0 0 0 / 0.08);
+      }
+    }
+
+    /* Top bar */
+    .top-bar {
+      background: var(--header);
+      color: var(--header-fg);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 4px oklch(0 0 0 / 0.08);
+    }
+
+    .top-bar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 12px;
+      flex-wrap: wrap;
+    }
+
+    .brand-mark {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .nav-link {
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      padding: 8px 10px;
+      border: none;
+      background: transparent;
+      color: var(--header-fg);
+      border-radius: 6px;
+      cursor: pointer;
+      text-decoration: none;
+      position: relative;
+      transition: background 0.14s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    .nav-link:hover { background: oklch(1 0 0 / 0.35); }
+    .nav-link:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+    .nav-link.active {
+      background: var(--surface);
+      color: var(--fg);
+      box-shadow: 0 1px 3px oklch(0 0 0 / 0.1);
+    }
+
+    .nav-badge {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      background: var(--accent);
+      color: var(--surface);
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      letter-spacing: 0;
+    }
+
+    .user-area {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 550;
+    }
+
+    .user-area button {
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      padding: 8px 12px;
+      border: 1px solid oklch(0.28 0.04 260 / 0.2);
+      background: var(--surface);
+      color: var(--header-fg);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.14s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    .user-area button:hover { background: oklch(0.97 0 0); }
+    .user-area button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+    .main-content {
+      flex: 1;
+      padding: 16px;
+      max-width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      .main-content { padding: 24px 32px; }
+    }
+
+    .screen-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    /* Category carousel */
+    .carousel-wrap {
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    .carousel-arrow {
+      position: absolute;
+      left: -4px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 2;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--fg);
+      transition: background 0.14s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    .carousel-arrow:hover { background: oklch(0.97 0 0); }
+    .carousel-arrow:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+    .category-carousel {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      padding: 4px 4px 4px 40px;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .category-carousel::-webkit-scrollbar { display: none; }
+
+    .category-card {
+      flex: 0 0 88px;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px 6px 10px;
+      cursor: pointer;
+      text-align: center;
+      transition: border-color 0.14s, box-shadow 0.14s;
+    }
+
+    .category-card:hover { border-color: oklch(0.75 0.01 260); }
+    .category-card:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+    .category-card.selected {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+
+    .category-card img,
+    .category-card .cat-thumb {
+      width: 64px;
+      height: 64px;
+      border-radius: 6px;
+      object-fit: cover;
+      display: block;
+      margin: 0 auto 6px;
+    }
+
+    .category-card span {
+      font-size: 12px;
+      font-weight: 550;
+      line-height: 1.3;
+      display: block;
+    }
+
+    /* Search & controls */
+    .toolbar {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    @media (min-width: 640px) {
+      .toolbar {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+
+    .search-field {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0 12px;
+      box-shadow: inset 0 1px 2px oklch(0 0 0 / 0.04);
+    }
+
+    .search-field input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 12px 0;
+      font-family: var(--font-body);
+      font-size: 15px;
+      color: var(--fg);
+    }
+
+    .search-field input:focus { outline: none; }
+    .search-field svg { flex-shrink: 0; color: var(--muted); }
+
+    .page-size {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .page-size select {
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 550;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--fg);
+      cursor: pointer;
+    }
+
+    .page-size select:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+    /* Product grid */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    @media (min-width: 640px) {
+      .product-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    }
+
+    @media (min-width: 960px) {
+      .product-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    .product-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: box-shadow 0.14s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    .product-card:hover { box-shadow: var(--shadow); }
+
+    .product-card .thumb {
+      aspect-ratio: 1;
+      background: oklch(0.97 0.01 260);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+    }
+
+    .product-card .thumb svg { width: 100%; height: 100%; max-width: 80px; }
+
+    .product-body {
+      padding: 12px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .product-name {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.35;
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
+
+    .product-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.45;
+      margin: 0;
+      flex: 1;
+    }
+
+    .product-price {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 4px 0 0;
+    }
+
+    .product-unit {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .btn {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      padding: 12px 16px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.14s cubic-bezier(0.23, 1, 0.32, 1), transform 0.1s;
+      min-height: 44px;
+    }
+
+    .btn:active:not(:disabled) { transform: translateY(1px); }
+    .btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--surface);
+    }
+
+    .btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+
+    .btn-secondary:hover:not(:disabled) { background: oklch(0.58 0.19 252 / 0.08); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid transparent;
+    }
+
+    .btn-ghost:hover:not(:disabled) { background: oklch(0.58 0.19 252 / 0.06); }
+
+    .btn-neutral {
+      background: var(--surface);
+      color: var(--fg);
+      border: 1px solid var(--border);
+    }
+
+    .btn-neutral:hover:not(:disabled) { background: oklch(0.97 0 0); border-color: oklch(0.75 0.01 260); }
+
+    .btn-block { width: 100%; margin-top: 8px; }
+
+    .load-more-wrap {
+      display: flex;
+      justify-content: center;
+      margin-top: 24px;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+    }
+
+    .empty-state h3 {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0 0 8px;
+    }
+
+    .empty-state p {
+      color: var(--muted);
+      margin: 0 0 16px;
+      max-width: 40ch;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Cart */
+    .cart-line {
+      display: flex;
+      gap: 12px;
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      align-items: flex-start;
+    }
+
+    .cart-line:last-child { border-bottom: none; }
+
+    .cart-line-info { flex: 1; min-width: 0; }
+
+    .cart-line-info h4 {
+      margin: 0 0 4px;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .cart-line-info p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .qty-control {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .qty-control button {
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: oklch(0.97 0 0);
+      cursor: pointer;
+      font-size: 18px;
+      color: var(--fg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .qty-control button:hover { background: oklch(0.94 0 0); }
+    .qty-control button:focus-visible { outline: none; box-shadow: inset var(--focus-ring); }
+
+    .qty-control span {
+      min-width: 36px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .cart-summary {
+      padding: 16px;
+      border-top: 2px solid var(--border);
+      background: oklch(0.98 0 0);
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .summary-row.total {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Forms */
+    .form-card {
+      max-width: 420px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .form-card h2 {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0 0 8px;
+    }
+
+    .form-card .subtitle {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 0 0 24px;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 13px;
+      font-weight: 550;
+      letter-spacing: 0.02em;
+      margin-bottom: 6px;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      padding: 12px;
+      font-family: var(--font-body);
+      font-size: 15px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--fg);
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: var(--focus-ring);
+    }
+
+    .form-link {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 14px;
+    }
+
+    .form-link button {
+      background: none;
+      border: none;
+      color: var(--accent);
+      font-weight: 550;
+      cursor: pointer;
+      text-decoration: underline;
+      font-size: inherit;
+      padding: 4px;
+    }
+
+    .form-link button:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: 4px; }
+
+    .error-msg {
+      color: var(--danger);
+      font-size: 13px;
+      margin-top: 8px;
+    }
+
+    /* Checkout */
+    .checkout-section {
+      margin-bottom: 20px;
+    }
+
+    .checkout-section h3 {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0 0 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .radio-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 8px;
+      cursor: pointer;
+      background: var(--surface);
+      transition: border-color 0.14s;
+    }
+
+    .radio-option:has(input:checked) {
+      border-color: var(--accent);
+      background: oklch(0.58 0.19 252 / 0.04);
+    }
+
+    .radio-option input { margin-top: 3px; accent-color: var(--accent); }
+
+    .radio-option strong { display: block; font-size: 14px; }
+    .radio-option span { font-size: 13px; color: var(--muted); }
+
+    /* Order success */
+    .success-card {
+      text-align: center;
+      padding: 48px 24px;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .success-icon {
+      width: 64px;
+      height: 64px;
+      background: oklch(0.62 0.17 145 / 0.15);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      color: var(--success);
+    }
+
+    .success-card h2 {
+      font-family: var(--font-display);
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0 0 12px;
+    }
+
+    .order-id {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      background: oklch(0.97 0 0);
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      margin: 16px 0 24px;
+    }
+
+    /* Orders list */
+    .order-list-item {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: box-shadow 0.14s;
+    }
+
+    .order-list-item:hover { box-shadow: var(--shadow); }
+    .order-list-item:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+    .order-list-item header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .order-list-item .id {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .status-badge {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: oklch(0.62 0.17 145 / 0.15);
+      color: oklch(0.45 0.14 145);
+    }
+
+    /* Backoffice */
+    .backoffice-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    .backoffice-table th,
+    .backoffice-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .backoffice-table th {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: oklch(0.98 0 0);
+    }
+
+    .backoffice-table tr:hover td { background: oklch(0.98 0 0); }
+
+    .detail-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    @media (min-width: 640px) {
+      .detail-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    .detail-block h4 {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 8px;
+    }
+
+    .detail-block p { margin: 0; font-size: 14px; }
+
+    .demo-switch {
+      position: fixed;
+      bottom: 12px;
+      right: 12px;
+      z-index: 200;
+      font-size: 11px;
+      padding: 8px 12px;
+      background: var(--fg);
+      color: var(--surface);
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      opacity: 0.7;
+      letter-spacing: 0.02em;
+    }
+
+    .demo-switch:hover { opacity: 1; }
+    .demo-switch:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+    .ph-img {
+      background: linear-gradient(145deg, oklch(0.96 0.02 260), oklch(0.92 0.03 260));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel" data-presets="react">
+    const { useState, useEffect, useRef, useMemo, useCallback } = React;
+
+    const STORAGE = {
+      cart: 'insumos_cart',
+      user: 'insumos_user',
+      orders: 'insumos_orders',
+      operator: 'insumos_operator',
+      view: 'insumos_view',
+      shell: 'insumos_shell',
+    };
+
+    const CATEGORIES = [
+      { id: 'todos', label: 'Todos', tone: 'neutral' },
+      { id: 'sementes', label: 'Sementes', tone: 'green' },
+      { id: 'fertilizantes', label: 'Fertilizantes', tone: 'blue' },
+      { id: 'correcao', label: 'Correção', tone: 'gray' },
+    ];
+
+    const PRODUCTS = [
+      { id: 'p1', name: 'Soja BRS 284', desc: 'Semente certificada, ciclo médio', price: 892.00, unit: 'sc 40 kg', category: 'sementes', tone: 'green' },
+      { id: 'p2', name: 'Milho AG 8088', desc: 'Híbrido alto rendimento', price: 1245.00, unit: 'sc 60 kg', category: 'sementes', tone: 'yellow' },
+      { id: 'p3', name: 'Feijão Carioca IPR', desc: 'Grupo II, plantio direto', price: 456.00, unit: 'sc 40 kg', category: 'sementes', tone: 'brown' },
+      { id: 'p4', name: 'Sorgo AD 36502', desc: 'Precoce, tolerante à seca', price: 678.00, unit: 'sc 40 kg', category: 'sementes', tone: 'orange' },
+      { id: 'p5', name: 'NPK 08-28-16', desc: 'Formulação plantio', price: 189.90, unit: 'sc 50 kg', category: 'fertilizantes', tone: 'blue' },
+      { id: 'p6', name: 'NPK 20-05-20', desc: 'Cobertura em milho', price: 205.50, unit: 'sc 50 kg', category: 'fertilizantes', tone: 'blue' },
+      { id: 'p7', name: 'Superfosfato Simples', desc: 'Fonte de fósforo', price: 142.00, unit: 'sc 50 kg', category: 'fertilizantes', tone: 'gray' },
+      { id: 'p8', name: 'Cloreto de Potássio', desc: 'KCl granular', price: 178.00, unit: 'sc 50 kg', category: 'fertilizantes', tone: 'white' },
+      { id: 'p9', name: 'Calcário Dolomítico', desc: 'PRNT 85%, correção de solo', price: 68.00, unit: 'sc 25 kg', category: 'correcao', tone: 'gray' },
+      { id: 'p10', name: 'Gesso Agrícola', desc: 'Enxofre e cálcio', price: 54.00, unit: 'sc 30 kg', category: 'correcao', tone: 'white' },
+      { id: 'p11', name: 'Aveia Preta', desc: 'Cobertura de solo', price: 312.00, unit: 'sc 40 kg', category: 'sementes', tone: 'green' },
+      { id: 'p12', name: 'Brachiaria Ruziziensis', desc: 'Pastagem renovação', price: 289.00, unit: 'sc 10 kg', category: 'sementes', tone: 'green' },
+      { id: 'p13', name: 'MAP 11-52-00', desc: 'Fósforo solúvel', price: 234.00, unit: 'sc 50 kg', category: 'fertilizantes', tone: 'blue' },
+      { id: 'p14', name: 'Sulfato de Amônio', desc: 'Nitrogênio e enxofre', price: 156.00, unit: 'sc 50 kg', category: 'fertilizantes', tone: 'white' },
+      { id: 'p15', name: 'Calcário Calcítico', desc: 'PRNT 90%', price: 62.00, unit: 'sc 25 kg', category: 'correcao', tone: 'gray' },
+      { id: 'p16', name: 'Trigo BRS 404', desc: 'Inverno, grãos firmes', price: 534.00, unit: 'sc 40 kg', category: 'sementes', tone: 'gold' },
+      { id: 'p17', name: 'Ureia 45% N', desc: 'Cobertura nitrogenada', price: 198.00, unit: 'sc 50 kg', category: 'fertilizantes', tone: 'white' },
+      { id: 'p18', name: 'Micronutrientes Mix', desc: 'B, Zn, Mn, Cu', price: 89.00, unit: 'sc 20 kg', category: 'fertilizantes', tone: 'purple' },
+      { id: 'p19', name: 'Calcário Magnesiano', desc: 'Mg + Ca para pastagem', price: 71.00, unit: 'sc 25 kg', category: 'correcao', tone: 'gray' },
+      { id: 'p20', name: 'Crotalária Juncea', desc: 'Adubação verde', price: 245.00, unit: 'sc 20 kg', category: 'sementes', tone: 'green' },
+    ];
+
+    const PROPERTIES = [
+      { id: 'faz1', name: 'Fazenda Santa Rita', city: 'Ribeirão Preto, SP' },
+      { id: 'faz2', name: 'Sítio Boa Vista', city: 'Passo Fundo, RS' },
+      { id: 'faz3', name: 'Chácara São José', city: 'Dourados, MS' },
+    ];
+
+    const PICKUPS = [
+      { id: 'loja1', name: 'Retirada na loja — Centro', address: 'Av. Brasil, 1200' },
+      { id: 'arm1', name: 'Retirada no armazém', address: 'Rod. BR-153, km 42' },
+    ];
+
+    function formatBRL(value) {
+      return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function loadJSON(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch { return fallback; }
+    }
+
+    function saveJSON(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function genOrderId() {
+      const n = Date.now().toString(36).toUpperCase();
+      const r = Math.random().toString(36).slice(2, 6).toUpperCase();
+      return `PED-${n}-${r}`;
+    }
+
+    const TONE_COLORS = {
+      neutral: { bg: 'oklch(0.94 0.01 260)', fg: 'oklch(0.45 0.02 260)' },
+      green: { bg: 'oklch(0.92 0.06 145)', fg: 'oklch(0.45 0.12 145)' },
+      yellow: { bg: 'oklch(0.93 0.1 95)', fg: 'oklch(0.5 0.12 85)' },
+      brown: { bg: 'oklch(0.88 0.04 55)', fg: 'oklch(0.42 0.06 55)' },
+      orange: { bg: 'oklch(0.9 0.08 55)', fg: 'oklch(0.48 0.14 55)' },
+      blue: { bg: 'oklch(0.92 0.04 252)', fg: 'oklch(0.48 0.14 252)' },
+      gray: { bg: 'oklch(0.91 0.01 260)', fg: 'oklch(0.48 0.02 260)' },
+      white: { bg: 'oklch(0.97 0 0)', fg: 'oklch(0.5 0.02 260)' },
+      gold: { bg: 'oklch(0.91 0.08 85)', fg: 'oklch(0.48 0.1 85)' },
+      purple: { bg: 'oklch(0.92 0.05 300)', fg: 'oklch(0.48 0.12 300)' },
+    };
+
+    function CategoryThumb({ cat }) {
+      const colors = TONE_COLORS[cat.tone] || TONE_COLORS.neutral;
+      if (cat.id === 'todos') {
+        return (
+          <div className="cat-thumb ph-img" style={{ background: colors.bg }}>
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+              <rect x="4" y="4" width="14" height="14" rx="2" fill={colors.fg} opacity="0.7"/>
+              <rect x="22" y="4" width="14" height="14" rx="2" fill={colors.fg} opacity="0.5"/>
+              <rect x="4" y="22" width="14" height="14" rx="2" fill={colors.fg} opacity="0.5"/>
+              <rect x="22" y="22" width="14" height="14" rx="2" fill={colors.fg} opacity="0.7"/>
+            </svg>
+          </div>
+        );
+      }
+      const icons = {
+        sementes: (
+          <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+            <ellipse cx="32" cy="48" rx="18" ry="8" fill={colors.fg} opacity="0.2"/>
+            <path d="M32 12c-8 0-14 6-14 14 0 10 14 22 14 22s14-12 14-22c0-8-6-14-14-14z" fill={colors.fg} opacity="0.85"/>
+            <path d="M32 18c-4 0-7 3-7 7 0 5 7 12 7 12s7-7 7-12c0-4-3-7-7-7z" fill={colors.bg}/>
+          </svg>
+        ),
+        fertilizantes: (
+          <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+            <rect x="16" y="20" width="32" height="36" rx="3" fill={colors.fg} opacity="0.85"/>
+            <rect x="20" y="24" width="24" height="12" rx="1" fill={colors.bg}/>
+            <path d="M22 14h20l4 6H18l4-6z" fill={colors.fg} opacity="0.6"/>
+          </svg>
+        ),
+        correcao: (
+          <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+            <rect x="18" y="18" width="28" height="34" rx="2" fill={colors.fg} opacity="0.85"/>
+            <rect x="22" y="22" width="20" height="8" rx="1" fill={colors.bg}/>
+            <circle cx="32" cy="42" r="6" fill={colors.bg}/>
+          </svg>
+        ),
+      };
+      return (
+        <div className="cat-thumb ph-img" style={{ background: colors.bg }}>
+          {icons[cat.id]}
+        </div>
+      );
+    }
+
+    function ProductThumb({ product }) {
+      const colors = TONE_COLORS[product.tone] || TONE_COLORS.neutral;
+      return (
+        <div className="thumb ph-img" style={{ background: colors.bg }}>
+          <svg viewBox="0 0 80 80" fill="none" aria-hidden="true">
+            <rect x="20" y="24" width="40" height="44" rx="4" fill={colors.fg} opacity="0.75"/>
+            <rect x="24" y="30" width="32" height="14" rx="2" fill={colors.bg}/>
+            <text x="40" y="58" textAnchor="middle" fill={colors.bg} fontSize="8" fontFamily="sans-serif" fontWeight="600">
+              {product.category.slice(0, 3).toUpperCase()}
+            </text>
+          </svg>
+        </div>
+      );
+    }
+
+    function SearchIcon() {
+      return (
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="1.6"/>
+          <path d="M14 14l4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+        </svg>
+      );
+    }
+
+    function ChevronLeft() {
+      return (
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+          <path d="M11 4L6 9l5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      );
+    }
+
+    function CheckIcon() {
+      return (
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <path d="M8 16l6 6 10-12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      );
+    }
+
+    function ProducerTopBar({ view, setView, cartCount, user, onLogout, onLogin }) {
+      const links = [
+        { id: 'catalogo', label: 'Catálogo' },
+        { id: 'carrinho', label: 'Carrinho', badge: cartCount },
+        { id: 'checkout', label: 'Checkout' },
+        { id: 'pedidos', label: 'Pedido' },
+      ];
+
+      return (
+        <header className="top-bar" data-od-id="producer-top-bar">
+          <div className="top-bar-inner">
+            <div className="brand-mark" data-od-id="brand">Insumos Agro</div>
+            <nav className="nav-links" aria-label="Navegação principal">
+              {links.map(link => (
+                <button
+                  key={link.id}
+                  type="button"
+                  className={`nav-link${view === link.id || (link.id === 'pedidos' && (view === 'pedidos' || view === 'pedido-recebido')) ? ' active' : ''}`}
+                  onClick={() => setView(link.id)}
+                  data-od-id={`nav-${link.id}`}
+                >
+                  {link.label}
+                  {link.badge > 0 && <span className="nav-badge" aria-label={`${link.badge} itens`}>{link.badge}</span>}
+                </button>
+              ))}
+            </nav>
+            <div className="user-area" data-od-id="user-area">
+              {user ? (
+                <>
+                  <span data-od-id="user-name">{user.shortName || user.email.split('@')[0]}</span>
+                  <button type="button" onClick={onLogout} data-od-id="btn-sair">Sair</button>
+                </>
+              ) : (
+                <button type="button" onClick={onLogin} data-od-id="btn-entrar">Entrar</button>
+              )}
+            </div>
+          </div>
+        </header>
+      );
+    }
+
+    function OperatorTopBar({ operator, onLogout }) {
+      return (
+        <header className="top-bar" data-od-id="operator-top-bar">
+          <div className="top-bar-inner">
+            <div className="brand-mark">Retaguarda — Revenda</div>
+            <nav className="nav-links">
+              <span className="nav-link active" data-od-id="nav-pedidos-revenda">Pedidos da revenda</span>
+            </nav>
+            <div className="user-area">
+              {operator && (
+                <>
+                  <span data-od-id="operator-name">{operator.name}</span>
+                  <button type="button" onClick={onLogout} data-od-id="operator-sair">Sair</button>
+                </>
+              )}
+            </div>
+          </div>
+        </header>
+      );
+    }
+
+    function CatalogoView({ products, category, setCategory, search, setSearch, pageSize, setPageSize, visibleCount, setVisibleCount, onAdd, hasFilters, onClearFilters }) {
+      const carouselRef = useRef(null);
+      const filtered = useMemo(() => {
+        return products.filter(p => {
+          const matchCat = category === 'todos' || p.category === category;
+          const q = search.trim().toLowerCase();
+          const matchSearch = !q || p.name.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q);
+          return matchCat && matchSearch;
+        });
+      }, [products, category, search]);
+
+      const visible = filtered.slice(0, visibleCount);
+      const hasMore = visibleCount < filtered.length;
+
+      const scrollCarousel = () => {
+        if (carouselRef.current) carouselRef.current.scrollBy({ left: -120, behavior: 'smooth' });
+      };
+
+      return (
+        <section data-od-id="s1-catalogo">
+          <div className="screen-label">S1 — Catálogo</div>
+
+          <div className="carousel-wrap" data-od-id="category-carousel-wrap">
+            <button type="button" className="carousel-arrow" onClick={scrollCarousel} aria-label="Rolar categorias para esquerda" data-od-id="carousel-prev">
+              <ChevronLeft />
+            </button>
+            <div className="category-carousel" ref={carouselRef} role="list" aria-label="Categorias">
+              {CATEGORIES.map(cat => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  role="listitem"
+                  className={`category-card${category === cat.id ? ' selected' : ''}`}
+                  onClick={() => { setCategory(cat.id); setVisibleCount(pageSize); }}
+                  data-od-id={`category-${cat.id}`}
+                  aria-pressed={category === cat.id}
+                >
+                  <CategoryThumb cat={cat} />
+                  <span>{cat.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="toolbar" data-od-id="catalog-toolbar">
+            <div className="search-field" data-od-id="search-field">
+              <SearchIcon />
+              <input
+                type="search"
+                placeholder="Buscar por nome"
+                value={search}
+                onChange={e => { setSearch(e.target.value); setVisibleCount(pageSize); }}
+                aria-label="Buscar por nome"
+              />
+            </div>
+            <div className="page-size" data-od-id="page-size-control">
+              <label htmlFor="page-size">Itens por página</label>
+              <select
+                id="page-size"
+                value={pageSize}
+                onChange={e => { setPageSize(Number(e.target.value)); setVisibleCount(Number(e.target.value)); }}
+              >
+                {[10, 15, 30, 50].map(n => <option key={n} value={n}>{n}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {filtered.length === 0 ? (
+            <div className="empty-state" data-od-id="catalog-empty">
+              <h3>Nenhum produto encontrado</h3>
+              <p>Ajuste a busca ou a categoria selecionada.</p>
+              {hasFilters && (
+                <button type="button" className="btn btn-secondary" onClick={onClearFilters} data-od-id="btn-limpar-filtros">
+                  Limpar filtros
+                </button>
+              )}
+            </div>
+          ) : (
+            <>
+              <div className="product-grid" data-od-id="product-grid">
+                {visible.map(p => (
+                  <article key={p.id} className="product-card" data-od-id={`product-${p.id}`}>
+                    <ProductThumb product={p} />
+                    <div className="product-body">
+                      <h3 className="product-name">{p.name}</h3>
+                      <p className="product-desc">{p.desc}</p>
+                      <p className="product-price">{formatBRL(p.price)}</p>
+                      <p className="product-unit">por {p.unit}</p>
+                      <button type="button" className="btn btn-neutral btn-block" onClick={() => onAdd(p.id)} data-od-id={`btn-add-${p.id}`}>
+                        Adicionar
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+              {hasMore && (
+                <div className="load-more-wrap">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setVisibleCount(c => c + pageSize)}
+                    data-od-id="btn-carregar-mais"
+                  >
+                    Carregar mais
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </section>
+      );
+    }
+
+    function CarrinhoView({ cart, products, onUpdateQty, onRemove, onGoCatalogo }) {
+      const lines = cart.map(item => {
+        const p = products.find(x => x.id === item.productId);
+        return p ? { ...item, product: p } : null;
+      }).filter(Boolean);
+
+      const subtotal = lines.reduce((s, l) => s + l.product.price * l.qty, 0);
+
+      if (lines.length === 0) {
+        return (
+          <section data-od-id="s2-carrinho-empty">
+            <div className="screen-label">S2 — Carrinho</div>
+            <div className="empty-state card">
+              <h3>Seu carrinho está vazio</h3>
+              <p>Adicione insumos pelo catálogo para montar seu pedido.</p>
+              <button type="button" className="btn btn-primary" onClick={onGoCatalogo} data-od-id="btn-ir-catalogo">
+                Ver catálogo
+              </button>
+            </div>
+          </section>
+        );
+      }
+
+      return (
+        <section data-od-id="s2-carrinho">
+          <div className="screen-label">S2 — Carrinho</div>
+          <div className="card">
+            {lines.map(line => (
+              <div key={line.productId} className="cart-line" data-od-id={`cart-line-${line.productId}`}>
+                <div className="cart-line-info">
+                  <h4>{line.product.name}</h4>
+                  <p>{formatBRL(line.product.price)} / {line.product.unit}</p>
+                  <button type="button" className="btn-ghost" style={{ padding: '4px 0', fontSize: 13, marginTop: 4 }} onClick={() => onRemove(line.productId)}>
+                    Remover
+                  </button>
+                </div>
+                <div className="qty-control" data-od-id={`qty-${line.productId}`}>
+                  <button type="button" aria-label="Diminuir quantidade" onClick={() => onUpdateQty(line.productId, line.qty - 1)}>−</button>
+                  <span aria-live="polite">{line.qty}</span>
+                  <button type="button" aria-label="Aumentar quantidade" onClick={() => onUpdateQty(line.productId, line.qty + 1)}>+</button>
+                </div>
+              </div>
+            ))}
+            <div className="cart-summary" data-od-id="cart-summary">
+              <div className="summary-row">
+                <span>Itens ({lines.reduce((s, l) => s + l.qty, 0)})</span>
+                <span>{formatBRL(subtotal)}</span>
+              </div>
+              <div className="summary-row total">
+                <span>Total</span>
+                <span>{formatBRL(subtotal)}</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    function AuthForm({ mode, onSubmit, onSwitch, error }) {
+      const [email, setEmail] = useState('');
+      const [password, setPassword] = useState('');
+      const isLogin = mode === 'entrar';
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!email.trim() || !password.trim()) return;
+        onSubmit({ email: email.trim(), password });
+      };
+
+      return (
+        <section data-od-id={isLogin ? 's3-entrar' : 's4-criar-conta'}>
+          <div className="screen-label">{isLogin ? 'S3 — Entrar' : 'S4 — Criar conta'}</div>
+          <div className="card form-card">
+            <h2 data-od-id="auth-title">{isLogin ? 'Entrar' : 'Criar conta'}</h2>
+            <p className="subtitle">
+              {isLogin ? 'Acesse com e-mail e senha para finalizar pedidos.' : 'Cadastre-se para acompanhar seus pedidos.'}
+            </p>
+            <form onSubmit={handleSubmit}>
+              <div className="field">
+                <label htmlFor="email">E-mail</label>
+                <input id="email" type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} required data-od-id="input-email" />
+              </div>
+              <div className="field">
+                <label htmlFor="password">Senha</label>
+                <input id="password" type="password" autoComplete={isLogin ? 'current-password' : 'new-password'} value={password} onChange={e => setPassword(e.target.value)} required minLength={4} data-od-id="input-password" />
+              </div>
+              {error && <p className="error-msg" role="alert">{error}</p>}
+              <button type="submit" className="btn btn-primary btn-block" data-od-id="btn-auth-submit">
+                {isLogin ? 'Entrar' : 'Criar conta'}
+              </button>
+            </form>
+            <p className="form-link">
+              {isLogin ? (
+                <>Não tem conta? <button type="button" onClick={() => onSwitch('criar-conta')} data-od-id="link-criar-conta">Criar conta</button></>
+              ) : (
+                <>Já tem conta? <button type="button" onClick={() => onSwitch('entrar')} data-od-id="link-entrar">Entrar</button></>
+              )}
+            </p>
+          </div>
+        </section>
+      );
+    }
+
+    function CheckoutView({ user, cart, products, onPlaceOrder, onGoAuth, property, setProperty, pickup, setPickup }) {
+      const lines = cart.map(item => {
+        const p = products.find(x => x.id === item.productId);
+        return p ? { ...item, product: p } : null;
+      }).filter(Boolean);
+      const total = lines.reduce((s, l) => s + l.product.price * l.qty, 0);
+
+      if (lines.length === 0) {
+        return (
+          <section data-od-id="s5-checkout-empty">
+            <div className="screen-label">S5 — Checkout</div>
+            <div className="empty-state card">
+              <h3>Carrinho vazio</h3>
+              <p>Adicione itens ao carrinho antes de confirmar o pedido.</p>
+            </div>
+          </section>
+        );
+      }
+
+      if (!user) {
+        return (
+          <section data-od-id="s5-checkout-auth">
+            <div className="screen-label">S5 — Checkout</div>
+            <div className="card form-card">
+              <h2>Identifique-se para continuar</h2>
+              <p className="subtitle">Entre ou crie uma conta para confirmar a retirada.</p>
+              <button type="button" className="btn btn-primary btn-block" onClick={() => onGoAuth('entrar')} data-od-id="checkout-btn-entrar">Entrar</button>
+              <button type="button" className="btn btn-secondary btn-block" style={{ marginTop: 8 }} onClick={() => onGoAuth('criar-conta')} data-od-id="checkout-btn-criar">Criar conta</button>
+            </div>
+          </section>
+        );
+      }
+
+      return (
+        <section data-od-id="s5-checkout">
+          <div className="screen-label">S5 — Checkout</div>
+          <div className="card" style={{ padding: 20, maxWidth: 560 }}>
+            <div className="checkout-section" data-od-id="checkout-property">
+              <h3>Propriedade</h3>
+              {PROPERTIES.map(prop => (
+                <label key={prop.id} className="radio-option">
+                  <input type="radio" name="property" value={prop.id} checked={property === prop.id} onChange={() => setProperty(prop.id)} />
+                  <div>
+                    <strong>{prop.name}</strong>
+                    <span>{prop.city}</span>
+                  </div>
+                </label>
+              ))}
+            </div>
+
+            <div className="checkout-section" data-od-id="checkout-pickup">
+              <h3>Local de retirada</h3>
+              {PICKUPS.map(pu => (
+                <label key={pu.id} className="radio-option">
+                  <input type="radio" name="pickup" value={pu.id} checked={pickup === pu.id} onChange={() => setPickup(pu.id)} />
+                  <div>
+                    <strong>{pu.name}</strong>
+                    <span>{pu.address}</span>
+                  </div>
+                </label>
+              ))}
+            </div>
+
+            <div className="checkout-section" data-od-id="checkout-summary">
+              <h3>Resumo ({lines.reduce((s, l) => s + l.qty, 0)} itens)</h3>
+              {lines.map(l => (
+                <div key={l.productId} className="summary-row">
+                  <span>{l.qty}× {l.product.name}</span>
+                  <span>{formatBRL(l.product.price * l.qty)}</span>
+                </div>
+              ))}
+              <div className="summary-row total">
+                <span>Total</span>
+                <span>{formatBRL(total)}</span>
+              </div>
+            </div>
+
+            <button type="button" className="btn btn-primary btn-block" onClick={onPlaceOrder} data-od-id="btn-confirmar-pedido">
+              Confirmar pedido
+            </button>
+          </div>
+        </section>
+      );
+    }
+
+    function PedidoRecebidoView({ orderId, onGoPedidos }) {
+      return (
+        <section data-od-id="s6-pedido-recebido">
+          <div className="screen-label">S6 — Pedido recebido</div>
+          <div className="card success-card">
+            <div className="success-icon"><CheckIcon /></div>
+            <h2 data-od-id="pedido-recebido-title">Pedido recebido</h2>
+            <p>Seu pedido foi registrado. Retire na data combinada com a revenda.</p>
+            <div className="order-id" data-od-id="order-id">{orderId}</div>
+            <button type="button" className="btn btn-primary" onClick={onGoPedidos} data-od-id="btn-ver-pedidos">
+              Ver meus pedidos
+            </button>
+          </div>
+        </section>
+      );
+    }
+
+    function MeusPedidosView({ user, orders, onLogin, onSelectOrder }) {
+      if (!user) {
+        return (
+          <section data-od-id="s7-pedidos-logged-out">
+            <div className="screen-label">S7 — Meus pedidos</div>
+            <div className="empty-state card">
+              <h3>Entre para ver seus pedidos</h3>
+              <p>Seus pedidos ficam salvos na sua conta.</p>
+              <button type="button" className="btn btn-primary" onClick={onLogin} data-od-id="btn-pedidos-entrar">Entrar</button>
+            </div>
+          </section>
+        );
+      }
+
+      const myOrders = orders.filter(o => o.userEmail === user.email).reverse();
+
+      if (myOrders.length === 0) {
+        return (
+          <section data-od-id="s7-pedidos-empty">
+            <div className="screen-label">S7 — Meus pedidos</div>
+            <div className="empty-state card">
+              <h3>Nenhum pedido ainda</h3>
+              <p>Seus pedidos confirmados aparecerão aqui.</p>
+            </div>
+          </section>
+        );
+      }
+
+      return (
+        <section data-od-id="s7-meus-pedidos">
+          <div className="screen-label">S7 — Meus pedidos</div>
+          {myOrders.map(o => (
+            <button key={o.id} type="button" className="order-list-item" onClick={() => onSelectOrder(o.id)} data-od-id={`order-item-${o.id}`}>
+              <header>
+                <span className="id">{o.id}</span>
+                <span className="status-badge">Recebido</span>
+              </header>
+              <p style={{ margin: 0, fontSize: 14 }}>{o.items.length} itens · {formatBRL(o.total)}</p>
+              <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--muted)' }}>{new Date(o.createdAt).toLocaleString('pt-BR')}</p>
+            </button>
+          ))}
+        </section>
+      );
+    }
+
+    function RetaguardaView({ operator, orders, selectedOrderId, setSelectedOrderId, onOperatorLogin, onOperatorLogout }) {
+      if (!operator) {
+        return (
+          <section data-od-id="s8-retaguarda-login">
+            <div className="screen-label">S8 — Retaguarda</div>
+            <div className="card form-card">
+              <h2>Acesso retaguarda</h2>
+              <p className="subtitle">Área do operador da revenda.</p>
+              <OperatorLoginForm onSubmit={onOperatorLogin} />
+            </div>
+          </section>
+        );
+      }
+
+      if (selectedOrderId) {
+        const order = orders.find(o => o.id === selectedOrderId);
+        if (!order) {
+          setSelectedOrderId(null);
+          return null;
+        }
+        const prop = PROPERTIES.find(p => p.id === order.propertyId);
+        const pu = PICKUPS.find(p => p.id === order.pickupId);
+
+        return (
+          <section data-od-id="s8-retaguarda-detalhe">
+            <div className="screen-label">S8 — Detalhe do pedido</div>
+            <button type="button" className="btn btn-ghost" style={{ marginBottom: 16, padding: '8px 0' }} onClick={() => setSelectedOrderId(null)} data-od-id="btn-voltar-lista">
+              ← Voltar à lista
+            </button>
+            <div className="card" style={{ padding: 20 }}>
+              <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <h2 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: 20 }}>{order.id}</h2>
+                <span className="status-badge">Recebido</span>
+              </header>
+              <div className="detail-grid">
+                <div className="detail-block">
+                  <h4>Produtor</h4>
+                  <p>{order.userEmail}</p>
+                </div>
+                <div className="detail-block">
+                  <h4>Data</h4>
+                  <p>{new Date(order.createdAt).toLocaleString('pt-BR')}</p>
+                </div>
+                <div className="detail-block">
+                  <h4>Propriedade</h4>
+                  <p>{prop ? `${prop.name} — ${prop.city}` : '—'}</p>
+                </div>
+                <div className="detail-block">
+                  <h4>Retirada</h4>
+                  <p>{pu ? `${pu.name}, ${pu.address}` : '—'}</p>
+                </div>
+              </div>
+              <h3 style={{ fontSize: 16, margin: '24px 0 12px', borderTop: '1px solid var(--border)', paddingTop: 16 }}>Itens</h3>
+              <table className="backoffice-table">
+                <thead>
+                  <tr><th>Produto</th><th>Qtd</th><th>Unit.</th><th>Subtotal</th></tr>
+                </thead>
+                <tbody>
+                  {order.items.map((item, i) => (
+                    <tr key={i}>
+                      <td>{item.name}</td>
+                      <td>{item.qty}</td>
+                      <td>{formatBRL(item.price)}</td>
+                      <td>{formatBRL(item.price * item.qty)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="summary-row total" style={{ marginTop: 16 }}>
+                <span>Total</span>
+                <span>{formatBRL(order.total)}</span>
+              </div>
+            </div>
+          </section>
+        );
+      }
+
+      return (
+        <section data-od-id="s8-retaguarda-lista">
+          <div className="screen-label">S8 — Pedidos da revenda</div>
+          {orders.length === 0 ? (
+            <div className="empty-state card">
+              <h3>Nenhum pedido recebido</h3>
+              <p>Os pedidos dos produtores aparecerão aqui.</p>
+            </div>
+          ) : (
+            <div className="card" style={{ overflow: 'auto' }}>
+              <table className="backoffice-table" data-od-id="orders-table">
+                <thead>
+                  <tr>
+                    <th>Pedido</th>
+                    <th>Produtor</th>
+                    <th>Itens</th>
+                    <th>Total</th>
+                    <th>Data</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...orders].reverse().map(o => (
+                    <tr key={o.id} style={{ cursor: 'pointer' }} onClick={() => setSelectedOrderId(o.id)} data-od-id={`bo-order-${o.id}`}>
+                      <td style={{ fontFamily: 'var(--font-mono)', fontSize: 13 }}>{o.id}</td>
+                      <td>{o.userEmail}</td>
+                      <td>{o.items.reduce((s, i) => s + i.qty, 0)}</td>
+                      <td>{formatBRL(o.total)}</td>
+                      <td>{new Date(o.createdAt).toLocaleDateString('pt-BR')}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      );
+    }
+
+    function OperatorLoginForm({ onSubmit }) {
+      const [email, setEmail] = useState('operador@revenda.com.br');
+      const [password, setPassword] = useState('');
+
+      return (
+        <form onSubmit={(e) => { e.preventDefault(); onSubmit({ email, password, name: 'Operador' }); }}>
+          <div className="field">
+            <label htmlFor="op-email">E-mail</label>
+            <input id="op-email" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+          </div>
+          <div className="field">
+            <label htmlFor="op-pass">Senha</label>
+            <input id="op-pass" type="password" value={password} onChange={e => setPassword(e.target.value)} required />
+          </div>
+          <button type="submit" className="btn btn-primary btn-block" data-od-id="btn-operator-login">
+            Entrar na retaguarda
+          </button>
+        </form>
+      );
+    }
+
+    function App() {
+      const [shell, setShell] = useState(() => loadJSON(STORAGE.shell, 'producer'));
+      const [view, setView] = useState(() => localStorage.getItem(STORAGE.view) || 'catalogo');
+      const [returnView, setReturnView] = useState('catalogo');
+
+      const [cart, setCart] = useState(() => loadJSON(STORAGE.cart, []));
+      const [user, setUser] = useState(() => loadJSON(STORAGE.user, null));
+      const [users, setUsers] = useState(() => loadJSON('insumos_users', {}));
+      const [orders, setOrders] = useState(() => loadJSON(STORAGE.orders, []));
+      const [operator, setOperator] = useState(() => loadJSON(STORAGE.operator, null));
+
+      const [category, setCategory] = useState('todos');
+      const [search, setSearch] = useState('');
+      const [pageSize, setPageSize] = useState(10);
+      const [visibleCount, setVisibleCount] = useState(10);
+
+      const [property, setProperty] = useState(PROPERTIES[0].id);
+      const [pickup, setPickup] = useState(PICKUPS[0].id);
+      const [authError, setAuthError] = useState('');
+      const [lastOrderId, setLastOrderId] = useState('');
+      const [selectedBoOrder, setSelectedBoOrder] = useState(null);
+
+      useEffect(() => { saveJSON(STORAGE.cart, cart); }, [cart]);
+      useEffect(() => { saveJSON(STORAGE.user, user); }, [user]);
+      useEffect(() => { saveJSON(STORAGE.orders, orders); }, [orders]);
+      useEffect(() => { saveJSON(STORAGE.operator, operator); }, [operator]);
+      useEffect(() => { saveJSON(STORAGE.shell, shell); }, [shell]);
+      useEffect(() => { localStorage.setItem(STORAGE.view, view); }, [view]);
+
+      const cartCount = cart.reduce((s, i) => s + i.qty, 0);
+
+      const navigate = useCallback((v) => {
+        setView(v);
+        setAuthError('');
+      }, []);
+
+      const addToCart = (productId) => {
+        setCart(prev => {
+          const existing = prev.find(i => i.productId === productId);
+          if (existing) return prev.map(i => i.productId === productId ? { ...i, qty: i.qty + 1 } : i);
+          return [...prev, { productId, qty: 1 }];
+        });
+      };
+
+      const updateQty = (productId, qty) => {
+        if (qty < 1) {
+          setCart(prev => prev.filter(i => i.productId !== productId));
+        } else {
+          setCart(prev => prev.map(i => i.productId === productId ? { ...i, qty } : i));
+        }
+      };
+
+      const handleAuth = ({ email, password }, isRegister) => {
+        if (isRegister) {
+          if (users[email]) {
+            setAuthError('Este e-mail já está cadastrado.');
+            return;
+          }
+          const shortName = email.split('@')[0].slice(0, 12);
+          const newUser = { email, password, shortName };
+          setUsers(prev => ({ ...prev, [email]: newUser }));
+          saveJSON('insumos_users', { ...users, [email]: newUser });
+          setUser(newUser);
+        } else {
+          const found = users[email];
+          if (!found || found.password !== password) {
+            setAuthError('E-mail ou senha incorretos.');
+            return;
+          }
+          setUser(found);
+        }
+        setAuthError('');
+        navigate(returnView);
+      };
+
+      const handleLogout = () => {
+        setUser(null);
+        if (view === 'pedidos' || view === 'checkout') navigate('catalogo');
+      };
+
+      const handlePlaceOrder = () => {
+        const lines = cart.map(item => {
+          const p = PRODUCTS.find(x => x.id === item.productId);
+          return p ? { productId: p.id, name: p.name, qty: item.qty, price: p.price, unit: p.unit } : null;
+        }).filter(Boolean);
+        const total = lines.reduce((s, l) => s + l.price * l.qty, 0);
+        const id = genOrderId();
+        const order = {
+          id,
+          userEmail: user.email,
+          propertyId: property,
+          pickupId: pickup,
+          items: lines,
+          total,
+          createdAt: new Date().toISOString(),
+        };
+        setOrders(prev => [...prev, order]);
+        setCart([]);
+        setLastOrderId(id);
+        navigate('pedido-recebido');
+      };
+
+      const clearFilters = () => {
+        setCategory('todos');
+        setSearch('');
+        setVisibleCount(pageSize);
+      };
+
+      const hasFilters = category !== 'todos' || search.trim() !== '';
+
+      const goAuth = (mode) => {
+        const authViews = ['entrar', 'criar-conta'];
+        setReturnView(authViews.includes(view) ? 'catalogo' : view);
+        navigate(mode);
+      };
+
+      const toggleShell = () => {
+        const next = shell === 'producer' ? 'operator' : 'producer';
+        setShell(next);
+        setView(next === 'operator' ? 'retaguarda' : 'catalogo');
+        setSelectedBoOrder(null);
+      };
+
+      let content;
+
+      if (shell === 'operator') {
+        content = (
+          <RetaguardaView
+            operator={operator}
+            orders={orders}
+            selectedOrderId={selectedBoOrder}
+            setSelectedOrderId={setSelectedBoOrder}
+            onOperatorLogin={(op) => { setOperator({ name: op.name, email: op.email }); }}
+            onOperatorLogout={() => { setOperator(null); setSelectedBoOrder(null); }}
+          />
+        );
+      } else if (view === 'catalogo') {
+        content = (
+          <CatalogoView
+            products={PRODUCTS}
+            category={category}
+            setCategory={setCategory}
+            search={search}
+            setSearch={setSearch}
+            pageSize={pageSize}
+            setPageSize={setPageSize}
+            visibleCount={visibleCount}
+            setVisibleCount={setVisibleCount}
+            onAdd={addToCart}
+            hasFilters={hasFilters}
+            onClearFilters={clearFilters}
+          />
+        );
+      } else if (view === 'carrinho') {
+        content = (
+          <CarrinhoView
+            cart={cart}
+            products={PRODUCTS}
+            onUpdateQty={updateQty}
+            onRemove={(id) => updateQty(id, 0)}
+            onGoCatalogo={() => navigate('catalogo')}
+          />
+        );
+      } else if (view === 'entrar') {
+        content = (
+          <AuthForm
+            mode="entrar"
+            error={authError}
+            onSubmit={(data) => handleAuth(data, false)}
+            onSwitch={(v) => navigate(v)}
+          />
+        );
+      } else if (view === 'criar-conta') {
+        content = (
+          <AuthForm
+            mode="criar-conta"
+            error={authError}
+            onSubmit={(data) => handleAuth(data, true)}
+            onSwitch={(v) => navigate(v)}
+          />
+        );
+      } else if (view === 'checkout') {
+        content = (
+          <CheckoutView
+            user={user}
+            cart={cart}
+            products={PRODUCTS}
+            onPlaceOrder={handlePlaceOrder}
+            onGoAuth={goAuth}
+            property={property}
+            setProperty={setProperty}
+            pickup={pickup}
+            setPickup={setPickup}
+          />
+        );
+      } else if (view === 'pedido-recebido') {
+        content = (
+          <PedidoRecebidoView
+            orderId={lastOrderId}
+            onGoPedidos={() => navigate('pedidos')}
+          />
+        );
+      } else if (view === 'pedidos') {
+        content = (
+          <MeusPedidosView
+            user={user}
+            orders={orders}
+            onLogin={() => goAuth('entrar')}
+            onSelectOrder={(id) => { setLastOrderId(id); navigate('pedido-recebido'); }}
+          />
+        );
+      }
+
+      return (
+        <div className="app-frame" data-od-id="app-frame">
+          {shell === 'operator' ? (
+            <OperatorTopBar operator={operator} onLogout={() => { setOperator(null); setSelectedBoOrder(null); }} />
+          ) : (
+            <ProducerTopBar
+              view={view}
+              setView={navigate}
+              cartCount={cartCount}
+              user={user}
+              onLogout={handleLogout}
+              onLogin={() => goAuth('entrar')}
+            />
+          )}
+          <main className="main-content">{content}</main>
+          <button type="button" className="demo-switch" onClick={toggleShell} aria-label="Alternar produtor/retaguarda">
+            {shell === 'producer' ? 'Modo retaguarda' : 'Modo produtor'}
+          </button>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

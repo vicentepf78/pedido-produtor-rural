@@ -47,7 +47,7 @@ class ConfirmacaoErpIT {
 	private final HttpClient cliente = HttpClient.newHttpClient();
 
 	@Test
-	void it007_postPersistePedidoAntesDaConfirmacaoAceita() throws Exception {
+	void it015_postPersistePedidoAntesDaConfirmacaoAceita() throws Exception {
 		AtomicInteger presentesNaAceite = new AtomicInteger();
 		when(gatewayErp.aceitar(any(PedidoLocal.class))).thenAnswer(invocacao -> {
 			PedidoLocal local = invocacao.getArgument(0);
@@ -77,7 +77,7 @@ class ConfirmacaoErpIT {
 	}
 
 	@Test
-	void it007_pedidoLocalPermaneceSeAdaptadorForSubstituidoPorFalha() throws Exception {
+	void it015_pedidoLocalPermaneceSeAdaptadorForSubstituidoPorFalha() throws Exception {
 		when(gatewayErp.aceitar(any(PedidoLocal.class))).thenThrow(new IllegalStateException("adaptador substituido"));
 
 		Sessao sessao = autenticar("produtor.alfa@example.com");

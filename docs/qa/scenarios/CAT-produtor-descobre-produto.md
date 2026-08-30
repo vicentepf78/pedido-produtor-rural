@@ -6,7 +6,7 @@ persona: Produtor rural
 journey: J-produtor-pedido-rapido
 expected: O produtor navega ou pesquisa os 30 produtos não regulamentados, vê nome, descrição curta, preço, unidade e imagem ou placeholder, e consegue adicionar um item disponível
 entry_points: /; /catalogo; GET /api/v1/catalogo/produtos
-qa_status: pass
+qa_status: untested
 bug_ids:
 fix_status:
 retest_status:

@@ -3,6 +3,7 @@ package br.agriplataforma.identity.api;
 import br.agriplataforma.identity.application.ComandoCadastro;
 import br.agriplataforma.identity.application.ComandoEntrada;
 import br.agriplataforma.identity.application.ComandoIdentidade;
+import br.agriplataforma.identity.application.ConsultaIdentidade;
 import br.agriplataforma.identity.application.UsuarioAutenticado;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,9 +24,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class AutenticacaoApi {
 
 	private final ComandoIdentidade comandoIdentidade;
+	private final ConsultaIdentidade consultaIdentidade;
 
-	public AutenticacaoApi(ComandoIdentidade comandoIdentidade) {
+	public AutenticacaoApi(ComandoIdentidade comandoIdentidade, ConsultaIdentidade consultaIdentidade) {
 		this.comandoIdentidade = comandoIdentidade;
+		this.consultaIdentidade = consultaIdentidade;
+	}
+
+	@GetMapping("/sessao")
+	public RespostaSessao sessao() {
+		return consultaIdentidade.usuarioAtual().map(RespostaSessao::autenticada).orElseGet(RespostaSessao::convidada);
 	}
 
 	@GetMapping("/csrf")
@@ -62,6 +70,7 @@ public class AutenticacaoApi {
 	}
 
 	private static RespostaAutenticacao resposta(UsuarioAutenticado usuario) {
-		return new RespostaAutenticacao(usuario.id(), usuario.nome(), List.of(usuario.papel().name()));
+		return new RespostaAutenticacao(
+				usuario.id(), usuario.nome(), usuario.email(), List.of(usuario.papel().name()));
 	}
 }

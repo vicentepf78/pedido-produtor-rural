@@ -11,7 +11,7 @@ import org.springframework.modulith.core.Violations;
 class ModulithArchitectureTest {
 
 	@Test
-	void ut026_rejeitaImportacaoDeInfraestruturaDeOutroModulo() {
+	void ut075_rejeitaImportacaoDeInfraestruturaDeOutroModulo() {
 		ApplicationModules violacao =
 				ApplicationModules.of(AplicacaoVioladora.class, ImportOption.Predefined.ONLY_INCLUDE_TESTS);
 		assertThatThrownBy(violacao::verify)
@@ -20,7 +20,7 @@ class ModulithArchitectureTest {
 	}
 
 	@Test
-	void limitesDosModulosDeProducaoSaoValidos() {
+	void ut076_limitesDosModulosDeProducaoSaoValidos() {
 		ApplicationModules.of(AgriPlatformApplication.class).verify();
 	}
 }

@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 class GatewayErpSimuladoTest {
 
 	@Test
-	void ut021_aceitaPedidoLocalSemMutarRegistro() {
+	void ut058_aceitaPedidoLocalSemMutarRegistro() {
 		GatewayErpSimulado gateway = new GatewayErpSimulado();
 		UUID idPedido = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
 		UUID idTenant = UUID.fromString("11111111-1111-1111-1111-111111111111");

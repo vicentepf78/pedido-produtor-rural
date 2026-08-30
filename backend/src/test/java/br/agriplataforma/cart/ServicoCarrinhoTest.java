@@ -93,7 +93,7 @@ class ServicoCarrinhoTest {
 	}
 
 	@Test
-	void ut006_duasUnidadesCalculamTotalDaLinhaEDoCarrinho() {
+	void ut036_duasUnidadesCalculamTotalDaLinhaEDoCarrinho() {
 		auroraDisponivel();
 
 		VisaoCarrinho visao = servico.adicionar(CHAVE, AURORA, new BigDecimal("2"));
@@ -106,7 +106,7 @@ class ServicoCarrinhoTest {
 	}
 
 	@Test
-	void ut007_alterarQuantidadeRecalculaTotal() {
+	void ut037_alterarQuantidadeRecalculaTotal() {
 		auroraDisponivel();
 		servico.adicionar(CHAVE, AURORA, new BigDecimal("2"));
 
@@ -118,7 +118,7 @@ class ServicoCarrinhoTest {
 	}
 
 	@Test
-	void ut008_removerLinhaFinalProduzCarrinhoVazio() {
+	void ut038_removerLinhaFinalProduzCarrinhoVazio() {
 		auroraDisponivel();
 		servico.adicionar(CHAVE, AURORA, BigDecimal.ONE);
 
@@ -130,7 +130,7 @@ class ServicoCarrinhoTest {
 
 	@ParameterizedTest
 	@ValueSource(strings = {"0", "-1", "1.5"})
-	void ut009_quantidadeInvalida(String quantidade) {
+	void ut039_quantidadeInvalida(String quantidade) {
 		assertThatThrownBy(() -> servico.adicionar(CHAVE, AURORA, new BigDecimal(quantidade)))
 				.isInstanceOf(ExcecaoCarrinho.class)
 				.satisfies(excecao -> {
@@ -142,7 +142,7 @@ class ServicoCarrinhoTest {
 	}
 
 	@Test
-	void ut010_mesmoProdutoConsolidaUmaLinha() {
+	void ut041_mesmoProdutoConsolidaUmaLinha() {
 		auroraDisponivel();
 		servico.adicionar(CHAVE, AURORA, BigDecimal.ONE);
 		VisaoCarrinho visao = servico.adicionar(CHAVE, AURORA, new BigDecimal("2"));
@@ -153,7 +153,7 @@ class ServicoCarrinhoTest {
 	}
 
 	@Test
-	void ut011_cemItensMantemQuantidadeETotal() {
+	void ut042_cemItensMantemQuantidadeETotal() {
 		List<UUID> ids = new ArrayList<>();
 		for (int i = 0; i < 100; i++) {
 			UUID id = UUID.fromString("00000000-0000-4000-8000-" + String.format("%012d", i));
@@ -182,7 +182,7 @@ class ServicoCarrinhoTest {
 	}
 
 	@Test
-	void ut012_falhaNaMutacaoPreservaCarrinhoConfirmado() {
+	void ut043_falhaNaMutacaoPreservaCarrinhoConfirmado() {
 		auroraDisponivel();
 		servico.adicionar(CHAVE, AURORA, new BigDecimal("2"));
 		when(consultaCatalogo.exigirProdutoPedivel(TENANT, NPK))
@@ -195,6 +195,51 @@ class ServicoCarrinhoTest {
 		assertThat(visao.itens().getFirst().idProduto()).isEqualTo(AURORA);
 		assertThat(visao.itens().getFirst().quantidade()).isEqualTo(2);
 		assertThat(visao.total()).isEqualByComparingTo("1240.00");
+	}
+
+	@Test
+	void ut040_produtoIndisponivel() {
+		when(consultaCatalogo.exigirProdutoPedivel(TENANT, NPK))
+				.thenThrow(new ExcecaoCatalogo("PRODUTO_INDISPONIVEL", "Este produto não está disponível."));
+		assertThatThrownBy(() -> servico.adicionar(CHAVE, NPK, BigDecimal.ONE))
+				.isInstanceOf(ExcecaoCatalogo.class)
+				.satisfies(excecao -> {
+					assertThat(((ExcecaoCatalogo) excecao).codigo()).isEqualTo("PRODUTO_INDISPONIVEL");
+					assertThat(excecao.getMessage()).isEqualTo("Este produto não está disponível.");
+				});
+	}
+
+	@Test
+	void ut044_duasAlteracoesConvergem() {
+		auroraDisponivel();
+		servico.adicionar(CHAVE, AURORA, new BigDecimal("2"));
+		servico.alterarQuantidade(CHAVE, AURORA, new BigDecimal("3"));
+		VisaoCarrinho visao = servico.alterarQuantidade(CHAVE, AURORA, new BigDecimal("1"));
+		assertThat(visao.itens()).hasSize(1);
+		assertThat(visao.itens().getFirst().quantidade()).isEqualTo(1);
+	}
+
+	@Test
+	void ut045_precoUreiaPermaneceAposIdentidade() {
+		UUID ureia = UUID.fromString("10000000-0000-4000-8000-000000000015");
+		when(consultaCatalogo.exigirProdutoPedivel(TENANT, ureia))
+				.thenReturn(new ProdutoParaCarrinho(ureia, "Ureia agrícola 50 kg", "Saco", new BigDecimal("198.00")));
+		when(consultaCatalogo.obterProdutoVisivel(TENANT, ureia))
+				.thenReturn(Optional.of(new ResumoProduto(
+						ureia, "Ureia agrícola 50 kg", "Fertilizantes", "desc", "Saco", new BigDecimal("198.00"), true, null)));
+		VisaoCarrinho visao = servico.adicionar(CHAVE, ureia, new BigDecimal("2"));
+		assertThat(visao.itens().getFirst().precoUnitario()).isEqualByComparingTo("198.00");
+		assertThat(visao.total()).isEqualByComparingTo("396.00");
+	}
+
+	@Test
+	void ut046_reguladoNaoEntraNoCarrinho() {
+		UUID regulado = UUID.fromString("10000000-0000-4000-8000-000000000099");
+		when(consultaCatalogo.exigirProdutoPedivel(TENANT, regulado))
+				.thenThrow(new ExcecaoCatalogo("PRODUTO_NAO_ELEGIVEL", "Este produto não pode ser pedido nesta loja."));
+		assertThatThrownBy(() -> servico.adicionar(CHAVE, regulado, BigDecimal.ONE))
+				.isInstanceOf(ExcecaoCatalogo.class)
+				.satisfies(excecao -> assertThat(((ExcecaoCatalogo) excecao).codigo()).isEqualTo("PRODUTO_NAO_ELEGIVEL"));
 	}
 
 	private void auroraDisponivel() {

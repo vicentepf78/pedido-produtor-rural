@@ -31,6 +31,7 @@ public class ServicoIdentidade implements ComandoIdentidade, ConsultaIdentidade 
 	@Override
 	@Transactional
 	public UsuarioAutenticado cadastrar(ComandoCadastro comando) {
+		exigirCamposCadastro(comando);
 		String email = normalizarEmail(comando.email());
 		var idTenant = consultaTenant.idTenantConfigurado();
 		if (repositorio.existsByIdTenantAndEmail(idTenant, email)) {
@@ -46,6 +47,7 @@ public class ServicoIdentidade implements ComandoIdentidade, ConsultaIdentidade 
 	@Override
 	@Transactional(readOnly = true)
 	public UsuarioAutenticado entrar(ComandoEntrada comando) {
+		exigirCamposEntrada(comando);
 		String email = normalizarEmail(comando.email());
 		var idTenant = consultaTenant.idTenantConfigurado();
 		Usuario usuario = repositorio
@@ -85,6 +87,27 @@ public class ServicoIdentidade implements ComandoIdentidade, ConsultaIdentidade 
 				usuario.nome(),
 				usuario.email(),
 				Papel.valueOf(usuario.papel()));
+	}
+
+	private static void exigirCamposCadastro(ComandoCadastro comando) {
+		if (comando.nome() == null || comando.nome().isBlank()) {
+			throw new ExcecaoAutenticacao("DADOS_OBRIGATORIOS", "Informe o nome.");
+		}
+		if (comando.email() == null || comando.email().isBlank()) {
+			throw new ExcecaoAutenticacao("DADOS_OBRIGATORIOS", "Informe o e-mail.");
+		}
+		if (comando.senha() == null || comando.senha().isBlank()) {
+			throw new ExcecaoAutenticacao("DADOS_OBRIGATORIOS", "Informe a senha.");
+		}
+	}
+
+	private static void exigirCamposEntrada(ComandoEntrada comando) {
+		if (comando.email() == null || comando.email().isBlank()) {
+			throw new ExcecaoAutenticacao("DADOS_OBRIGATORIOS", "Informe o e-mail.");
+		}
+		if (comando.senha() == null || comando.senha().isBlank()) {
+			throw new ExcecaoAutenticacao("DADOS_OBRIGATORIOS", "Informe a senha.");
+		}
 	}
 
 	private static String normalizarEmail(String email) {

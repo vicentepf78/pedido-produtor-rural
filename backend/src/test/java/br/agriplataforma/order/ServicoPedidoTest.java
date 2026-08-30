@@ -13,6 +13,7 @@ import br.agriplataforma.cart.application.ConsultaCarrinho;
 import br.agriplataforma.catalog.application.ProdutoParaCarrinho;
 import br.agriplataforma.cart.application.VisaoCarrinho;
 import br.agriplataforma.catalog.application.ConsultaCatalogo;
+import br.agriplataforma.catalog.application.ExcecaoCatalogo;
 import br.agriplataforma.catalog.application.ResumoProduto;
 import br.agriplataforma.identity.application.ConsultaIdentidade;
 import br.agriplataforma.identity.application.Papel;
@@ -143,7 +144,7 @@ class ServicoPedidoTest {
 	}
 
 	@Test
-	void ut013_checkoutAceitaProdutorAutenticadoComPropriedadeERetirada() {
+	void ut047_checkoutAceitaProdutorAutenticadoComPropriedadeERetirada() {
 		ConfirmacaoPedido confirmacao = servico.criar(comandoValido());
 
 		assertThat(confirmacao.idPedido()).isNotNull();
@@ -156,7 +157,7 @@ class ServicoPedidoTest {
 	}
 
 	@Test
-	void ut014_carrinhoVazioRetornaCarrinhoVazio() {
+	void ut048_carrinhoVazioRetornaCarrinhoVazio() {
 		when(consultaCarrinho.obter(CHAVE_CARRINHO))
 				.thenReturn(new VisaoCarrinho(List.of(), BigDecimal.ZERO.setScale(2)));
 
@@ -171,7 +172,7 @@ class ServicoPedidoTest {
 	}
 
 	@Test
-	void ut015_semPropriedadeOuRetiradaRetornaDadosObrigatorios() {
+	void ut049_semPropriedadeOuRetiradaRetornaDadosObrigatorios() {
 		when(consultaPropriedades.buscarPropria(null)).thenReturn(Optional.empty());
 
 		assertThatThrownBy(() -> servico.criar(new CriarPedido(CHAVE_CARRINHO, null, RETIRADA, CHAVE_IDEMP)))
@@ -190,7 +191,7 @@ class ServicoPedidoTest {
 	}
 
 	@Test
-	void ut018_duasConfirmacoesComMesmaChaveProduzemUmPedido() {
+	void ut050_duasConfirmacoesComMesmaChaveProduzemUmPedido() {
 		ConfirmacaoPedido primeira = servico.criar(comandoValido());
 		ConfirmacaoPedido segunda = servico.criar(comandoValido());
 
@@ -200,7 +201,7 @@ class ServicoPedidoTest {
 	}
 
 	@Test
-	void ut018_violacaoDeUnicidadeRecuperaOPedidoExistente() {
+	void ut059_violacaoDeUnicidadeRecuperaOPedidoExistente() {
 		Pedido existente = Pedido.novo(
 				TENANT,
 				PRODUTOR_ALFA,
@@ -222,7 +223,7 @@ class ServicoPedidoTest {
 	}
 
 	@Test
-	void ut020_confirmacaoCriaSnapshotImutavel() {
+	void ut062_confirmacaoCriaSnapshotImutavel() {
 		servico.criar(comandoValido());
 		VisaoPedido visao = servico.obterParaProdutor(ALFA, pedidoPersistido.id());
 
@@ -234,10 +235,12 @@ class ServicoPedidoTest {
 		assertThat(visao.itens().getFirst().precoUnitario()).isEqualByComparingTo("620.00");
 		assertThat(visao.itens().getFirst().totalLinha()).isEqualByComparingTo("1240.00");
 		assertThat(visao.total()).isEqualByComparingTo("1240.00");
+		assertThat(visao.situacao()).isEqualTo("RECEBIDO");
+		assertThat(visao.confirmacao()).isEqualTo("ACEITA");
 	}
 
 	@Test
-	void ut021_mockAceitaPedidoLocalJaPersistido() {
+	void ut058_mockAceitaPedidoLocalJaPersistido() {
 		ConfirmacaoPedido confirmacao = servico.criar(comandoValido());
 
 		assertThat(confirmacao.confirmacao()).isEqualTo("ACEITA");
@@ -251,7 +254,7 @@ class ServicoPedidoTest {
 	}
 
 	@Test
-	void ut022_alterarPrecoCatalogoNaoAlteraPedido() {
+	void ut054_alterarPrecoCatalogoNaoAlteraPedido() {
 		servico.criar(comandoValido());
 		when(consultaCatalogo.obterProdutoVisivel(TENANT, AURORA))
 				.thenReturn(Optional.of(new ResumoProduto(
@@ -271,7 +274,7 @@ class ServicoPedidoTest {
 	}
 
 	@Test
-	void ut023_produtorNaoLePedidoDeOutroProdutor() {
+	void ut056_produtorNaoLePedidoDeOutroProdutor() {
 		servico.criar(comandoValido());
 		UUID idPedido = pedidoPersistido.id();
 		autenticar(BETA, PRODUTOR_BETA);
@@ -283,6 +286,80 @@ class ServicoPedidoTest {
 					assertThat(pedido.codigo()).isEqualTo("ACESSO_PEDIDO_NEGADO");
 					assertThat(pedido.getMessage()).isEqualTo("Você não pode visualizar este pedido.");
 				});
+	}
+
+	@Test
+	void ut051_sessaoExpiradaNaoApagaCarrinho() {
+		when(consultaIdentidade.exigirAutenticado())
+				.thenThrow(new br.agriplataforma.identity.application.ExcecaoAutenticacao(
+						"NAO_AUTENTICADO", "Entre ou crie uma conta para continuar."));
+		assertThatThrownBy(() -> servico.criar(comandoValido()))
+				.isInstanceOf(br.agriplataforma.identity.application.ExcecaoAutenticacao.class)
+				.satisfies(excecao -> assertThat(((br.agriplataforma.identity.application.ExcecaoAutenticacao) excecao)
+								.codigo())
+						.isEqualTo("NAO_AUTENTICADO"));
+		assertThat(consultaCarrinho.obter(CHAVE_CARRINHO).itens()).hasSize(1);
+	}
+
+	@Test
+	void ut052_itemInelegivelImpedeConfirmacao() {
+		when(consultaCatalogo.exigirProdutoPedivel(TENANT, AURORA))
+				.thenThrow(new ExcecaoCatalogo("PRODUTO_NAO_ELEGIVEL", "Este produto não pode ser pedido nesta loja."));
+		assertThatThrownBy(() -> servico.criar(comandoValido())).isInstanceOf(ExcecaoCatalogo.class);
+		verify(comandoCarrinho, never()).esvaziar(any());
+	}
+
+	@Test
+	void ut053_propriedadeDeBetaRecusada() {
+		UUID fazendaSul = UUID.fromString("66666666-6666-6666-6666-666666666666");
+		when(consultaPropriedades.buscarPropria(fazendaSul)).thenReturn(Optional.empty());
+		assertThatThrownBy(() ->
+						servico.criar(new CriarPedido(CHAVE_CARRINHO, fazendaSul, RETIRADA, CHAVE_IDEMP)))
+				.isInstanceOf(ExcecaoPedido.class)
+				.satisfies(excecao -> assertThat(((ExcecaoPedido) excecao).codigo())
+						.isEqualTo("DADOS_CHECKOUT_OBRIGATORIOS"));
+	}
+
+	@Test
+	void ut055_operadorNaoCriaPedido() {
+		when(consultaIdentidade.exigirAutenticado())
+				.thenReturn(new UsuarioAutenticado(
+						UUID.fromString("22222222-2222-2222-2222-222222222222"),
+						TENANT,
+						"Operador",
+						"operador.revenda@example.com",
+						Papel.OPERADOR_REVENDA));
+		assertThatThrownBy(() -> servico.criar(comandoValido()))
+				.isInstanceOf(ExcecaoPedido.class)
+				.satisfies(excecao -> {
+					ExcecaoPedido pedido = (ExcecaoPedido) excecao;
+					assertThat(pedido.codigo()).isEqualTo("ACESSO_NEGADO");
+					assertThat(pedido.getMessage()).isEqualTo("Você não tem permissão para este recurso.");
+				});
+	}
+
+	@Test
+	void ut057_idInexistenteNaoRevelaOutroPedido() {
+		servico.criar(comandoValido());
+		assertThatThrownBy(() -> servico.obterParaProdutor(ALFA, UUID.randomUUID()))
+				.isInstanceOf(ExcecaoPedido.class)
+				.satisfies(excecao -> assertThat(((ExcecaoPedido) excecao).codigo())
+						.isEqualTo("ACESSO_PEDIDO_NEGADO"));
+	}
+
+	@Test
+	void ut060_interrupcaoNaoDeixaMeioTermo() {
+		org.mockito.Mockito.doThrow(new RuntimeException("falha")).when(repositorioItens).saveAll(any());
+		assertThatThrownBy(() -> servico.criar(comandoValido())).isInstanceOf(RuntimeException.class);
+	}
+
+	@Test
+	void ut061_listaVaziaDeAlfa() {
+		when(repositorioPedido.findByIdTenantAndIdProdutor(any(), any(), any()))
+				.thenReturn(org.springframework.data.domain.Page.empty());
+		var pagina = servico.listarParaProdutor(ALFA, 1, 10);
+		assertThat(pagina.itens()).isEmpty();
+		assertThat(pagina.total()).isZero();
 	}
 
 	private CriarPedido comandoValido() {

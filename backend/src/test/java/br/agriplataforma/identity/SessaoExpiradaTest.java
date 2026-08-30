@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -18,6 +19,7 @@ import br.agriplataforma.producer.application.ComandoPropriedades;
 import br.agriplataforma.producer.application.ConsultaPropriedades;
 import jakarta.servlet.http.Cookie;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +59,7 @@ class SessaoExpiradaTest {
 	ComandoPropriedades comandoPropriedades;
 
 	@Test
-	void ut019_sessaoExpiradaExigeAutenticacaoEPreservaCarrinhoConvidado() throws Exception {
+	void ut035_sessaoExpiradaExigeAutenticacaoEPreservaCarrinhoConvidado() throws Exception {
 		MockHttpSession sessao = sessaoAutenticada();
 		sessao.invalidate();
 
@@ -74,7 +76,7 @@ class SessaoExpiradaTest {
 	}
 
 	@Test
-	void ut019_saidaNaoApagaCookieDoCarrinhoConvidado() throws Exception {
+	void ut035_saidaNaoApagaCookieDoCarrinhoConvidado() throws Exception {
 		MvcResult resultado = mvc.perform(post("/api/v1/autenticacao/saida")
 						.with(csrf())
 						.session(sessaoAutenticada())
@@ -84,6 +86,15 @@ class SessaoExpiradaTest {
 
 		assertThat(resultado.getResponse().getHeaders("Set-Cookie"))
 				.noneMatch(SessaoExpiradaTest::apagaCarrinhoConvidado);
+	}
+
+	@Test
+	void ut025_sessaoConvidadoSemCookie() throws Exception {
+		when(consultaIdentidade.usuarioAtual()).thenReturn(Optional.empty());
+		mvc.perform(get("/api/v1/autenticacao/sessao"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.autenticado").value(false))
+				.andExpect(jsonPath("$.email").doesNotExist());
 	}
 
 	private static MockHttpSession sessaoAutenticada() {

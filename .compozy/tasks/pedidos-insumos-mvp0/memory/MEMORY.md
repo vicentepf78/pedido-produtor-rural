@@ -61,3 +61,5 @@
   `ACESSO_NEGADO` e `GET /api/v1/retaguarda/pedidos/{id}` estão em `_dx.md`.
 - MCP browser do Cursor não manteve aba neste host; o walk de maior risco
   usou Playwright contra o stack vivo (sem `apiMock`).
+- Phase E: `git push` de `66e004c` em `origin/mvp-0` ok. `gh` sem login
+  (`GH_TOKEN` ausente) — não dá para abrir o draft PR nem vigiar checks.

@@ -14,5 +14,11 @@ public interface RepositorioProduto extends JpaRepository<Produto, UUID> {
 	Page<Produto> findByIdTenantAndReguladoFalseAndNomeContainingIgnoreCaseOrderByNomeAsc(
 			UUID idTenant, String nome, Pageable pageable);
 
+	Page<Produto> findByIdTenantAndReguladoFalseAndCategoriaOrderByNomeAsc(
+			UUID idTenant, String categoria, Pageable pageable);
+
+	Page<Produto> findByIdTenantAndReguladoFalseAndCategoriaAndNomeContainingIgnoreCaseOrderByNomeAsc(
+			UUID idTenant, String categoria, String nome, Pageable pageable);
+
 	Optional<Produto> findByIdAndIdTenant(UUID id, UUID idTenant);
 }

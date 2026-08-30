@@ -41,7 +41,7 @@ class RetaguardaIT {
 
 	@Test
 	@Order(2)
-	void it009_listaRetaguardaDevolveSomenteResumosDoTenantConfigurado() throws Exception {
+	void it018_listaRetaguardaDevolveSomenteResumosDoTenantConfigurado() throws Exception {
 		Sessao alfa = autenticar("produtor.alfa@example.com");
 		String cookieCarrinho = adicionarAurora(alfa);
 		HttpResponse<String> criado = postPedido(
@@ -73,7 +73,7 @@ class RetaguardaIT {
 
 	@Test
 	@Order(1)
-	void it010_retaguardaVaziaExplicitaERecusaProdutor() throws Exception {
+	void it019_retaguardaVaziaExplicitaERecusaProdutor() throws Exception {
 		jdbc.update("DELETE FROM \"order\".\"itemPedido\"");
 		jdbc.update("DELETE FROM \"order\".\"pedido\"");
 		Sessao operador = autenticar("operador.revenda@example.com");
@@ -88,6 +88,45 @@ class RetaguardaIT {
 		assertThat(negado.body()).contains("\"codigo\":\"ACESSO_NEGADO\"");
 		assertThat(negado.body()).doesNotContain("\"itens\"");
 		assertThat(negado.body()).doesNotContain("Produtor Alfa");
+	}
+
+	@Test
+	@Order(3)
+	void it031_retaguardaSemSessao() throws Exception {
+		HttpResponse<String> lista = cliente.send(
+				HttpRequest.newBuilder(uri("/api/v1/retaguarda/pedidos")).GET().build(),
+				HttpResponse.BodyHandlers.ofString());
+		assertThat(lista.body()).contains("NAO_AUTENTICADO");
+	}
+
+	@Test
+	@Order(4)
+	void it038_detalheOperadorSnapshot() throws Exception {
+		Sessao alfa = autenticar("produtor.alfa@example.com");
+		String cookieCarrinho = adicionarAurora(alfa);
+		HttpResponse<String> criado = postPedido(
+				alfa,
+				cookieCarrinho,
+				UUID.randomUUID().toString(),
+				"{\"idPropriedade\":\"%s\",\"preferenciaRetirada\":\"DEPOSITO_PRINCIPAL\"}"
+						.formatted(FAZENDA_NORTE));
+		String idPedido = extrair(criado.body(), "idPedido");
+		Sessao operador = autenticar("operador.revenda@example.com");
+		HttpResponse<String> detalhe = get(operador, "/api/v1/retaguarda/pedidos/" + idPedido);
+		assertThat(detalhe.statusCode()).isEqualTo(200);
+		assertThat(detalhe.body()).contains("\"confirmacao\":\"ACEITA\"");
+		HttpResponse<String> novamente = get(operador, "/api/v1/retaguarda/pedidos/" + idPedido);
+		assertThat(novamente.body()).contains("\"confirmacao\":\"ACEITA\"");
+	}
+
+	@Test
+	@Order(1)
+	void it049_listaVaziaOperador() throws Exception {
+		jdbc.update("DELETE FROM \"order\".\"itemPedido\"");
+		jdbc.update("DELETE FROM \"order\".\"pedido\"");
+		Sessao operador = autenticar("operador.revenda@example.com");
+		HttpResponse<String> vazia = get(operador, "/api/v1/retaguarda/pedidos?pagina=1&tamanhoPagina=25");
+		assertThat(vazia.body()).contains("\"itens\":[]");
 	}
 
 	private String adicionarAurora(Sessao sessao) throws Exception {

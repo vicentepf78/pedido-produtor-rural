@@ -30,7 +30,7 @@ class CarrinhoConvidadoIT {
 	private final HttpClient cliente = HttpClient.newBuilder().build();
 
 	@Test
-	void it003_adicionarItemDevolveLinhaETotalDoContratoDx() throws Exception {
+	void it013_adicionarItemDevolveLinhaETotalDoContratoDx() throws Exception {
 		HttpResponse<String> resposta = postJson(
 				"/api/v1/carrinhos/convidado/itens",
 				"{\"idProduto\":\"%s\",\"quantidade\":2}".formatted(AURORA),
@@ -46,7 +46,7 @@ class CarrinhoConvidadoIT {
 	}
 
 	@Test
-	void it003_quantidadeInvalidaEProdutosRecusados() throws Exception {
+	void it027_quantidadeInvalidaEProdutosRecusados() throws Exception {
 		HttpResponse<String> zero = postJson(
 				"/api/v1/carrinhos/convidado/itens",
 				"{\"idProduto\":\"%s\",\"quantidade\":0}".formatted(AURORA),
@@ -77,7 +77,7 @@ class CarrinhoConvidadoIT {
 	}
 
 	@Test
-	void it004_carrinhoPersisteAposRestaurarSessaoECarrinhoVazioNaoLiberaCheckout() throws Exception {
+	void it034_carrinhoPersisteAposRestaurarSessaoECarrinhoVazioNaoLiberaCheckout() throws Exception {
 		HttpResponse<String> vazio = cliente.send(
 				HttpRequest.newBuilder(uri("/api/v1/carrinhos/convidado")).GET().build(),
 				HttpResponse.BodyHandlers.ofString());
@@ -105,6 +105,73 @@ class CarrinhoConvidadoIT {
 		assertThat(restaurado.headers().allValues("Set-Cookie"))
 				.noneMatch(cookie -> cookie.toLowerCase().contains("chavecarrinhoconvidado=")
 						&& cookie.toLowerCase().contains("max-age=0"));
+	}
+
+	@Test
+	void it014_alterarERemoverAtualizamTotal() throws Exception {
+		HttpResponse<String> adicao = postJson(
+				"/api/v1/carrinhos/convidado/itens",
+				"{\"idProduto\":\"%s\",\"quantidade\":2}".formatted(AURORA),
+				null);
+		String cookie = cookieCarrinho(adicao.headers().allValues("Set-Cookie"));
+		Csrf csrf = csrf();
+		HttpResponse<String> alterado = cliente.send(
+				HttpRequest.newBuilder(uri("/api/v1/carrinhos/convidado/itens/" + AURORA))
+						.header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+						.header("X-XSRF-TOKEN", csrf.token())
+						.header("Cookie", csrf.cookie() + "; " + cookie.split(";", 2)[0])
+						.method("PATCH", HttpRequest.BodyPublishers.ofString("{\"quantidade\":1}"))
+						.build(),
+				HttpResponse.BodyHandlers.ofString());
+		assertThat(alterado.statusCode()).isEqualTo(200);
+		assertThat(alterado.body()).contains("\"total\":\"620.00\"");
+		Csrf csrf2 = csrf();
+		HttpResponse<String> removido = cliente.send(
+				HttpRequest.newBuilder(uri("/api/v1/carrinhos/convidado/itens/" + AURORA))
+						.header("X-XSRF-TOKEN", csrf2.token())
+						.header("Cookie", csrf2.cookie() + "; " + cookie.split(";", 2)[0])
+						.DELETE()
+						.build(),
+				HttpResponse.BodyHandlers.ofString());
+		assertThat(removido.body()).contains("\"itens\":[]");
+	}
+
+	@Test
+	void it028_produtoIndisponivel() throws Exception {
+		HttpResponse<String> ureia = postJson(
+				"/api/v1/carrinhos/convidado/itens",
+				"{\"idProduto\":\"%s\",\"quantidade\":1}".formatted(UREIA),
+				null);
+		assertThat(ureia.statusCode()).isEqualTo(409);
+		assertThat(ureia.body()).contains("PRODUTO_INDISPONIVEL");
+	}
+
+	@Test
+	void it044_precoPermaneceAposEntrada() throws Exception {
+		HttpResponse<String> adicao = postJson(
+				"/api/v1/carrinhos/convidado/itens",
+				"{\"idProduto\":\"%s\",\"quantidade\":2}".formatted(AURORA),
+				null);
+		assertThat(adicao.body()).contains("\"precoUnitario\":\"620.00\"");
+		String cookie = cookieCarrinho(adicao.headers().allValues("Set-Cookie"));
+		Csrf csrf = csrf();
+		HttpResponse<String> entrada = cliente.send(
+				HttpRequest.newBuilder(uri("/api/v1/autenticacao/entrada"))
+						.header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+						.header("X-XSRF-TOKEN", csrf.token())
+						.header("Cookie", csrf.cookie() + "; " + cookie.split(";", 2)[0])
+						.POST(HttpRequest.BodyPublishers.ofString(
+								"{\"email\":\"produtor.alfa@example.com\",\"senha\":\"Senha#Fixture2026\"}"))
+						.build(),
+				HttpResponse.BodyHandlers.ofString());
+		assertThat(entrada.statusCode()).isEqualTo(200);
+		HttpResponse<String> carrinho = cliente.send(
+				HttpRequest.newBuilder(uri("/api/v1/carrinhos/convidado"))
+						.header("Cookie", cookie.split(";", 2)[0])
+						.GET()
+						.build(),
+				HttpResponse.BodyHandlers.ofString());
+		assertThat(carrinho.body()).contains("\"precoUnitario\":\"620.00\"");
 	}
 
 	private HttpResponse<String> postJson(String caminho, String json, String cookieCarrinho) throws Exception {

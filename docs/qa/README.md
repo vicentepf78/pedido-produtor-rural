@@ -74,8 +74,10 @@ Não versionar segredos. Chaves de entrada dos cenários:
 
 ## Como subir o ambiente
 
+Passo a passo (terminal e IntelliJ): [README na raiz](../../README.md).
+
 1. `docker compose up -d` (PostgreSQL local; valores de `.env.example`).
-2. Backend: `cd backend && ./mvnw spring-boot:run` (porta 8080).
+2. Backend: `cd backend && ./mvnw spring-boot:run -Dspring-boot.run.profiles=local` (porta 8080).
 3. Frontend: `cd frontend && npm run dev` (proxy `/api` e `/actuator`).
 4. Health: `GET /actuator/health` deve responder UP antes do walk.
 

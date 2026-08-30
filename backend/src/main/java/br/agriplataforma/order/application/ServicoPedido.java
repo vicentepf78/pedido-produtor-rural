@@ -272,7 +272,7 @@ public class ServicoPedido implements ComandoPedido, ConsultaPedidoRetaguarda {
 	private UsuarioAutenticado exigirProdutor() {
 		UsuarioAutenticado usuario = consultaIdentidade.exigirAutenticado();
 		if (usuario.papel() != Papel.PRODUTOR) {
-			throw new ExcecaoPedido("ACESSO_PEDIDO_NEGADO", "Você não pode visualizar este pedido.");
+			throw new ExcecaoPedido("ACESSO_NEGADO", "Você não tem permissão para este recurso.");
 		}
 		return usuario;
 	}
