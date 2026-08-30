@@ -27,8 +27,20 @@ spring:
     init:
       mode: never
 
+server:
+  servlet:
+    session:
+      tracking-modes: cookie
+      timeout: 30m
+      cookie:
+        name: sessao
+        http-only: true
+        secure: true
+        same-site: lax
+
 agriplataforma:
   idTenantSemeado: ${AGRIPLATAFORMA_ID_TENANT_SEMEADO:11111111-1111-1111-1111-111111111111}
+
 
 management:
   endpoints:
