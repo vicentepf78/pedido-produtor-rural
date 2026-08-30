@@ -1,5 +1,5 @@
 ---
-status: pending
+status: completed
 title: Fundação modular, banco e verificação de arquitetura
 type: infra
 complexity: high
@@ -52,20 +52,20 @@ consegue persistir, publicar API ou provar limites de arquitetura.
 
 ## Subtasks
 
-- [ ] 1.1 Criar o projeto Maven Java 21 com Spring Boot, Spring Modulith, JPA,
+- [x] 1.1 Criar o projeto Maven Java 21 com Spring Boot, Spring Modulith, JPA,
       Flyway e Testcontainers.
-- [ ] 1.2 Declarar os oito módulos de negócio e a raiz de composição da
+- [x] 1.2 Declarar os oito módulos de negócio e a raiz de composição da
       aplicação.
-- [ ] 1.3 Criar schemas e migrações Flyway por módulo, incluindo seed do
+- [x] 1.3 Criar schemas e migrações Flyway por módulo, incluindo seed do
       tenant ativo único.
-- [ ] 1.4 Congelar a estratégia de nomes `camelCase` quoted no PostgreSQL e
+- [x] 1.4 Congelar a estratégia de nomes `camelCase` quoted no PostgreSQL e
       nas entidades.
-- [ ] 1.5 Expor health, validação de configuração e logs estruturados sem
+- [x] 1.5 Expor health, validação de configuração e logs estruturados sem
       dados pessoais.
-- [ ] 1.6 Criar o esqueleto React/Vite com as rotas das superfícies S1–S6.
-- [ ] 1.7 Adicionar alvos `test`, `test-integration` e `test-e2e-web` ao
+- [x] 1.6 Criar o esqueleto React/Vite com as rotas das superfícies S1–S6.
+- [x] 1.7 Adicionar alvos `test`, `test-integration` e `test-e2e-web` ao
       Makefile e ligá-los ao `gate`.
-- [ ] 1.8 Implementar UT-026 e IT-011 cobrindo limites Modulith e migração
+- [x] 1.8 Implementar UT-026 e IT-011 cobrindo limites Modulith e migração
       em banco vazio.
 
 ## Implementation Details
@@ -137,9 +137,9 @@ português brasileiro.
 
 Cases assigned from `_tests.md`, the test contract — read each ID's full definition there before writing tests.
 
-- [ ] UT-026 — a verificação Spring Modulith rejeita importação de
+- [x] UT-026 — a verificação Spring Modulith rejeita importação de
       infraestrutura de outro módulo.
-- [ ] IT-011 — migrações aplicam em PostgreSQL vazio e a verificação de
+- [x] IT-011 — migrações aplicam em PostgreSQL vazio e a verificação de
       limites Modulith é aprovada.
 
 Cobrir também, dentro desses casos ou como asserções irmãs no mesmo teste de

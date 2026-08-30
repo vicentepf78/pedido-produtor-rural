@@ -1,0 +1,55 @@
+# cy-loop-tasks state.yaml -- managed by .agents/skills/cy-loop-tasks/scripts/update-state.py. Do not hand-edit.
+slug: "pedidos-insumos-mvp0"
+created_at: "2026-08-30T14:31:14Z"
+last_updated: "2026-08-30T14:43:13Z"
+mode: "tasks"
+iteration: 2
+goal_signature: "ship pedidos-insumos-mvp0 end-to-end via cy-loop-tasks: every iteration runs .agents/skills/cy-loop-tasks/scripts/detect-phase.py and executes the printed action; every Phase B checkpoint runs its focused task validation then cy-final-verify before commit; continue until qa-report and qa-execution are complete, consecutive deep-review rounds reach SHIP, and required PR CI is green at the exact head"
+frontend_agent: null
+stacked: false
+
+tasks:
+  total: 7
+  completed: ["task_01"]
+  current: null
+  pending: ["task_02", "task_03", "task_04", "task_05", "task_06", "task_07"]
+
+progress:
+  deliverables_complete: false
+  checklist: []
+
+qa:
+  report_done: false
+  execution_done: false
+
+review:
+  rounds: 0
+  last_verdict: null
+  ship: false
+
+verify:
+  last_run: "2026-08-30T14:43:13Z"
+  last_status: "PASS"
+
+delivery:
+  pr_urls: []
+  head_shas: []
+  ci_status: null
+  checks: []
+  observed_at: null
+
+iterations:
+  - n: 1
+    timestamp: "2026-08-30T14:31:21Z"
+    phase: "0"
+    action: "bootstrap (mode=tasks)"
+    outcome: "completed"
+    memory_written: ["memory/MEMORY.md"]
+    blockers: []
+  - n: 2
+    timestamp: "2026-08-30T14:43:13Z"
+    phase: "B"
+    action: "executed task_01"
+    outcome: "completed"
+    memory_written: ["memory/task_01.md", "memory/MEMORY.md"]
+    blockers: []
