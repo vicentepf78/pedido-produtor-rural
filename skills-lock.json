@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "deep-review": {
+      "source": "coder/mux",
+      "sourceType": "github",
+      "skillPath": ".xum/skills/deep-review/SKILL.md",
+      "computedHash": "3de87e357fa07099b802be336ede6fa50c61bdc32185ef16ce81cc3d86faa6c6"
+    }
+  }
+}

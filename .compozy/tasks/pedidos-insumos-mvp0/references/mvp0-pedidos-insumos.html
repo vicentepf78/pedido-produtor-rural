@@ -1,0 +1,1539 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>MVP0 — Pedidos de insumos</title>
+  <style>
+    :root {
+      --bg: oklch(97% 0 0);
+      --surface: oklch(100% 0 0);
+      --fg: oklch(18% 0 0);
+      --muted: oklch(42% 0 0);
+      --border: oklch(72% 0 0);
+      --border-strong: oklch(35% 0 0);
+      --accent: oklch(45% 0.08 250);
+      --accent-fg: oklch(100% 0 0);
+      --danger: oklch(48% 0.14 25);
+      --warn: oklch(62% 0.12 85);
+      --success: oklch(48% 0.12 145);
+      --focus: oklch(52% 0.14 250);
+      --placeholder: oklch(88% 0 0);
+      --font-display: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+      --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+      --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+      --touch: 44px;
+      --radius: 6px;
+      --shadow: 0 1px 0 oklch(0% 0 0 / 0.08);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+      color: inherit;
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    .app-shell {
+      max-width: 430px;
+      min-height: 100dvh;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+      border-left: 1px dashed var(--border);
+      border-right: 1px dashed var(--border);
+    }
+
+    .wire-label {
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .demo-bar {
+      padding: 0.625rem 0.875rem;
+      background: oklch(94% 0 0);
+      border-bottom: 2px dashed var(--border-strong);
+    }
+
+    .demo-bar p {
+      margin: 0 0 0.5rem;
+      font-size: 0.8125rem;
+      color: var(--muted);
+    }
+
+    .demo-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.375rem;
+    }
+
+    .chip {
+      min-height: 36px;
+      padding: 0.375rem 0.625rem;
+      border: 1px solid var(--border-strong);
+      border-radius: 999px;
+      background: var(--surface);
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+
+    .chip[aria-pressed="true"] {
+      background: var(--fg);
+      color: var(--surface);
+      border-color: var(--fg);
+    }
+
+    .screen-header {
+      padding: 0.875rem 1rem 0.75rem;
+      border-bottom: 2px solid var(--border-strong);
+    }
+
+    .screen-header h1 {
+      margin: 0.25rem 0 0;
+      font-family: var(--font-display);
+      font-size: 1.125rem;
+      font-weight: 700;
+      line-height: 1.25;
+    }
+
+    .screen-body {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+
+    .bottom-nav {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-top: 2px solid var(--border-strong);
+      background: var(--surface);
+    }
+
+    .nav-btn {
+      min-height: var(--touch);
+      padding: 0.5rem 0.25rem;
+      border: 0;
+      border-right: 1px dashed var(--border);
+      background: transparent;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .nav-btn:last-child { border-right: 0; }
+
+    .nav-btn[aria-current="page"] {
+      background: oklch(94% 0 0);
+      box-shadow: inset 0 -3px 0 var(--border-strong);
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.375rem;
+      margin-bottom: 0.875rem;
+    }
+
+    .field label {
+      font-size: 0.8125rem;
+      font-weight: 600;
+    }
+
+    .field input,
+    .field select {
+      min-height: var(--touch);
+      padding: 0.625rem 0.75rem;
+      border: 2px solid var(--border-strong);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .field input[aria-invalid="true"],
+    .field select[aria-invalid="true"] {
+      border-color: var(--danger);
+    }
+
+    .inline-error {
+      margin: 0;
+      font-size: 0.8125rem;
+      color: var(--danger);
+      font-weight: 600;
+    }
+
+    .inline-info {
+      margin: 0;
+      font-size: 0.8125rem;
+      color: var(--muted);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: var(--touch);
+      padding: 0.625rem 1rem;
+      border: 2px solid var(--border-strong);
+      border-radius: var(--radius);
+      background: var(--surface);
+      font-weight: 700;
+      font-size: 0.875rem;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: var(--shadow);
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--accent-fg);
+    }
+
+    .btn-ghost {
+      border-style: dashed;
+      background: oklch(97% 0 0);
+    }
+
+    .btn-block { width: 100%; }
+
+    .btn-sm {
+      min-height: 36px;
+      padding: 0.375rem 0.75rem;
+      font-size: 0.8125rem;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .search-row input { flex: 1; }
+
+    .category-tabs {
+      display: flex;
+      gap: 0.375rem;
+      overflow-x: auto;
+      padding-bottom: 0.25rem;
+      margin-bottom: 0.875rem;
+      scrollbar-width: none;
+    }
+
+    .category-tabs::-webkit-scrollbar { display: none; }
+
+    .cat-tab {
+      flex: 0 0 auto;
+      min-height: 36px;
+      padding: 0.375rem 0.75rem;
+      border: 1px solid var(--border-strong);
+      border-radius: 999px;
+      background: var(--surface);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .cat-tab[aria-selected="true"] {
+      background: var(--fg);
+      color: var(--surface);
+    }
+
+    .product-card {
+      display: grid;
+      grid-template-columns: 88px 1fr;
+      gap: 0.75rem;
+      padding: 0.875rem;
+      margin-bottom: 0.75rem;
+      border: 2px solid var(--border-strong);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .product-card.unavailable {
+      border-style: dashed;
+      background: oklch(97% 0 0);
+    }
+
+    .product-thumb {
+      width: 88px;
+      height: 88px;
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      background: var(--placeholder);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 0.6875rem;
+      color: var(--muted);
+      font-weight: 600;
+      padding: 0.25rem;
+    }
+
+    .product-thumb.has-image {
+      border-style: solid;
+      background-size: cover;
+      background-position: center;
+      color: transparent;
+    }
+
+    .product-meta h2 {
+      margin: 0 0 0.25rem;
+      font-size: 0.9375rem;
+      line-height: 1.3;
+    }
+
+    .product-meta p {
+      margin: 0 0 0.375rem;
+      font-size: 0.8125rem;
+      color: var(--muted);
+    }
+
+    .price-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0.375rem 0.75rem;
+      margin: 0.375rem 0 0.625rem;
+    }
+
+    .unit-price {
+      font-family: var(--font-mono);
+      font-size: 0.9375rem;
+      font-weight: 700;
+    }
+
+    .unit-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .mono {
+      font-family: var(--font-mono);
+    }
+
+    .status-box {
+      padding: 1rem;
+      border: 2px dashed var(--border-strong);
+      border-radius: var(--radius);
+      text-align: center;
+      background: oklch(97% 0 0);
+    }
+
+    .status-box h2 {
+      margin: 0 0 0.375rem;
+      font-size: 1rem;
+    }
+
+    .status-box p {
+      margin: 0 0 0.75rem;
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+
+    .skeleton {
+      border-radius: var(--radius);
+      background: linear-gradient(90deg, oklch(92% 0 0) 25%, oklch(96% 0 0) 50%, oklch(92% 0 0) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.2s infinite linear;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .skeleton-card {
+      height: 120px;
+      margin-bottom: 0.75rem;
+      border: 1px dashed var(--border);
+    }
+
+    .cart-line {
+      padding: 0.875rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cart-line:first-child { padding-top: 0; }
+
+    .cart-line-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .cart-line-header h2 {
+      margin: 0;
+      font-size: 0.9375rem;
+      flex: 1;
+    }
+
+    .qty-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .qty-row input {
+      width: 5.5rem;
+      min-height: var(--touch);
+      padding: 0.5rem;
+      border: 2px solid var(--border-strong);
+      border-radius: var(--radius);
+      font-family: var(--font-mono);
+      text-align: center;
+    }
+
+    .line-total {
+      margin-left: auto;
+      font-family: var(--font-mono);
+      font-weight: 700;
+    }
+
+    .summary-panel {
+      margin-top: 1rem;
+      padding: 0.875rem;
+      border: 2px solid var(--border-strong);
+      border-radius: var(--radius);
+      background: oklch(97% 0 0);
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      font-size: 0.9375rem;
+    }
+
+    .summary-row.total {
+      margin-top: 0.5rem;
+      padding-top: 0.5rem;
+      border-top: 1px dashed var(--border-strong);
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .summary-row .mono { font-family: var(--font-mono); }
+
+    .sticky-footer {
+      padding: 0.875rem 1rem calc(0.875rem + env(safe-area-inset-bottom));
+      border-top: 2px solid var(--border-strong);
+      background: var(--surface);
+    }
+
+    .section-title {
+      margin: 1.25rem 0 0.625rem;
+      font-size: 0.8125rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .section-title:first-child { margin-top: 0; }
+
+    .pill {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border: 1px solid var(--border-strong);
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+    }
+
+    .pill.success { border-color: var(--success); color: var(--success); }
+    .pill.warn { border-color: var(--warn); color: oklch(38% 0.08 85); }
+    .pill.neutral { color: var(--muted); }
+
+    .order-list-item {
+      width: 100%;
+      text-align: left;
+      padding: 0.875rem;
+      margin-bottom: 0.5rem;
+      border: 2px solid var(--border-strong);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+    }
+
+    .order-list-item:focus-visible { outline-offset: 1px; }
+
+    .order-list-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.375rem;
+    }
+
+    .order-id {
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      font-weight: 700;
+    }
+
+    .order-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.375rem 0.75rem;
+      font-size: 0.8125rem;
+      color: var(--muted);
+    }
+
+    .detail-grid {
+      display: grid;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      font-size: 0.875rem;
+    }
+
+    .detail-row dt {
+      margin: 0;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .detail-row dd {
+      margin: 0;
+      text-align: right;
+      font-family: var(--font-mono);
+    }
+
+    .readonly-banner {
+      padding: 0.625rem 0.75rem;
+      margin-bottom: 0.875rem;
+      border: 1px dashed var(--border-strong);
+      border-radius: var(--radius);
+      background: oklch(96% 0 0);
+      font-size: 0.8125rem;
+      color: var(--muted);
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      min-height: var(--touch);
+      margin-bottom: 0.5rem;
+      padding: 0;
+      border: 0;
+      background: none;
+      font-weight: 700;
+      font-size: 0.875rem;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .badge-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 1.25rem;
+      height: 1.25rem;
+      padding: 0 0.25rem;
+      margin-left: 0.25rem;
+      border-radius: 999px;
+      background: var(--fg);
+      color: var(--surface);
+      font-size: 0.6875rem;
+      font-family: var(--font-mono);
+    }
+
+    .notice {
+      padding: 0.625rem 0.75rem;
+      margin-bottom: 0.875rem;
+      border-left: 4px solid var(--border-strong);
+      background: oklch(96% 0 0);
+      font-size: 0.8125rem;
+    }
+
+    .hidden-regulated {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 0.5rem;
+    }
+
+    @media (min-width: 768px) {
+      .app-shell { max-width: 390px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+
+  <script type="text/babel" data-presets="react">
+    const { useState, useMemo, useEffect } = React;
+
+    const STORE = {
+      name: "AgroRevenda Centro",
+      subtitle: "Insumos para o produtor rural",
+    };
+
+    const CATEGORIES = [
+      { id: "all", label: "Todos" },
+      { id: "sementes", label: "Sementes" },
+      { id: "fertilizantes", label: "Fertilizantes" },
+      { id: "defensivos", label: "Defensivos" },
+      { id: "correcao", label: "Correção" },
+    ];
+
+    const ALL_PRODUCTS = [
+      {
+        id: "p-semente-milho",
+        name: "Semente de milho DK697",
+        category: "sementes",
+        description: "Híbrido adaptado ao cerrado, alto vigor.",
+        unit: "sc 60 kg",
+        price: 890,
+        eligible: true,
+        available: true,
+        regulated: false,
+        hidden: false,
+        image: null,
+      },
+      {
+        id: "p-npk",
+        name: "Fertilizante NPK 20-05-20",
+        category: "fertilizantes",
+        description: "Formulação balanceada para cobertura.",
+        unit: "sc 50 kg",
+        price: 215,
+        eligible: true,
+        available: true,
+        regulated: false,
+        hidden: false,
+        image: "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="88" height="88"><rect fill="#ddd" width="88" height="88"/><text x="44" y="48" text-anchor="middle" font-size="10" fill="#666">NPK</text></svg>'),
+      },
+      {
+        id: "p-ureia",
+        name: "Ureia 45% N",
+        category: "fertilizantes",
+        description: "Adubo nitrogenado granulado.",
+        unit: "sc 50 kg",
+        price: 178,
+        eligible: true,
+        available: false,
+        unavailableReason: "Sem estoque no momento. Previsão de reposição em 5 dias.",
+        regulated: false,
+        hidden: false,
+        image: null,
+      },
+      {
+        id: "p-glypho",
+        name: "Herbicida glifosato 480 g/L",
+        category: "defensivos",
+        description: "Controle de plantas daninhas — produto regulado.",
+        unit: "L",
+        price: 42,
+        eligible: false,
+        available: true,
+        regulated: true,
+        hidden: false,
+        image: null,
+      },
+      {
+        id: "p-interno",
+        name: "Produto restrito (oculto)",
+        category: "defensivos",
+        description: "Visível apenas com permissão.",
+        unit: "un",
+        price: 0,
+        eligible: true,
+        available: true,
+        regulated: false,
+        hidden: true,
+        image: null,
+      },
+    ];
+
+    const PROPERTIES = [
+      { id: "prop-1", label: "Fazenda Boa Vista — 420 ha" },
+      { id: "prop-2", label: "Sítio São João — 85 ha" },
+    ];
+
+    const PICKUP_OPTIONS = [
+      { id: "loja", label: "Retirar na loja (Centro)" },
+      { id: "armazem", label: "Retirar no armazém (BR-050 km 12)" },
+    ];
+
+    const formatMoney = (value) =>
+      value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+    const formatDateTime = (iso) =>
+      new Date(iso).toLocaleString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
+    function App() {
+      const [screen, setScreen] = useState(() => localStorage.getItem("mvp0-screen") || "catalog");
+      const [catalogDemo, setCatalogDemo] = useState("results");
+      const [search, setSearch] = useState("");
+      const [category, setCategory] = useState("all");
+      const [cart, setCart] = useState([]);
+      const [qtyErrors, setQtyErrors] = useState({});
+      const [auth, setAuth] = useState({ mode: "login", name: "", email: "", password: "" });
+      const [checkout, setCheckout] = useState({ propertyId: "", pickupId: "" });
+      const [checkoutErrors, setCheckoutErrors] = useState({});
+      const [confirmedOrder, setConfirmedOrder] = useState(null);
+      const [selectedOrderId, setSelectedOrderId] = useState(null);
+      const [backofficeOrderId, setBackofficeOrderId] = useState(null);
+      const [orders, setOrders] = useState([
+        {
+          id: "PED-2026-0042",
+          producer: "Maria Souza",
+          createdAt: "2026-08-28T14:32:00-03:00",
+          status: "Recebido",
+          confirmation: "Aceita",
+          propertyId: "prop-1",
+          pickupId: "loja",
+          items: [
+            { productId: "p-semente-milho", name: "Semente de milho DK697", unit: "sc 60 kg", price: 890, qty: 2 },
+            { productId: "p-npk", name: "Fertilizante NPK 20-05-20", unit: "sc 50 kg", price: 215, qty: 4 },
+          ],
+        },
+      ]);
+
+      useEffect(() => {
+        localStorage.setItem("mvp0-screen", screen);
+      }, [screen]);
+
+      const eligibleProducts = useMemo(
+        () => ALL_PRODUCTS.filter((p) => p.eligible && !p.regulated && !p.hidden),
+        []
+      );
+
+      const filteredProducts = useMemo(() => {
+        let list = eligibleProducts;
+        if (category !== "all") list = list.filter((p) => p.category === category);
+        if (search.trim()) {
+          const q = search.trim().toLowerCase();
+          list = list.filter((p) => p.name.toLowerCase().includes(q));
+        }
+        return list;
+      }, [eligibleProducts, category, search]);
+
+      const cartTotal = useMemo(
+        () => cart.reduce((sum, line) => sum + line.price * line.qty, 0),
+        [cart]
+      );
+
+      const cartCount = cart.reduce((sum, line) => sum + line.qty, 0);
+
+      const navigate = (next) => {
+        setScreen(next);
+        window.scrollTo(0, 0);
+      };
+
+      const addToCart = (product) => {
+        if (!product.available) return;
+        setCart((prev) => {
+          const existing = prev.find((l) => l.productId === product.id);
+          if (existing) {
+            return prev.map((l) =>
+              l.productId === product.id ? { ...l, qty: l.qty + 1 } : l
+            );
+          }
+          return [
+            ...prev,
+            {
+              productId: product.id,
+              name: product.name,
+              unit: product.unit,
+              price: product.price,
+              qty: 1,
+            },
+          ];
+        });
+        setQtyErrors((e) => ({ ...e, [product.id]: "" }));
+      };
+
+      const updateQty = (productId, raw) => {
+        const parsed = Number(raw);
+        const isValid = Number.isInteger(parsed) && parsed > 0;
+        setQtyErrors((e) => ({
+          ...e,
+          [productId]: isValid ? "" : "Informe uma quantidade inteira positiva.",
+        }));
+        if (!isValid) return;
+        setCart((prev) =>
+          prev.map((l) => (l.productId === productId ? { ...l, qty: parsed } : l))
+        );
+      };
+
+      const removeLine = (productId) => {
+        setCart((prev) => prev.filter((l) => l.productId !== productId));
+        setQtyErrors((e) => {
+          const next = { ...e };
+          delete next[productId];
+          return next;
+        });
+      };
+
+      const validateCheckout = () => {
+        const errors = {};
+        if (!auth.email.trim()) errors.email = "Informe o e-mail.";
+        if (!auth.password.trim()) errors.password = "Informe a senha.";
+        if (auth.mode === "register" && !auth.name.trim()) errors.name = "Informe o nome.";
+        if (!checkout.propertyId) errors.propertyId = "Selecione uma propriedade.";
+        if (!checkout.pickupId) errors.pickupId = "Selecione a preferência de retirada.";
+        setCheckoutErrors(errors);
+        return Object.keys(errors).length === 0;
+      };
+
+      const confirmOrder = () => {
+        if (cart.length === 0) return;
+        if (!validateCheckout()) return;
+        const id = `PED-2026-${String(Math.floor(Math.random() * 9000) + 1000)}`;
+        const order = {
+          id,
+          producer: auth.name.trim() || auth.email.split("@")[0] || "Produtor",
+          createdAt: new Date().toISOString(),
+          status: "Recebido",
+          confirmation: "Aceita",
+          propertyId: checkout.propertyId,
+          pickupId: checkout.pickupId,
+          items: cart.map((l) => ({ ...l })),
+        };
+        setOrders((prev) => [order, ...prev]);
+        setConfirmedOrder(order);
+        setCart([]);
+        setQtyErrors({});
+        navigate("confirmation");
+      };
+
+      const renderDemoBar = () => (
+        <div className="demo-bar" data-od-id="demo-state-bar">
+          <p><span className="wire-label">Wireframe</span> — alternar estados do catálogo</p>
+          <div className="demo-chips" role="group" aria-label="Estados do catálogo">
+            {[
+              ["results", "Resultados"],
+              ["empty", "Busca vazia"],
+              ["loading", "Carregando"],
+              ["error", "Erro"],
+              ["denied", "Acesso negado"],
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                className="chip"
+                aria-pressed={catalogDemo === value}
+                onClick={() => setCatalogDemo(value)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+
+      const renderCatalog = () => {
+        const unavailableEligible = ALL_PRODUCTS.filter(
+          (p) => p.eligible && !p.regulated && !p.hidden && !p.available
+        );
+
+        return (
+          <>
+            {renderDemoBar()}
+            <header className="screen-header" data-od-id="catalog-header">
+              <span className="wire-label">Tela 1 — Catálogo</span>
+              <h1>{STORE.name}</h1>
+              <p className="inline-info">{STORE.subtitle}</p>
+            </header>
+            <main className="screen-body" data-od-id="catalog-body">
+              <div className="search-row">
+                <input
+                  type="search"
+                  aria-label="Buscar por nome"
+                  placeholder="Buscar por nome"
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    if (catalogDemo !== "results") setCatalogDemo("results");
+                  }}
+                  data-od-id="catalog-search"
+                />
+              </div>
+
+              <div
+                className="category-tabs"
+                role="tablist"
+                aria-label="Categorias"
+                data-od-id="catalog-categories"
+              >
+                {CATEGORIES.map((cat) => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    role="tab"
+                    className="cat-tab"
+                    aria-selected={category === cat.id}
+                    onClick={() => setCategory(cat.id)}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+
+              <p className="notice" data-od-id="regulated-notice">
+                Produtos regulados não aparecem neste catálogo do MVP0.
+              </p>
+
+              {catalogDemo === "loading" && (
+                <div data-od-id="catalog-loading" aria-live="polite">
+                  <div className="skeleton skeleton-card" />
+                  <div className="skeleton skeleton-card" />
+                  <div className="skeleton skeleton-card" />
+                  <p className="inline-info">Carregando produtos…</p>
+                </div>
+              )}
+
+              {catalogDemo === "error" && (
+                <div className="status-box" data-od-id="catalog-error" role="alert">
+                  <h2>Não foi possível carregar</h2>
+                  <p>Verifique sua conexão e tente novamente.</p>
+                  <button type="button" className="btn btn-ghost" onClick={() => setCatalogDemo("results")}>
+                    Tentar novamente
+                  </button>
+                </div>
+              )}
+
+              {catalogDemo === "denied" && (
+                <div className="status-box" data-od-id="catalog-denied" role="alert">
+                  <h2>Acesso negado</h2>
+                  <p>Este produto está oculto ou você não tem permissão para visualizá-lo.</p>
+                  <button type="button" className="btn btn-ghost" onClick={() => setCatalogDemo("results")}>
+                    Voltar ao catálogo
+                  </button>
+                </div>
+              )}
+
+              {catalogDemo === "empty" && (
+                <div className="status-box" data-od-id="catalog-empty">
+                  <h2>Nenhum resultado</h2>
+                  <p>Não encontramos produtos para &ldquo;{search || "busca atual"}&rdquo;.</p>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    data-od-id="clear-search-btn"
+                    onClick={() => {
+                      setSearch("");
+                      setCategory("all");
+                      setCatalogDemo("results");
+                    }}
+                  >
+                    Limpar busca
+                  </button>
+                </div>
+              )}
+
+              {catalogDemo === "results" && (
+                <div data-od-id="catalog-results">
+                  {filteredProducts.length === 0 && search.trim() ? (
+                    <div className="status-box" data-od-id="catalog-empty-live">
+                      <h2>Nenhum resultado</h2>
+                      <p>Não encontramos produtos para &ldquo;{search}&rdquo;.</p>
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={() => {
+                          setSearch("");
+                          setCategory("all");
+                        }}
+                      >
+                        Limpar busca
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      {filteredProducts.map((product) => (
+                        <article
+                          key={product.id}
+                          className={`product-card${product.available ? "" : " unavailable"}`}
+                          data-od-id={`product-card-${product.id}`}
+                        >
+                          <div
+                            className={`product-thumb${product.image ? " has-image" : ""}`}
+                            style={product.image ? { backgroundImage: `url(${product.image})` } : undefined}
+                            aria-hidden="true"
+                          >
+                            {!product.image && "Sem imagem"}
+                          </div>
+                          <div className="product-meta">
+                            <h2>{product.name}</h2>
+                            <p>{product.description}</p>
+                            <div className="price-row">
+                              <span className="unit-price">{formatMoney(product.price)}</span>
+                              <span className="unit-label">/ {product.unit}</span>
+                            </div>
+                            {product.available ? (
+                              <button
+                                type="button"
+                                className="btn btn-primary btn-sm"
+                                data-od-id={`add-btn-${product.id}`}
+                                onClick={() => addToCart(product)}
+                              >
+                                Adicionar
+                              </button>
+                            ) : (
+                              <>
+                                <p className="inline-error" role="status">
+                                  {product.unavailableReason}
+                                </p>
+                                <button type="button" className="btn btn-sm" disabled aria-disabled="true">
+                                  Indisponível
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </article>
+                      ))}
+
+                      {unavailableEligible
+                        .filter((p) => category === "all" || p.category === category)
+                        .filter((p) => !filteredProducts.some((fp) => fp.id === p.id))
+                        .map((product) => (
+                          <article
+                            key={product.id}
+                            className="product-card unavailable"
+                            data-od-id={`product-card-${product.id}`}
+                          >
+                            <div className="product-thumb" aria-hidden="true">Sem imagem</div>
+                            <div className="product-meta">
+                              <h2>{product.name}</h2>
+                              <p>{product.description}</p>
+                              <div className="price-row">
+                                <span className="unit-price">{formatMoney(product.price)}</span>
+                                <span className="unit-label">/ {product.unit}</span>
+                              </div>
+                              <p className="inline-error" role="status">{product.unavailableReason}</p>
+                              <button type="button" className="btn btn-sm" disabled>Indisponível</button>
+                            </div>
+                          </article>
+                        ))}
+                    </>
+                  )}
+                  <p className="hidden-regulated">
+                    {ALL_PRODUCTS.filter((p) => p.regulated).length} produto(s) regulado(s) excluído(s) do catálogo.
+                  </p>
+                </div>
+              )}
+            </main>
+          </>
+        );
+      };
+
+      const renderCart = () => (
+        <>
+          <header className="screen-header" data-od-id="cart-header">
+            <span className="wire-label">Tela 2 — Carrinho</span>
+            <h1>Carrinho</h1>
+          </header>
+          <main className="screen-body" data-od-id="cart-body">
+            {cart.length === 0 ? (
+              <div className="status-box" data-od-id="cart-empty">
+                <h2>Carrinho vazio</h2>
+                <p>Adicione ao menos um produto antes do checkout.</p>
+                <button type="button" className="btn btn-primary" onClick={() => navigate("catalog")}>
+                  Ir ao catálogo
+                </button>
+              </div>
+            ) : (
+              <>
+                {cart.map((line) => (
+                  <div key={line.productId} className="cart-line" data-od-id={`cart-line-${line.productId}`}>
+                    <div className="cart-line-header">
+                      <h2>{line.name}</h2>
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        data-od-id={`remove-${line.productId}`}
+                        onClick={() => removeLine(line.productId)}
+                      >
+                        Remover
+                      </button>
+                    </div>
+                    <p className="inline-info">
+                      Unitário: <span className="mono">{formatMoney(line.price)}</span> / {line.unit}
+                    </p>
+                    <div className="qty-row">
+                      <label htmlFor={`qty-${line.productId}`}>Qtd</label>
+                      <input
+                        id={`qty-${line.productId}`}
+                        type="number"
+                        inputMode="numeric"
+                        min="1"
+                        step="1"
+                        value={line.qty}
+                        aria-invalid={!!qtyErrors[line.productId]}
+                        aria-describedby={qtyErrors[line.productId] ? `qty-err-${line.productId}` : undefined}
+                        onChange={(e) => updateQty(line.productId, e.target.value)}
+                        data-od-id={`qty-input-${line.productId}`}
+                      />
+                      <span className="line-total">{formatMoney(line.price * line.qty)}</span>
+                    </div>
+                    {qtyErrors[line.productId] && (
+                      <p id={`qty-err-${line.productId}`} className="inline-error" role="alert">
+                        {qtyErrors[line.productId]}
+                      </p>
+                    )}
+                  </div>
+                ))}
+                <div className="summary-panel" data-od-id="cart-summary">
+                  <div className="summary-row total">
+                    <span>Total do pedido</span>
+                    <span className="mono">{formatMoney(cartTotal)}</span>
+                  </div>
+                </div>
+              </>
+            )}
+          </main>
+          <footer className="sticky-footer" data-od-id="cart-footer">
+            <button
+              type="button"
+              className="btn btn-primary btn-block"
+              data-od-id="cart-checkout-btn"
+              disabled={cart.length === 0 || Object.values(qtyErrors).some(Boolean)}
+              onClick={() => navigate("checkout")}
+            >
+              Ir para checkout
+            </button>
+          </footer>
+        </>
+      );
+
+      const checkoutValid =
+        cart.length > 0 &&
+        auth.email.trim() &&
+        auth.password.trim() &&
+        (auth.mode === "login" || auth.name.trim()) &&
+        checkout.propertyId &&
+        checkout.pickupId &&
+        !Object.values(qtyErrors).some(Boolean);
+
+      const renderCheckout = () => (
+        <>
+          <header className="screen-header" data-od-id="checkout-header">
+            <span className="wire-label">Tela 3 — Checkout</span>
+            <h1>Checkout</h1>
+          </header>
+          <main className="screen-body" data-od-id="checkout-body">
+            <h2 className="section-title">Identificação</h2>
+            <div role="tablist" aria-label="Modo de identificação" style={{ display: "flex", gap: "0.5rem", marginBottom: "0.875rem" }}>
+              {[
+                ["login", "Entrar"],
+                ["register", "Criar conta"],
+              ].map(([mode, label]) => (
+                <button
+                  key={mode}
+                  type="button"
+                  className="cat-tab"
+                  role="tab"
+                  aria-selected={auth.mode === mode}
+                  onClick={() => setAuth((a) => ({ ...a, mode }))}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {auth.mode === "register" && (
+              <div className="field">
+                <label htmlFor="auth-name">Nome</label>
+                <input
+                  id="auth-name"
+                  type="text"
+                  autoComplete="name"
+                  value={auth.name}
+                  aria-invalid={!!checkoutErrors.name}
+                  onChange={(e) => setAuth((a) => ({ ...a, name: e.target.value }))}
+                  data-od-id="checkout-name"
+                />
+                {checkoutErrors.name && <p className="inline-error">{checkoutErrors.name}</p>}
+              </div>
+            )}
+
+            <div className="field">
+              <label htmlFor="auth-email">E-mail</label>
+              <input
+                id="auth-email"
+                type="email"
+                autoComplete="email"
+                value={auth.email}
+                aria-invalid={!!checkoutErrors.email}
+                onChange={(e) => setAuth((a) => ({ ...a, email: e.target.value }))}
+                data-od-id="checkout-email"
+              />
+              {checkoutErrors.email && <p className="inline-error">{checkoutErrors.email}</p>}
+            </div>
+
+            <div className="field">
+              <label htmlFor="auth-password">Senha</label>
+              <input
+                id="auth-password"
+                type="password"
+                autoComplete={auth.mode === "login" ? "current-password" : "new-password"}
+                value={auth.password}
+                aria-invalid={!!checkoutErrors.password}
+                onChange={(e) => setAuth((a) => ({ ...a, password: e.target.value }))}
+                data-od-id="checkout-password"
+              />
+              {checkoutErrors.password && <p className="inline-error">{checkoutErrors.password}</p>}
+            </div>
+
+            <h2 className="section-title">Propriedade e retirada</h2>
+
+            <div className="field">
+              <label htmlFor="checkout-property">Propriedade</label>
+              <select
+                id="checkout-property"
+                value={checkout.propertyId}
+                aria-invalid={!!checkoutErrors.propertyId}
+                onChange={(e) => setCheckout((c) => ({ ...c, propertyId: e.target.value }))}
+                data-od-id="checkout-property"
+              >
+                <option value="">Selecione…</option>
+                {PROPERTIES.map((p) => (
+                  <option key={p.id} value={p.id}>{p.label}</option>
+                ))}
+              </select>
+              {checkoutErrors.propertyId && <p className="inline-error">{checkoutErrors.propertyId}</p>}
+            </div>
+
+            <div className="field">
+              <label htmlFor="checkout-pickup">Preferência de retirada</label>
+              <select
+                id="checkout-pickup"
+                value={checkout.pickupId}
+                aria-invalid={!!checkoutErrors.pickupId}
+                onChange={(e) => setCheckout((c) => ({ ...c, pickupId: e.target.value }))}
+                data-od-id="checkout-pickup"
+              >
+                <option value="">Selecione…</option>
+                {PICKUP_OPTIONS.map((p) => (
+                  <option key={p.id} value={p.id}>{p.label}</option>
+                ))}
+              </select>
+              {checkoutErrors.pickupId && <p className="inline-error">{checkoutErrors.pickupId}</p>}
+            </div>
+
+            <div className="summary-panel" data-od-id="checkout-summary">
+              <p className="wire-label" style={{ marginBottom: "0.5rem" }}>Resumo</p>
+              {cart.map((line) => (
+                <div key={line.productId} className="summary-row">
+                  <span>{line.qty}× {line.name}</span>
+                  <span className="mono">{formatMoney(line.price * line.qty)}</span>
+                </div>
+              ))}
+              <div className="summary-row total">
+                <span>Total</span>
+                <span className="mono">{formatMoney(cartTotal)}</span>
+              </div>
+            </div>
+          </main>
+          <footer className="sticky-footer" data-od-id="checkout-footer">
+            <button
+              type="button"
+              className="btn btn-primary btn-block"
+              data-od-id="confirm-order-btn"
+              disabled={!checkoutValid}
+              onClick={confirmOrder}
+            >
+              Confirmar pedido
+            </button>
+          </footer>
+        </>
+      );
+
+      const renderOrderDetail = (order, { readonly = false, backAction, backLabel = "Voltar" } = {}) => {
+        if (!order) return null;
+        const property = PROPERTIES.find((p) => p.id === order.propertyId);
+        const pickup = PICKUP_OPTIONS.find((p) => p.id === order.pickupId);
+        const total = order.items.reduce((s, l) => s + l.price * l.qty, 0);
+
+        return (
+          <>
+            <header className="screen-header" data-od-id="order-detail-header">
+              {backAction && (
+                <button type="button" className="back-link" onClick={backAction} data-od-id="order-detail-back">
+                  ← {backLabel}
+                </button>
+              )}
+              <span className="wire-label">{readonly ? "Detalhe (somente leitura)" : "Tela 4 — Confirmação"}</span>
+              <h1>{readonly ? order.id : "Pedido recebido"}</h1>
+            </header>
+            <main className="screen-body" data-od-id="order-detail-body">
+              {readonly && (
+                <div className="readonly-banner" data-od-id="readonly-banner">
+                  Snapshot imutável do pedido — operador não pode editar.
+                </div>
+              )}
+
+              {!readonly && (
+                <div className="status-box" data-od-id="confirmation-success" style={{ marginBottom: "1rem", borderStyle: "solid" }}>
+                  <h2>Pedido recebido</h2>
+                  <p>Obrigado! Seu pedido foi registrado.</p>
+                </div>
+              )}
+
+              <dl className="detail-grid" data-od-id="order-meta-grid">
+                <div className="detail-row">
+                  <dt>Identificador</dt>
+                  <dd>{order.id}</dd>
+                </div>
+                <div className="detail-row">
+                  <dt>Situação</dt>
+                  <dd><span className="pill neutral">{order.status}</span></dd>
+                </div>
+                <div className="detail-row">
+                  <dt>Confirmação</dt>
+                  <dd><span className="pill success">{order.confirmation}</span></dd>
+                </div>
+                {readonly && (
+                  <div className="detail-row">
+                    <dt>Produtor</dt>
+                    <dd>{order.producer}</dd>
+                  </div>
+                )}
+                <div className="detail-row">
+                  <dt>{readonly ? "Criação" : "Data/hora"}</dt>
+                  <dd>{formatDateTime(order.createdAt)}</dd>
+                </div>
+                <div className="detail-row">
+                  <dt>Propriedade</dt>
+                  <dd style={{ fontFamily: "inherit", fontSize: "0.8125rem", maxWidth: "55%", textAlign: "right" }}>
+                    {property?.label || "—"}
+                  </dd>
+                </div>
+                <div className="detail-row">
+                  <dt>Retirada</dt>
+                  <dd style={{ fontFamily: "inherit", fontSize: "0.8125rem", maxWidth: "55%", textAlign: "right" }}>
+                    {pickup?.label || "—"}
+                  </dd>
+                </div>
+              </dl>
+
+              <h2 className="section-title">Itens</h2>
+              {order.items.map((line) => (
+                <div key={line.productId} className="cart-line" data-od-id={`detail-line-${line.productId}`}>
+                  <h2 style={{ margin: "0 0 0.375rem", fontSize: "0.9375rem" }}>{line.name}</h2>
+                  <div className="summary-row">
+                    <span>{line.qty} × {formatMoney(line.price)} / {line.unit}</span>
+                    <span className="mono">{formatMoney(line.price * line.qty)}</span>
+                  </div>
+                </div>
+              ))}
+
+              <div className="summary-panel" data-od-id="order-detail-total">
+                <div className="summary-row total">
+                  <span>Total do pedido</span>
+                  <span className="mono">{formatMoney(total)}</span>
+                </div>
+              </div>
+            </main>
+          </>
+        );
+      };
+
+      const renderConfirmation = () =>
+        renderOrderDetail(confirmedOrder, {
+          backAction: () => navigate("my-orders"),
+          backLabel: "Meus pedidos",
+        });
+
+      const renderMyOrders = () => {
+        if (selectedOrderId) {
+          const order = orders.find((o) => o.id === selectedOrderId);
+          return renderOrderDetail(order, {
+            readonly: false,
+            backAction: () => setSelectedOrderId(null),
+            backLabel: "Meus pedidos",
+          });
+        }
+
+        return (
+          <>
+            <header className="screen-header" data-od-id="my-orders-header">
+              <span className="wire-label">Tela 5 — Meus pedidos</span>
+              <h1>Meus pedidos</h1>
+            </header>
+            <main className="screen-body" data-od-id="my-orders-body">
+              {orders.length === 0 ? (
+                <div className="status-box">
+                  <h2>Nenhum pedido</h2>
+                  <p>Seus pedidos confirmados aparecerão aqui.</p>
+                </div>
+              ) : (
+                orders.map((order) => {
+                  const total = order.items.reduce((s, l) => s + l.price * l.qty, 0);
+                  return (
+                    <button
+                      key={order.id}
+                      type="button"
+                      className="order-list-item"
+                      data-od-id={`my-order-${order.id}`}
+                      onClick={() => setSelectedOrderId(order.id)}
+                    >
+                      <div className="order-list-top">
+                        <span className="order-id">{order.id}</span>
+                        <span className="mono">{formatMoney(total)}</span>
+                      </div>
+                      <div className="order-meta">
+                        <span>{formatDateTime(order.createdAt)}</span>
+                        <span className="pill neutral">{order.status}</span>
+                        <span className="pill success">{order.confirmation}</span>
+                      </div>
+                    </button>
+                  );
+                })
+              )}
+            </main>
+          </>
+        );
+      };
+
+      const renderBackoffice = () => {
+        if (backofficeOrderId) {
+          const order = orders.find((o) => o.id === backofficeOrderId);
+          return renderOrderDetail(order, {
+            readonly: true,
+            backAction: () => setBackofficeOrderId(null),
+            backLabel: "Pedidos do backoffice",
+          });
+        }
+
+        return (
+          <>
+            <header className="screen-header" data-od-id="backoffice-header">
+              <span className="wire-label">Tela 6 — Backoffice</span>
+              <h1>Pedidos do backoffice</h1>
+              <p className="inline-info">Área exclusiva do operador</p>
+            </header>
+            <main className="screen-body" data-od-id="backoffice-body">
+              {orders.map((order) => {
+                const total = order.items.reduce((s, l) => s + l.price * l.qty, 0);
+                return (
+                  <button
+                    key={order.id}
+                    type="button"
+                    className="order-list-item"
+                    data-od-id={`bo-order-${order.id}`}
+                    onClick={() => setBackofficeOrderId(order.id)}
+                  >
+                    <div className="order-list-top">
+                      <span className="order-id">{order.id}</span>
+                      <span className="mono">{formatMoney(total)}</span>
+                    </div>
+                    <div className="order-meta">
+                      <span>{order.producer}</span>
+                      <span>{formatDateTime(order.createdAt)}</span>
+                      <span className="pill neutral">{order.status}</span>
+                      <span className="pill success">{order.confirmation}</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </main>
+          </>
+        );
+      };
+
+      const screens = {
+        catalog: renderCatalog,
+        cart: renderCart,
+        checkout: renderCheckout,
+        confirmation: renderConfirmation,
+        "my-orders": renderMyOrders,
+        backoffice: renderBackoffice,
+      };
+
+      return (
+        <div className="app-shell" data-od-id="app-shell">
+          {screens[screen]?.()}
+
+          {!selectedOrderId && !backofficeOrderId && screen !== "confirmation" && (
+            <nav className="bottom-nav" aria-label="Navegação principal" data-od-id="bottom-nav">
+              {[
+                ["catalog", "Catálogo"],
+                ["cart", "Carrinho"],
+                ["checkout", "Checkout"],
+                ["my-orders", "Pedidos"],
+              ].map(([id, label]) => (
+                <button
+                  key={id}
+                  type="button"
+                  className="nav-btn"
+                  aria-current={screen === id ? "page" : undefined}
+                  onClick={() => navigate(id)}
+                  data-od-id={`nav-${id}`}
+                >
+                  {label}
+                  {id === "cart" && cartCount > 0 && (
+                    <span className="badge-count" aria-label={`${cartCount} itens`}>{cartCount}</span>
+                  )}
+                </button>
+              ))}
+            </nav>
+          )}
+
+          {!selectedOrderId && !backofficeOrderId && screen !== "confirmation" && (
+            <div style={{ padding: "0.5rem 1rem 0.75rem", borderTop: "1px dashed var(--border)" }}>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm btn-block"
+                aria-current={screen === "backoffice" ? "page" : undefined}
+                onClick={() => navigate("backoffice")}
+                data-od-id="nav-backoffice"
+              >
+                Backoffice (operador)
+              </button>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<App />);
+  </script>
+</body>
+</html>

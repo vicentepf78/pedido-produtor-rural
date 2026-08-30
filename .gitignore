@@ -1,0 +1,15 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+
+docs/qa/screenshots/
+docs/qa/state.csv
+docs/qa/evidence/
+
+__pycache__/
+*.pyc
+
+backend/target/
+frontend/node_modules/
+frontend/dist/
