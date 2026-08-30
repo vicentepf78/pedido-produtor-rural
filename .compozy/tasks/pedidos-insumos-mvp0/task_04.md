@@ -1,5 +1,5 @@
 ---
-status: pending
+status: completed
 title: Checkout, pedido idempotente e Meus pedidos
 type: fullstack
 complexity: high
@@ -60,13 +60,13 @@ Evidence for each row: `.compozy/tasks/pedidos-insumos-mvp0/evidence/visual/task
 
 ## Subtasks
 
-- [ ] 4.1 Implementar comando de criação de pedido e snapshot imutável.
-- [ ] 4.2 Validar carrinho, propriedade, retirada e sessão no checkout.
-- [ ] 4.3 Garantir idempotência e recusa de acesso cruzado entre produtores.
-- [ ] 4.4 Expor listagem e detalhe em Meus pedidos.
-- [ ] 4.5 Construir S3, S4 e S5 mobile-first.
-- [ ] 4.6 Implementar os casos UT/IT/E2E desta tarefa.
-- [ ] 4.7 Gerar evidência visual de VC-01–VC-07.
+- [x] 4.1 Implementar comando de criação de pedido e snapshot imutável.
+- [x] 4.2 Validar carrinho, propriedade, retirada e sessão no checkout.
+- [x] 4.3 Garantir idempotência e recusa de acesso cruzado entre produtores.
+- [x] 4.4 Expor listagem e detalhe em Meus pedidos.
+- [x] 4.5 Construir S3, S4 e S5 mobile-first.
+- [x] 4.6 Implementar os casos UT/IT/E2E desta tarefa.
+- [x] 4.7 Gerar evidência visual de VC-01–VC-07.
 
 ## Implementation Details
 
@@ -131,10 +131,10 @@ relacional, não JSON.
 
 Cases assigned from `_tests.md`, the test contract — read each ID's full definition there before writing tests.
 
-- [ ] UT-013, UT-014, UT-015 — checkout válido, carrinho vazio, dados obrigatórios.
-- [ ] UT-018, UT-020, UT-022, UT-023 — idempotência, snapshot, imutabilidade de preço, permissão.
-- [ ] IT-006, IT-008 — POST duplicado e GET negado / refresh sem novo pedido.
-- [ ] E2E-005, E2E-006, E2E-007, E2E-008 — confirmar, erros de checkout, revisitar, acesso negado.
+- [x] UT-013, UT-014, UT-015 — checkout válido, carrinho vazio, dados obrigatórios.
+- [x] UT-018, UT-020, UT-022, UT-023 — idempotência, snapshot, imutabilidade de preço, permissão.
+- [x] IT-006, IT-008 — POST duplicado e GET negado / refresh sem novo pedido.
+- [x] E2E-005, E2E-006, E2E-007, E2E-008 — confirmar, erros de checkout, revisitar, acesso negado.
 
 A persistência do pedido antes da confirmação do Mock ERP é da task_05.
 

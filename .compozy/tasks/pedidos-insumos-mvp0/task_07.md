@@ -1,5 +1,5 @@
 ---
-status: pending
+status: completed
 title: Real-User QA Execution
 type: qa-execution
 complexity: critical
@@ -50,17 +50,17 @@ minutos” vale.
 
 ## Subtasks
 
-- [ ] 7.1 Ler README, cenários, bugs abertos e charters; criar o relatório
+- [x] 7.1 Ler README, cenários, bugs abertos e charters; criar o relatório
       com a matriz `Pending`.
-- [ ] 7.2 Confirmar precondições: suíte automática verde e app alcançável.
-- [ ] 7.3 Caminhar J-produtor-pedido-rapido em viewport móvel até “Pedido
+- [x] 7.2 Confirmar precondições: suíte automática verde e app alcançável.
+- [x] 7.3 Caminhar J-produtor-pedido-rapido em viewport móvel até “Pedido
       recebido” e Meus pedidos (meta ≤3 minutos, sem ajuda).
-- [ ] 7.4 Caminhar J-operador-retaguarda: lista, detalhe, vazio e recusa do
+- [x] 7.4 Caminhar J-operador-retaguarda: lista, detalhe, vazio e recusa do
       produtor.
-- [ ] 7.5 Rodar o tour de cada charter, bordas e lentes experienciais.
-- [ ] 7.6 Arquivar bugs, aplicar só fixes do governor, reandar jornadas
+- [x] 7.5 Rodar o tour de cada charter, bordas e lentes experienciais.
+- [x] 7.6 Arquivar bugs, aplicar só fixes do governor, reandar jornadas
       impactadas.
-- [ ] 7.7 Fechar o relatório datado e rodar `make gate`.
+- [x] 7.7 Fechar o relatório datado e rodar `make gate`.
 
 ## Implementation Details
 

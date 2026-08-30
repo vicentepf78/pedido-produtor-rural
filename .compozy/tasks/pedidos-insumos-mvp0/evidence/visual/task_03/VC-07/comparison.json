@@ -1,0 +1,17 @@
+{
+  "contract_id": "VC-07",
+  "viewport_reference": {
+    "width": 1440,
+    "height": 900
+  },
+  "viewport_implementation": {
+    "width": 1440,
+    "height": 900
+  },
+  "pixel_diff_ratio": 0.0927,
+  "pixel_threshold": 0.35,
+  "blocking_divergences": 0,
+  "validator": "manual-playwright-pillow (eng-ui-screenshot ausente)",
+  "verdict": "PASS",
+  "reviewed": true
+}

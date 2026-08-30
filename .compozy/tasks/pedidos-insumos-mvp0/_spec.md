@@ -179,8 +179,8 @@ funcionalidade do frontend são `catalog`, `cart`, `checkout`, `my-orders` e
 - Um módulo não deve importar entidades JPA, repositórios, migrações de banco de
   dados ou adaptadores de infraestrutura de outro módulo.
 - `order` define `GatewayErp`; somente `integration` o implementa.
-- `cart` lê dados de produto por consultas públicas de `catalog` e cria um pedido por
-  comandos públicos de `order`.
+- `cart` lê dados de produto por consultas públicas de `catalog`. `order` consome o
+  carrinho e cria o pedido local.
 - O módulo da aplicação Spring Boot é a única raiz de composição.
 - Os módulos de funcionalidade React usam os contratos da API e não podem duplicar
   regras de precificação ou autorização.

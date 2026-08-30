@@ -91,14 +91,90 @@ Content-Type: application/json
 }
 ```
 
-O navegador recebe um cookie de sessão seguro. A senha nunca aparece em uma
-resposta ou log.
+O navegador recebe um cookie de sessão seguro (`sessao`, HttpOnly). A senha nunca aparece em uma
+resposta ou log. O cliente envia o token CSRF do cookie `XSRF-TOKEN` no cabeçalho `X-XSRF-TOKEN`.
+
+### Obter token CSRF
+
+```http
+GET /api/v1/autenticacao/csrf
+```
+
+```json
+{ "token": "csrf-token" }
+```
+
+O cookie `XSRF-TOKEN` é gravado. O SPA reenvia o `token` no cabeçalho `X-XSRF-TOKEN` em mutações.
+
+### Entrar com e-mail e senha
+
+```http
+POST /api/v1/autenticacao/entrada
+Content-Type: application/json
+
+{
+  "email": "joao.silva@example.com",
+  "senha": "Rural#2026Order"
+}
+```
+
+A resposta e o cookie de sessão seguem o mesmo contrato do cadastro.
+
+### Encerrar a sessão
+
+```http
+POST /api/v1/autenticacao/saida
+```
+
+Resposta `204`. Invalida a sessão autenticada e não apaga o cookie do carrinho de convidado
+(`chaveCarrinhoConvidado`).
+
+### Listar propriedades do produtor autenticado
+
+```http
+GET /api/v1/produtor/propriedades
+```
+
+```json
+{
+  "itens": [
+    {
+      "id": "prop_01J8F71VTX5R",
+      "nome": "Fazenda Santa Luzia"
+    }
+  ]
+}
+```
+
+Somente o produtor autenticado vê as próprias propriedades, delimitadas ao tenant configurado.
+
+### Registrar propriedade do produtor autenticado
+
+```http
+POST /api/v1/produtor/propriedades
+Content-Type: application/json
+
+{
+  "nome": "Fazenda Santa Luzia"
+}
+```
+
+```json
+{
+  "id": "prop_01J8F71VTX5R",
+  "nome": "Fazenda Santa Luzia"
+}
+```
+
+Conta recém-cadastrada começa sem propriedades. O checkout coleta o nome e registra a primeira
+propriedade antes de `POST /api/v1/pedidos`.
 
 ### Confirmar um pedido
 
 ```http
 POST /api/v1/pedidos
 Content-Type: application/json
+Idempotency-Key: 9f3e2c1a-4b5d-6e7f-8a9b-0c1d2e3f4a5b
 
 {
   "idPropriedade": "prop_01J8F71VTX5R",
@@ -187,6 +263,15 @@ GET /api/v1/retaguarda/pedidos?pagina=1&tamanhoPagina=25
 }
 ```
 
+### Detalhe de um pedido para o operador do revendedor
+
+```http
+GET /api/v1/retaguarda/pedidos/{idPedido}
+```
+
+A resposta segue o snapshot do pedido (itens, preços, propriedade, retirada, total e confirmação)
+acrescido de `nomeProdutor`. Produtor autenticado recebe `403` `ACESSO_NEGADO`.
+
 ## Erros
 
 | Condição | Resposta |
@@ -198,3 +283,7 @@ GET /api/v1/retaguarda/pedidos?pagina=1&tamanhoPagina=25
 | Dados de checkout ausentes | `DADOS_CHECKOUT_OBRIGATORIOS`: “Escolha uma propriedade e a preferência de retirada.” |
 | Confirmação duplicada | Retornar a confirmação de pedido existente. |
 | Produtor abre o pedido de outro produtor | `ACESSO_PEDIDO_NEGADO`: “Você não pode visualizar este pedido.” |
+| E-mail já cadastrado | `EMAIL_DUPLICADO`: “Este e-mail já está cadastrado. Entre com sua senha ou use outro e-mail.” |
+| Credenciais inválidas | `CREDENCIAIS_INVALIDAS`: “E-mail ou senha inválidos.” |
+| Sessão ausente ou expirada | `NAO_AUTENTICADO`: “Entre ou crie uma conta para continuar.” |
+| Operador sem permissão ou produtor na retaguarda | `ACESSO_NEGADO`: “Você não tem permissão para este recurso.” |

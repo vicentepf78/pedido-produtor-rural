@@ -1,5 +1,5 @@
 ---
-status: pending
+status: completed
 title: Tenant, identidade, produtor e propriedades
 type: backend
 complexity: high
@@ -45,14 +45,14 @@ estáveis.
 
 ## Subtasks
 
-- [ ] 2.1 Migrar e persistir Tenant, Usuario, Produtor e Propriedade com
+- [x] 2.1 Migrar e persistir Tenant, Usuario, Produtor e Propriedade com
       campos `camelCase` quoted.
-- [ ] 2.2 Semear tenant, operador e produtor/propriedades de fixture.
-- [ ] 2.3 Publicar cadastro, entrada, logout e cookie de sessão seguro.
-- [ ] 2.4 Publicar consulta de propriedades do produtor autenticado.
-- [ ] 2.5 Aplicar papéis e isolamento por `idTenant` em todas as consultas.
-- [ ] 2.6 Garantir que sessão expirada preserve o carrinho de convidado.
-- [ ] 2.7 Implementar UT-016, UT-017, UT-019 e IT-005.
+- [x] 2.2 Semear tenant, operador e produtor/propriedades de fixture.
+- [x] 2.3 Publicar cadastro, entrada, logout e cookie de sessão seguro.
+- [x] 2.4 Publicar consulta de propriedades do produtor autenticado.
+- [x] 2.5 Aplicar papéis e isolamento por `idTenant` em todas as consultas.
+- [x] 2.6 Garantir que sessão expirada preserve o carrinho de convidado.
+- [x] 2.7 Implementar UT-016, UT-017, UT-019 e IT-005.
 
 ## Implementation Details
 
@@ -123,9 +123,9 @@ localStorage. Referência de DX: cadastro e sessão.
 
 Cases assigned from `_tests.md`, the test contract — read each ID's full definition there before writing tests.
 
-- [ ] UT-016, UT-017 — cadastro duplicado e credenciais inválidas sem expor senha.
-- [ ] UT-019 — sessão expirada exige autenticação e preserva carrinho de convidado.
-- [ ] IT-005 — cadastro define cookie seguro e o produtor seleciona somente
+- [x] UT-016, UT-017 — cadastro duplicado e credenciais inválidas sem expor senha.
+- [x] UT-019 — sessão expirada exige autenticação e preserva carrinho de convidado.
+- [x] IT-005 — cadastro define cookie seguro e o produtor seleciona somente
       propriedades próprias.
 
 ## Success Criteria

@@ -1,5 +1,5 @@
 ---
-status: pending
+status: completed
 title: QA Plan and Session Charters
 type: qa-report
 complexity: high
@@ -39,15 +39,15 @@ fluxo nem superfície de entrada.
 
 ## Subtasks
 
-- [ ] 6.1 Ler `docs/qa/README.md`, templates e bugs abertos; criar `personas.md`.
-- [ ] 6.2 Escrever `docs/qa/journeys/J-produtor-pedido-rapido.md` e
+- [x] 6.1 Ler `docs/qa/README.md`, templates e bugs abertos; criar `personas.md`.
+- [x] 6.2 Escrever `docs/qa/journeys/J-produtor-pedido-rapido.md` e
       `docs/qa/journeys/J-operador-retaguarda.md` com Mermaid e abandono.
-- [ ] 6.3 Mintar ou atualizar os cenários listados em Deliverables, com
+- [x] 6.3 Mintar ou atualizar os cenários listados em Deliverables, com
       `entry_points` HTTP e web.
-- [ ] 6.4 Escrever charters em `docs/qa/charters/` (targeted + canário).
-- [ ] 6.5 Mapear hot spots de regressão das invariantes da Parte II e do
+- [x] 6.4 Escrever charters em `docs/qa/charters/` (targeted + canário).
+- [x] 6.5 Mapear hot spots de regressão das invariantes da Parte II e do
       ADR-001 para a seleção de charters.
-- [ ] 6.6 Validar completeza do ciclo (jornada com charter, cenário com id,
+- [x] 6.6 Validar completeza do ciclo (jornada com charter, cenário com id,
       taxonomia considerada).
 
 ## Implementation Details

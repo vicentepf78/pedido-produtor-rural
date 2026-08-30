@@ -1,5 +1,5 @@
 ---
-status: pending
+status: completed
 title: Catálogo curado e carrinho de convidado
 type: fullstack
 complexity: high
@@ -69,13 +69,13 @@ Evidence for each row: `.compozy/tasks/pedidos-insumos-mvp0/evidence/visual/task
 
 ## Subtasks
 
-- [ ] 3.1 Semear 30 produtos não regulamentados e a consulta pública de catálogo.
-- [ ] 3.2 Recusar produto regulamentado, oculto ou indisponível para pedido.
-- [ ] 3.3 Implementar carrinho de convidado, consolidação, totais e escala de 100 itens.
-- [ ] 3.4 Persistir o carrinho no navegador e preservar estado confirmado em falha.
-- [ ] 3.5 Construir S1 e S2 mobile-first a partir do Visual Contract.
-- [ ] 3.6 Implementar UT-001–UT-012, IT-001–IT-004 e E2E-001–E2E-004.
-- [ ] 3.7 Gerar o pacote de evidência visual de cada linha VC-01–VC-07.
+- [x] 3.1 Semear 30 produtos não regulamentados e a consulta pública de catálogo.
+- [x] 3.2 Recusar produto regulamentado, oculto ou indisponível para pedido.
+- [x] 3.3 Implementar carrinho de convidado, consolidação, totais e escala de 100 itens.
+- [x] 3.4 Persistir o carrinho no navegador e preservar estado confirmado em falha.
+- [x] 3.5 Construir S1 e S2 mobile-first a partir do Visual Contract.
+- [x] 3.6 Implementar UT-001–UT-012, IT-001–IT-004 e E2E-001–E2E-004.
+- [x] 3.7 Gerar o pacote de evidência visual de cada linha VC-01–VC-07.
 
 ## Implementation Details
 
@@ -140,10 +140,10 @@ contrato. Imagens: valor de apresentação seguro; Cloudinary está fora do MVP0
 
 Cases assigned from `_tests.md`, the test contract — read each ID's full definition there before writing tests.
 
-- [ ] UT-001, UT-002, UT-003, UT-004, UT-005 — descoberta, elegibilidade, vazio, indisponível, imagem.
-- [ ] UT-006, UT-007, UT-008, UT-009, UT-010, UT-011, UT-012 — totais, mutação, quantidade, consolidação, escala, interrupção.
-- [ ] IT-001, IT-002, IT-003, IT-004 — API de catálogo, produto oculto, carrinho e persistência.
-- [ ] E2E-001, E2E-002, E2E-003, E2E-004 — jornadas móveis de catálogo e carrinho.
+- [x] UT-001, UT-002, UT-003, UT-004, UT-005 — descoberta, elegibilidade, vazio, indisponível, imagem.
+- [x] UT-006, UT-007, UT-008, UT-009, UT-010, UT-011, UT-012 — totais, mutação, quantidade, consolidação, escala, interrupção.
+- [x] IT-001, IT-002, IT-003, IT-004 — API de catálogo, produto oculto, carrinho e persistência.
+- [x] E2E-001, E2E-002, E2E-003, E2E-004 — jornadas móveis de catálogo e carrinho.
 
 ## Success Criteria
 
