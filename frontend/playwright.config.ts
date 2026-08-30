@@ -7,6 +7,7 @@ export default defineConfig({
 testIgnore: [
     ...(process.env.VISUAL_TASK03 ? [] : ["**/visual-task03.spec.ts"]),
     ...(process.env.VISUAL_TASK04 ? [] : ["**/visual-task04.spec.ts"]),
+    ...(process.env.VISUAL_TASK05 ? [] : ["**/visual-task05.spec.ts"]),
   ],
   use: {
     baseURL: "http://127.0.0.1:5173",

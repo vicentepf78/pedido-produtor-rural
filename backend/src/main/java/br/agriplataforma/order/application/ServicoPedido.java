@@ -17,19 +17,26 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Service
-public class ServicoPedido implements ComandoPedido {
+public class ServicoPedido implements ComandoPedido, ConsultaPedidoRetaguarda {
 
 	static final String MENSAGEM_RECEBIDO = "Pedido recebido";
 	static final String DADOS_CHECKOUT = "DADOS_CHECKOUT_OBRIGATORIOS";
 	static final String MSG_DADOS = "Escolha uma propriedade e a preferência de retirada.";
+	static final String ACEITA = "ACEITA";
+
+	private static final Logger LOG = LoggerFactory.getLogger(ServicoPedido.class);
 
 	private final ConsultaIdentidade consultaIdentidade;
 	private final ConsultaPropriedades consultaPropriedades;
@@ -37,6 +44,8 @@ public class ServicoPedido implements ComandoPedido {
 	private final ConsultaCatalogo consultaCatalogo;
 	private final RepositorioPedido repositorioPedido;
 	private final RepositorioItemPedido repositorioItens;
+	private final GatewayErp gatewayErp;
+	private final TransactionTemplate transacao;
 
 	public ServicoPedido(
 			ConsultaIdentidade consultaIdentidade,
@@ -44,17 +53,20 @@ public class ServicoPedido implements ComandoPedido {
 			ConsultaCarrinho consultaCarrinho,
 			ConsultaCatalogo consultaCatalogo,
 			RepositorioPedido repositorioPedido,
-			RepositorioItemPedido repositorioItens) {
+			RepositorioItemPedido repositorioItens,
+			GatewayErp gatewayErp,
+			PlatformTransactionManager gerenciadorTransacao) {
 		this.consultaIdentidade = consultaIdentidade;
 		this.consultaPropriedades = consultaPropriedades;
 		this.consultaCarrinho = consultaCarrinho;
 		this.consultaCatalogo = consultaCatalogo;
 		this.repositorioPedido = repositorioPedido;
 		this.repositorioItens = repositorioItens;
+		this.gatewayErp = gatewayErp;
+		this.transacao = new TransactionTemplate(gerenciadorTransacao);
 	}
 
 	@Override
-	@Transactional
 	public ConfirmacaoPedido criar(CriarPedido comando) {
 		UsuarioAutenticado usuario = exigirProdutor();
 		ResumoPropriedade propriedade = consultaPropriedades
@@ -66,10 +78,17 @@ public class ServicoPedido implements ComandoPedido {
 		}
 		UUID idProdutor = consultaPropriedades.idProdutorDoAutenticado();
 		String chave = chaveEfetiva(comando, usuario, idProdutor);
-		return repositorioPedido
+		Pedido existente = transacao.execute(status -> repositorioPedido
 				.findByIdTenantAndIdProdutorAndChaveIdempotencia(usuario.idTenant(), idProdutor, chave)
-				.map(ServicoPedido::confirmacao)
-				.orElseGet(() -> persistirNovo(comando, usuario, idProdutor, propriedade, retirada, chave));
+				.orElse(null));
+		if (existente != null) {
+			aceitarSePendente(existente);
+			return confirmacao(recarregar(existente.id()));
+		}
+		Pedido novo = transacao.execute(
+				status -> persistirNovo(comando, usuario, idProdutor, propriedade, retirada, chave));
+		aceitarSePendente(novo);
+		return confirmacao(recarregar(novo.id()));
 	}
 
 	@Override
@@ -112,7 +131,45 @@ public class ServicoPedido implements ComandoPedido {
 		return new PaginaPedido<>(itens, paginaEfetiva, tamanhoEfetivo, resultado.getTotalElements());
 	}
 
-	private ConfirmacaoPedido persistirNovo(
+	@Override
+	@Transactional(readOnly = true)
+	public PaginaPedido<ResumoPedidoRetaguarda> listarPorTenant(UUID idTenant, int pagina, int tamanhoPagina) {
+		int paginaEfetiva = pagina < 1 ? 1 : pagina;
+		int tamanhoEfetivo = tamanhoPagina < 1 ? 25 : Math.min(tamanhoPagina, 100);
+		Page<Pedido> resultado = repositorioPedido.findByIdTenant(
+				idTenant, PageRequest.of(paginaEfetiva - 1, tamanhoEfetivo, Sort.by(Sort.Direction.DESC, "criadoEm")));
+		List<ResumoPedidoRetaguarda> itens = resultado.getContent().stream()
+				.map(pedido -> new ResumoPedidoRetaguarda(
+						pedido.id(),
+						pedido.nomeProdutor(),
+						pedido.total().setScale(2, RoundingMode.HALF_UP),
+						pedido.situacao(),
+						pedido.confirmacao(),
+						pedido.criadoEm()))
+				.toList();
+		return new PaginaPedido<>(itens, paginaEfetiva, tamanhoEfetivo, resultado.getTotalElements());
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public VisaoPedidoRetaguarda obterPorTenant(UUID idTenant, UUID idPedido) {
+		Pedido pedido = repositorioPedido
+				.findByIdAndIdTenant(idPedido, idTenant)
+				.orElseThrow(() -> new ExcecaoPedido("PEDIDO_NAO_ENCONTRADO", "Pedido não encontrado."));
+		VisaoPedido visao = visao(pedido);
+		return new VisaoPedidoRetaguarda(
+				visao.idPedido(),
+				pedido.nomeProdutor(),
+				visao.situacao(),
+				visao.confirmacao(),
+				visao.nomePropriedade(),
+				visao.preferenciaRetirada(),
+				visao.total(),
+				visao.criadoEm(),
+				visao.itens());
+	}
+
+	private Pedido persistirNovo(
 			CriarPedido comando,
 			UsuarioAutenticado usuario,
 			UUID idProdutor,
@@ -129,6 +186,7 @@ public class ServicoPedido implements ComandoPedido {
 				idProdutor,
 				propriedade.id(),
 				propriedade.nome(),
+				usuario.nome(),
 				retirada,
 				total,
 				chave);
@@ -152,13 +210,37 @@ public class ServicoPedido implements ComandoPedido {
 			}
 			repositorioItens.saveAll(linhas);
 			consultaCarrinho.esvaziar(comando.chaveProprietario());
-			return confirmacao(pedido);
+			return pedido;
 		} catch (DataIntegrityViolationException duplicado) {
 			return repositorioPedido
 					.findByIdTenantAndIdProdutorAndChaveIdempotencia(usuario.idTenant(), idProdutor, chave)
-					.map(ServicoPedido::confirmacao)
 					.orElseThrow(() -> duplicado);
 		}
+	}
+
+	private void aceitarSePendente(Pedido pedido) {
+		if (pedido == null || ACEITA.equals(pedido.confirmacao())) {
+			return;
+		}
+		try {
+			ConfirmacaoErp resultado = gatewayErp.aceitar(new PedidoLocal(pedido.id(), pedido.idTenant()));
+			if (resultado != null && ACEITA.equals(resultado.codigo())) {
+				transacao.executeWithoutResult(status -> {
+					Pedido persistido = repositorioPedido.findById(pedido.id()).orElse(null);
+					if (persistido == null) {
+						return;
+					}
+					persistido.registrarConfirmacaoAceita();
+					LOG.info("confirmacao_aceita idPedido={} idTenant={}", persistido.id(), persistido.idTenant());
+				});
+			}
+		} catch (RuntimeException ignorada) {
+			LOG.info("confirmacao_pendente idPedido={} idTenant={}", pedido.id(), pedido.idTenant());
+		}
+	}
+
+	private Pedido recarregar(UUID idPedido) {
+		return transacao.execute(status -> repositorioPedido.findById(idPedido).orElseThrow());
 	}
 
 	private VisaoPedido visao(Pedido pedido) {

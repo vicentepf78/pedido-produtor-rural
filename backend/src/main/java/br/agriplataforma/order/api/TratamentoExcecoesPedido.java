@@ -13,6 +13,7 @@ class TratamentoExcecoesPedido {
 	ResponseEntity<ErroApi> tratar(ExcecaoPedido excecao) {
 		HttpStatus status = switch (excecao.codigo()) {
 			case "ACESSO_PEDIDO_NEGADO" -> HttpStatus.FORBIDDEN;
+			case "PEDIDO_NAO_ENCONTRADO" -> HttpStatus.NOT_FOUND;
 			default -> HttpStatus.BAD_REQUEST;
 		};
 		return ResponseEntity.status(status).body(new ErroApi(excecao.codigo(), excecao.getMessage()));

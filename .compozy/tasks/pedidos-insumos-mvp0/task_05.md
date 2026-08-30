@@ -1,5 +1,5 @@
 ---
-status: in_progress
+status: completed
 title: Mock ERP e backoffice somente leitura
 type: fullstack
 complexity: high
@@ -54,12 +54,12 @@ Evidence for each row: `.compozy/tasks/pedidos-insumos-mvp0/evidence/visual/task
 
 ## Subtasks
 
-- [ ] 5.1 Implementar `GatewayErpSimulado` atrás da porta de `order`.
-- [ ] 5.2 Registrar confirmação aceita sem mutar o snapshot do pedido.
-- [ ] 5.3 Publicar listagem e detalhe de retaguarda por tenant e papel.
-- [ ] 5.4 Construir S6 somente leitura.
-- [ ] 5.5 Implementar UT-021, UT-024, UT-025, IT-007, IT-009, IT-010, E2E-009, E2E-010.
-- [ ] 5.6 Gerar evidência visual de VC-01–VC-05.
+- [x] 5.1 Implementar `GatewayErpSimulado` atrás da porta de `order`.
+- [x] 5.2 Registrar confirmação aceita sem mutar o snapshot do pedido.
+- [x] 5.3 Publicar listagem e detalhe de retaguarda por tenant e papel.
+- [x] 5.4 Construir S6 somente leitura.
+- [x] 5.5 Implementar UT-021, UT-024, UT-025, IT-007, IT-009, IT-010, E2E-009, E2E-010.
+- [x] 5.6 Gerar evidência visual de VC-01–VC-05.
 
 ## Implementation Details
 
@@ -120,11 +120,11 @@ liga o adaptador. `backoffice` lê resumos; não escreve pedido. Frontend em
 
 Cases assigned from `_tests.md`, the test contract — read each ID's full definition there before writing tests.
 
-- [ ] UT-021 — mock aceita pedido local já persistido.
-- [ ] UT-024, UT-025 — resumo do operador e recusa do produtor.
-- [ ] IT-007 — `POST /api/v1/pedidos` persiste antes da confirmação aceita.
-- [ ] IT-009, IT-010 — lista da retaguarda por tenant, vazio e recusa.
-- [ ] E2E-009, E2E-010 — operador inspeciona; vazio e rota negada ao produtor.
+- [x] UT-021 — mock aceita pedido local já persistido.
+- [x] UT-024, UT-025 — resumo do operador e recusa do produtor.
+- [x] IT-007 — `POST /api/v1/pedidos` persiste antes da confirmação aceita.
+- [x] IT-009, IT-010 — lista da retaguarda por tenant, vazio e recusa.
+- [x] E2E-009, E2E-010 — operador inspeciona; vazio e rota negada ao produtor.
 
 ## Success Criteria
 

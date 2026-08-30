@@ -7,6 +7,7 @@ import { PaginaCheckout } from "./features/checkout/PaginaCheckout";
 import { PaginaMeusPedidos } from "./features/my-orders/PaginaMeusPedidos";
 import { PaginaDetalhePedido } from "./features/my-orders/PaginaDetalhePedido";
 import { PaginaPedidosRetaguarda } from "./features/backoffice-orders/PaginaPedidosRetaguarda";
+import { PaginaDetalheRetaguarda } from "./features/backoffice-orders/PaginaDetalheRetaguarda";
 
 export function App() {
   return (
@@ -21,6 +22,7 @@ export function App() {
             <Route path="/checkout" element={<PaginaCheckout />} />
             <Route path="/pedidos/:idPedido" element={<PaginaDetalhePedido />} />
             <Route path="/meus-pedidos" element={<PaginaMeusPedidos />} />
+            <Route path="/retaguarda/pedidos/:idPedido" element={<PaginaDetalheRetaguarda />} />
             <Route path="/retaguarda/pedidos" element={<PaginaPedidosRetaguarda />} />
           </Routes>
         </LayoutApp>

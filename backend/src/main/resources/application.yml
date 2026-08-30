@@ -40,6 +40,7 @@ server:
 
 agriplataforma:
   idTenantSemeado: ${AGRIPLATAFORMA_ID_TENANT_SEMEADO:11111111-1111-1111-1111-111111111111}
+  gatewayErp: simulado
 
 
 management:

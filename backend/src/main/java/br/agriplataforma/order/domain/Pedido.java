@@ -22,6 +22,8 @@ public class Pedido {
 
 	private String nomePropriedade;
 
+	private String nomeProdutor;
+
 	private String preferenciaRetirada;
 
 	private String situacao;
@@ -42,6 +44,7 @@ public class Pedido {
 			UUID idProdutor,
 			UUID idPropriedade,
 			String nomePropriedade,
+			String nomeProdutor,
 			String preferenciaRetirada,
 			String situacao,
 			String confirmacao,
@@ -53,6 +56,7 @@ public class Pedido {
 		this.idProdutor = idProdutor;
 		this.idPropriedade = idPropriedade;
 		this.nomePropriedade = nomePropriedade;
+		this.nomeProdutor = nomeProdutor;
 		this.preferenciaRetirada = preferenciaRetirada;
 		this.situacao = situacao;
 		this.confirmacao = confirmacao;
@@ -66,6 +70,7 @@ public class Pedido {
 			UUID idProdutor,
 			UUID idPropriedade,
 			String nomePropriedade,
+			String nomeProdutor,
 			String preferenciaRetirada,
 			BigDecimal total,
 			String chaveIdempotencia) {
@@ -75,12 +80,17 @@ public class Pedido {
 				idProdutor,
 				idPropriedade,
 				nomePropriedade,
+				nomeProdutor,
 				preferenciaRetirada,
 				"RECEBIDO",
 				"PENDENTE",
 				total,
 				chaveIdempotencia,
 				Instant.now());
+	}
+
+	public void registrarConfirmacaoAceita() {
+		this.confirmacao = "ACEITA";
 	}
 
 	public UUID id() {
@@ -101,6 +111,10 @@ public class Pedido {
 
 	public String nomePropriedade() {
 		return nomePropriedade;
+	}
+
+	public String nomeProdutor() {
+		return nomeProdutor;
 	}
 
 	public String preferenciaRetirada() {

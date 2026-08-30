@@ -3,6 +3,7 @@ package br.agriplataforma.order;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -14,9 +15,12 @@ import br.agriplataforma.catalog.application.ResumoProduto;
 import br.agriplataforma.identity.application.ConsultaIdentidade;
 import br.agriplataforma.identity.application.Papel;
 import br.agriplataforma.identity.application.UsuarioAutenticado;
+import br.agriplataforma.order.application.ConfirmacaoErp;
 import br.agriplataforma.order.application.ConfirmacaoPedido;
 import br.agriplataforma.order.application.CriarPedido;
 import br.agriplataforma.order.application.ExcecaoPedido;
+import br.agriplataforma.order.application.GatewayErp;
+import br.agriplataforma.order.application.PedidoLocal;
 import br.agriplataforma.order.application.ServicoPedido;
 import br.agriplataforma.order.application.VisaoPedido;
 import br.agriplataforma.order.domain.ItemPedido;
@@ -33,10 +37,13 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.SimpleTransactionStatus;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -71,19 +78,29 @@ class ServicoPedidoTest {
 	@Mock
 	RepositorioItemPedido repositorioItens;
 
+	@Mock
+	GatewayErp gatewayErp;
+
+	@Mock
+	PlatformTransactionManager gerenciadorTransacao;
+
 	ServicoPedido servico;
 	Pedido pedidoPersistido;
 	final List<ItemPedido> itensPersistidos = new ArrayList<>();
 
 	@BeforeEach
 	void preparar() {
+		when(gerenciadorTransacao.getTransaction(any())).thenReturn(new SimpleTransactionStatus());
+		when(gatewayErp.aceitar(any(PedidoLocal.class))).thenReturn(new ConfirmacaoErp("ACEITA"));
 		servico = new ServicoPedido(
 				consultaIdentidade,
 				consultaPropriedades,
 				consultaCarrinho,
 				consultaCatalogo,
 				repositorioPedido,
-				repositorioItens);
+				repositorioItens,
+				gatewayErp,
+				gerenciadorTransacao);
 		autenticar(ALFA, PRODUTOR_ALFA);
 		when(consultaPropriedades.buscarPropria(FAZENDA_NORTE))
 				.thenReturn(Optional.of(new ResumoPropriedade(FAZENDA_NORTE, "Fazenda Norte")));
@@ -121,6 +138,7 @@ class ServicoPedidoTest {
 
 		assertThat(confirmacao.idPedido()).isNotNull();
 		assertThat(confirmacao.situacao()).isEqualTo("RECEBIDO");
+		assertThat(confirmacao.confirmacao()).isEqualTo("ACEITA");
 		assertThat(confirmacao.mensagem()).isEqualTo("Pedido recebido");
 		assertThat(pedidoPersistido.nomePropriedade()).isEqualTo("Fazenda Norte");
 		assertThat(pedidoPersistido.preferenciaRetirada()).isEqualTo(RETIRADA);
@@ -168,6 +186,7 @@ class ServicoPedidoTest {
 
 		assertThat(segunda.idPedido()).isEqualTo(primeira.idPedido());
 		verify(repositorioPedido).save(any());
+		verify(gatewayErp).aceitar(any(PedidoLocal.class));
 	}
 
 	@Test
@@ -183,6 +202,20 @@ class ServicoPedidoTest {
 		assertThat(visao.itens().getFirst().precoUnitario()).isEqualByComparingTo("620.00");
 		assertThat(visao.itens().getFirst().totalLinha()).isEqualByComparingTo("1240.00");
 		assertThat(visao.total()).isEqualByComparingTo("1240.00");
+	}
+
+	@Test
+	void ut021_mockAceitaPedidoLocalJaPersistido() {
+		ConfirmacaoPedido confirmacao = servico.criar(comandoValido());
+
+		assertThat(confirmacao.confirmacao()).isEqualTo("ACEITA");
+		assertThat(pedidoPersistido.confirmacao()).isEqualTo("ACEITA");
+		InOrder ordem = inOrder(repositorioPedido, gatewayErp);
+		ordem.verify(repositorioPedido).save(any(Pedido.class));
+		ordem.verify(repositorioPedido).flush();
+		ordem.verify(gatewayErp).aceitar(org.mockito.ArgumentMatchers.argThat(local -> local.idPedido()
+				.equals(pedidoPersistido.id())
+				&& local.idTenant().equals(TENANT)));
 	}
 
 	@Test

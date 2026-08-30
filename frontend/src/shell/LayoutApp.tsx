@@ -6,7 +6,7 @@ export function LayoutApp({ children }: { children: ReactNode }) {
   const { carrinho } = useCarrinho();
   const local = useLocation();
   const quantidade = carrinho.itens.reduce((soma, item) => soma + item.quantidade, 0);
-  const ocultarNav = local.pathname.startsWith("/pedidos/");
+  const ocultarNav = local.pathname.startsWith("/pedidos/") || local.pathname.startsWith("/retaguarda/");
 
   return (
     <div className="app-shell" data-od-id="app-shell">

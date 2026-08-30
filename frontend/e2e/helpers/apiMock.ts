@@ -172,6 +172,7 @@ export async function mockarApis(page: Page) {
   type PedidoMock = {
     idPedido: string;
     dono: string;
+    nomeProdutor: string;
     situacao: string;
     confirmacao: string;
     nomePropriedade: string;
@@ -211,6 +212,17 @@ export async function mockarApis(page: Page) {
       return;
     }
     sessaoAtiva = true;
+    if (corpo.email.includes("operador")) {
+      usuarioAtual = "operador";
+      await rota.fulfill({
+        json: {
+          idUsuario: "usr-operador",
+          nome: "Operador Demonstracao",
+          papeis: ["OPERADOR_REVENDA"],
+        },
+      });
+      return;
+    }
     usuarioAtual = corpo.email.includes("beta") ? "beta" : "alfa";
     await rota.fulfill({
       json: {
@@ -262,8 +274,9 @@ export async function mockarApis(page: Page) {
       const pedido: PedidoMock = {
         idPedido,
         dono: usuarioAtual,
+        nomeProdutor: usuarioAtual === "beta" ? "Produtor Beta" : "Produtor Alfa",
         situacao: "RECEBIDO",
-        confirmacao: "PENDENTE",
+        confirmacao: "ACEITA",
         nomePropriedade: propriedade,
         preferenciaRetirada: corpo.preferenciaRetirada,
         total,
@@ -279,7 +292,7 @@ export async function mockarApis(page: Page) {
       pedidos.push(pedido);
       linhas.length = 0;
       await rota.fulfill({
-        json: { idPedido, situacao: "RECEBIDO", confirmacao: "PENDENTE", mensagem: "Pedido recebido" },
+        json: { idPedido, situacao: "RECEBIDO", confirmacao: "ACEITA", mensagem: "Pedido recebido" },
       });
       return;
     }
@@ -312,6 +325,47 @@ export async function mockarApis(page: Page) {
     await rota.fulfill({ json: pedido });
   });
 
+  await page.route(/\/api\/v1\/retaguarda\/pedidos(\/[^/?]+)?(\?|$)/, async (rota) => {
+    if (rota.request().method() !== "GET") {
+      await rota.fallback();
+      return;
+    }
+    if (!sessaoAtiva) {
+      await rota.fulfill({
+        status: 401,
+        json: { codigo: "NAO_AUTENTICADO", mensagem: "Entre ou crie uma conta para continuar." },
+      });
+      return;
+    }
+    if (usuarioAtual !== "operador") {
+      await rota.fulfill({
+        status: 403,
+        json: {
+          codigo: "ACESSO_NEGADO",
+          mensagem: "Somente o operador da revenda pode inspecionar os pedidos da retaguarda.",
+        },
+      });
+      return;
+    }
+    const url = new URL(rota.request().url());
+    const id = url.pathname.split("/").filter(Boolean)[4];
+    if (!id) {
+      await rota.fulfill({
+        json: { itens: pedidos, pagina: 1, tamanhoPagina: 25, total: pedidos.length },
+      });
+      return;
+    }
+    const pedido = pedidos.find((item) => item.idPedido === id);
+    if (!pedido) {
+      await rota.fulfill({
+        status: 404,
+        json: { codigo: "PEDIDO_NAO_ENCONTRADO", mensagem: "Pedido não encontrado." },
+      });
+      return;
+    }
+    await rota.fulfill({ json: pedido });
+  });
+
   return {
     povoarCemLinhas() {
       linhas.length = 0;
@@ -330,8 +384,9 @@ export async function mockarApis(page: Page) {
       pedidos.push({
         idPedido: "ord-demo",
         dono: "alfa",
+        nomeProdutor: "Produtor Alfa",
         situacao: "RECEBIDO",
-        confirmacao: "PENDENTE",
+        confirmacao: "ACEITA",
         nomePropriedade: "Fazenda Boa Vista — 420 ha",
         preferenciaRetirada: "DEPOSITO_PRINCIPAL",
         total: "1240.00",
@@ -350,7 +405,7 @@ export async function mockarApis(page: Page) {
     negarPedido(id: string) {
       negados.add(id);
     },
-    autenticarComo(papel: "alfa" | "beta") {
+    autenticarComo(papel: "alfa" | "beta" | "operador") {
       sessaoAtiva = true;
       usuarioAtual = papel;
     },

@@ -13,4 +13,8 @@ public interface RepositorioPedido extends JpaRepository<Pedido, UUID> {
 			UUID idTenant, UUID idProdutor, String chaveIdempotencia);
 
 	Page<Pedido> findByIdTenantAndIdProdutor(UUID idTenant, UUID idProdutor, Pageable pagina);
+
+	Page<Pedido> findByIdTenant(UUID idTenant, Pageable pagina);
+
+	Optional<Pedido> findByIdAndIdTenant(UUID id, UUID idTenant);
 }
