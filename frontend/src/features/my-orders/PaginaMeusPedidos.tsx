@@ -1,16 +1,27 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useSessao } from "../../estado/ProvedorSessao";
 import { formatarDinheiro, isFalhaApi } from "../../infra/http";
 import { listarPedidos, type ResumoPedido } from "./api";
 import { classeConfirmacao, formatarQuando, rotuloConfirmacao, rotuloSituacao } from "./DetalhePedido";
 
 export function PaginaMeusPedidos() {
   const navegar = useNavigate();
+  const { sessao, pronta } = useSessao();
   const [pedidos, setPedidos] = useState<ResumoPedido[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!pronta) {
+      return;
+    }
+    if (!sessao.autenticado) {
+      setPedidos([]);
+      setErro(null);
+      setCarregando(false);
+      return;
+    }
     let ativo = true;
     async function carregar() {
       setCarregando(true);
@@ -39,7 +50,9 @@ export function PaginaMeusPedidos() {
     return () => {
       ativo = false;
     };
-  }, []);
+  }, [pronta, sessao]);
+
+  const precisaEntrar = pronta && !sessao.autenticado;
 
   return (
     <>
@@ -47,23 +60,36 @@ export function PaginaMeusPedidos() {
         <h1>Meus pedidos</h1>
       </header>
       <main className="screen-body" data-od-id="my-orders-body">
-        {carregando && <p className="inline-info">Carregando pedidos…</p>}
-        {erro && (
+        {precisaEntrar && (
+          <section className="status-box" data-od-id="s7-pedidos-logged-out">
+            <h2>Entre para ver seus pedidos</h2>
+            <p>Seus pedidos ficam salvos na sua conta.</p>
+            <Link className="btn btn-primary" to="/entrar?origem=/meus-pedidos" data-od-id="btn-pedidos-entrar">
+              Entrar
+            </Link>
+          </section>
+        )}
+        {!precisaEntrar && carregando && <p className="inline-info">Carregando pedidos…</p>}
+        {!precisaEntrar && erro && (
           <div className="status-box" role="alert">
             <h2>Não foi possível carregar</h2>
             <p>{erro}</p>
-            <button type="button" className="btn btn-ghost" onClick={() => navegar("/checkout")}>
-              Ir ao checkout
-            </button>
+            <Link className="btn btn-ghost" to="/entrar?origem=/meus-pedidos">
+              Entrar
+            </Link>
           </div>
         )}
-        {!carregando && !erro && pedidos.length === 0 && (
-          <div className="status-box">
+        {!precisaEntrar && !carregando && !erro && pedidos.length === 0 && (
+          <div className="status-box" data-od-id="s7-pedidos-empty">
             <h2>Nenhum pedido</h2>
             <p>Seus pedidos confirmados aparecerão aqui.</p>
+            <Link className="btn btn-ghost" to="/catalogo">
+              Ir ao catálogo
+            </Link>
           </div>
         )}
-        {!carregando &&
+        {!precisaEntrar &&
+          !carregando &&
           !erro &&
           pedidos.map((pedido) => (
             <button

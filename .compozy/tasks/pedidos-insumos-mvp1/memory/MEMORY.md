@@ -2,8 +2,8 @@
 
 ## Current State
 
-- Phase B `task_01` implementada e verificada (`make test` + `make test-integration`).
-- Próxima ação esperada: Phase B `execute_task task=task_02`.
+- Phase B `task_02` implementada e verificada (Playwright 20/20).
+- Próxima ação esperada: Phase B `execute_task task=task_03`.
 - Branch de trabalho: `mvp-1`. Sem `--frontend` e sem `--stacked`.
 
 ## Shared Decisions
@@ -16,6 +16,9 @@
 - Tarefas 01–04 implementam a loja; 05–06 são o par QA. Sem worker frontend; execução local.
 - Seed de catálogo não foi alterado para casar `_dx.md`: ureia semeada é `Ureia 45% N` @ 178.00 (UUID `...0013`), indisponível. ITs usam a semente; unitários mockam o exemplo 198.00.
 - `GET /error` é `permitAll` para erros de validação não virarem 401.
+- Destino pós-Entrar: `resolverDestinoAposEntrada`; operador ignora `origem` da loja.
+- Sair no topo é dois toques e não apaga o carrinho de convidado.
+- `eng-ui-screenshot` não está instalado neste repo; não inventar pacote visual substituto.
 
 ## Shared Learnings
 
@@ -35,5 +38,6 @@
 ## Handoffs
 
 - `task_01` concluída: catálogo paginado, `GET /sessao`, cadastro/entrada com `email`+`papeis`.
-- QA flag-only: reset `CAT-produtor-descobre-produto`, `AUTH-cadastro-e-sessao`, `CAT-produto-indisponivel-ou-regulado`; novos `CAT-paginacao-catalogo`, `AUTH-sessao-atual`. Walk na Phase C.
-- `task_02` herda destino/`origem` e topo (UT-071/UT-072).
+- `task_02` concluída: TopoLoja, `/entrar` `/cadastro`, destino por papel, TopoOperador mínimo.
+- QA flag-only task_02: reset `AUTH-cadastro-e-sessao`; novos `AUTH-entrar-tela-propria`, `NAV-topo-loja`. Walk na Phase C.
+- `task_03` herda o fundo do catálogo do MVP 0; não mexer no topo/identidade desta tarefa.

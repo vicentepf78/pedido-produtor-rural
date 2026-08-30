@@ -19,3 +19,5 @@ overlaps: CHK-identificacao-tardia
 Cookie `sessao` HttpOnly+Secure (exceto perfil local). CSRF via `XSRF-TOKEN`. Health e datasource são pré-condição de sessão, não casos soltos. E-mail duplicado e credenciais inválidas não vazam senha. Logout e expiração não apagam `chaveCarrinhoConvidado`. Planejado para CH-checkout-lixo-entrada.
 
 Walk 2026-08-30: cadastro duplicado, senha errada e `POST /autenticacao/saida` preservaram o carrinho. Friction: não há Sair na UI (`BUG-20260830-sem-sair-na-interface`).
+
+Reset em task_02: Entrar/Sair passaram ao TopoLoja e às rotas `/entrar` e `/cadastro`. Walk deferred to Phase C.

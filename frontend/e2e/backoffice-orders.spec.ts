@@ -31,6 +31,7 @@ test.describe("Backoffice móvel", () => {
     await expect(page.getByRole("heading", { name: "Acesso negado" })).toBeVisible();
     await expect(page.getByText("Somente o operador da revenda pode inspecionar os pedidos da retaguarda.")).toBeVisible();
     await expect(page.locator('[data-od-id="backoffice-body"] .order-list-item')).toHaveCount(0);
-    await expect(page.getByRole("navigation", { name: "Navegação principal" })).toHaveCount(0);
+    await expect(page.locator('[data-od-id="producer-top-bar"]')).toBeVisible();
+    await expect(page.locator('[data-od-id="operator-top-bar"]')).toHaveCount(0);
   });
 });

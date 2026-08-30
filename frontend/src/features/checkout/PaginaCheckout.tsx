@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCarrinho } from "../../estado/ProvedorCarrinho";
+import { useSessao } from "../../estado/ProvedorSessao";
 import { FalhaApi, formatarDinheiro, isFalhaApi } from "../../infra/http";
 import {
   cadastrar,
@@ -8,7 +9,6 @@ import {
   criarPropriedade,
   entrar,
   listarPropriedades,
-  sair,
   type ResumoPropriedade,
 } from "./api";
 import { OPCOES_RETIRADA } from "./opcoes";
@@ -44,6 +44,7 @@ type Erros = Partial<Record<"name" | "email" | "password" | "propertyId" | "pick
 export function PaginaCheckout() {
   const navegar = useNavigate();
   const { carrinho, recarregar } = useCarrinho();
+  const { aplicarAutenticacao, encerrar } = useSessao();
   const chaveIdempotencia = useRef(crypto.randomUUID());
   const [rascunho, setRascunho] = useState<Rascunho>(lerRascunho);
   const [senha, setSenha] = useState("");
@@ -147,9 +148,9 @@ export function PaginaCheckout() {
       let lista = propriedades;
       if (!autenticado) {
         if (rascunho.modo === "register") {
-          await cadastrar(rascunho.nome.trim(), rascunho.email.trim(), senha);
+          aplicarAutenticacao(await cadastrar(rascunho.nome.trim(), rascunho.email.trim(), senha));
         } else {
-          await entrar(rascunho.email.trim(), senha);
+          aplicarAutenticacao(await entrar(rascunho.email.trim(), senha));
         }
         lista = await listarPropriedades();
         setPropriedades(lista);
@@ -222,7 +223,7 @@ export function PaginaCheckout() {
   const modos = ["login", "register"] as const;
 
   async function encerrarSessao() {
-    await sair();
+    await encerrar();
     setAutenticado(false);
     setPropriedades([]);
   }

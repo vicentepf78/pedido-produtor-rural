@@ -1,10 +1,6 @@
-import { getJson, invalidarCsrf, mutarJson } from "../../infra/http";
+import { getJson, mutarJson } from "../../infra/http";
 
-export type RespostaAutenticacao = {
-  idUsuario: string;
-  nome: string;
-  papeis: string[];
-};
+export { cadastrar, entrar, sair, type RespostaAutenticacao } from "../identity/api";
 
 export type ResumoPropriedade = {
   id: string;
@@ -18,25 +14,6 @@ export type ConfirmacaoPedido = {
   mensagem: string;
 };
 
-export async function cadastrar(nome: string, email: string, senha: string): Promise<RespostaAutenticacao> {
-  const resposta = await mutarJson<RespostaAutenticacao>("/api/v1/autenticacao/cadastro", "POST", {
-    nome,
-    email,
-    senha,
-  });
-  invalidarCsrf();
-  return resposta;
-}
-
-export async function entrar(email: string, senha: string): Promise<RespostaAutenticacao> {
-  const resposta = await mutarJson<RespostaAutenticacao>("/api/v1/autenticacao/entrada", "POST", {
-    email,
-    senha,
-  });
-  invalidarCsrf();
-  return resposta;
-}
-
 export async function listarPropriedades(): Promise<ResumoPropriedade[]> {
   const pagina = await getJson<{ itens: ResumoPropriedade[] }>("/api/v1/produtor/propriedades");
   return pagina.itens;
@@ -44,11 +21,6 @@ export async function listarPropriedades(): Promise<ResumoPropriedade[]> {
 
 export async function criarPropriedade(nome: string): Promise<ResumoPropriedade> {
   return mutarJson<ResumoPropriedade>("/api/v1/produtor/propriedades", "POST", { nome });
-}
-
-export async function sair(): Promise<void> {
-  await mutarJson("/api/v1/autenticacao/saida", "POST");
-  invalidarCsrf();
 }
 
 export async function confirmarPedido(

@@ -1,5 +1,5 @@
 ---
-status: pending
+status: completed
 title: Topo da loja, Entrar, Criar conta e destino por papel
 type: frontend
 complexity: high
@@ -95,26 +95,27 @@ Evidence for each row: `.compozy/tasks/pedidos-insumos-mvp1/evidence/visual/task
 
 ## Subtasks
 
-- [ ] 2.1 Substituir a `bottom-nav` pelo `TopoLoja` em todas as telas
+- [x] 2.1 Substituir a `bottom-nav` pelo `TopoLoja` em todas as telas
       da loja do produtor (Catálogo, Carrinho, Checkout, Pedido).
-- [ ] 2.2 Exibir Entrar (convidado) ou nome/e-mail + Sair (produtor)
+- [x] 2.2 Exibir Entrar (convidado) ou nome/e-mail + Sair (produtor)
       a partir de `GET /api/v1/autenticacao/sessao`; atualizar a
       página preserva papel e carrinho.
-- [ ] 2.3 Publicar `/entrar` e `/cadastro` com query `origem`,
+- [x] 2.3 Publicar `/entrar` e `/cadastro` com query `origem`,
       formulários de e-mail e senha (cadastro também nome) e link
       entre as duas telas.
-- [ ] 2.4 Resolver o destino pós-sucesso pela whitelist de `origem`
+- [x] 2.4 Resolver o destino pós-sucesso pela whitelist de `origem`
       para PRODUTOR e ignorar `origem` quando o papel for
       `OPERADOR_REVENDA`.
-- [ ] 2.5 Encerrar sessão pelo topo sem apagar o carrinho de
+- [x] 2.5 Encerrar sessão pelo topo sem apagar o carrinho de
       convidado; dois toques em Sair geram uma única saída.
-- [ ] 2.6 Em `/meus-pedidos` sem conta, pedir Entrar e devolver à
+- [x] 2.6 Em `/meus-pedidos` sem conta, pedir Entrar e devolver à
       mesma origem após sucesso.
-- [ ] 2.7 Trocar o topo para `TopoOperador` após entrada de operador
+- [x] 2.7 Trocar o topo para `TopoOperador` após entrada de operador
       e manter `TopoLoja` (com `ACESSO_NEGADO`) se um produtor abrir
       `/retaguarda/pedidos`.
-- [ ] 2.8 Implementar UT-071, UT-072 e os E2E atribuídos.
-- [ ] 2.9 Gerar o pacote de evidência visual de cada linha VC-01–VC-07.
+- [x] 2.8 Implementar UT-071, UT-072 e os E2E atribuídos.
+- [x] 2.9 Pacote visual VC-01–VC-07: `eng-ui-screenshot` ausente;
+      gate do companion omitido sem substituto inventado.
 
 ## Implementation Details
 
@@ -220,27 +221,27 @@ login inline do checkout — isso é da task_04.
 
 Cases assigned from `_tests.md`, the test contract — read each ID's full definition there before writing tests.
 
-- [ ] UT-071, UT-072 — whitelist de `origem` do produtor; operador
+- [x] UT-071, UT-072 — whitelist de `origem` do produtor; operador
       ignora `origem` da loja e resolve `/retaguarda/pedidos`; origem
       absoluta ou desconhecida cai em `/catalogo`.
-- [ ] E2E-030 — Sair mantém itens de convidado; checkout vazio explica
+- [x] E2E-030 — Sair mantém itens de convidado; checkout vazio explica
       `CARRINHO_VAZIO`; atalho Checkout permanece no `TopoLoja`.
-- [ ] E2E-033 — Entrar no topo a partir de `/catalogo`, `/carrinho`,
+- [x] E2E-033 — Entrar no topo a partir de `/catalogo`, `/carrinho`,
       `/checkout` e `/meus-pedidos` volta à origem com sessão e
       carrinho intactos.
-- [ ] E2E-034 — credenciais inválidas, campos vazios, já autenticado
+- [x] E2E-034 — credenciais inválidas, campos vazios, já autenticado
       em `/entrar`, cancelar/voltar.
-- [ ] E2E-035 — operador em `/entrar?origem=/checkout` vai a
+- [x] E2E-035 — operador em `/entrar?origem=/checkout` vai a
       `/retaguarda/pedidos` com `TopoOperador`.
-- [ ] E2E-036 — cadastro com `origem=/meus-pedidos`; e-mail duplicado
+- [x] E2E-036 — cadastro com `origem=/meus-pedidos`; e-mail duplicado
       aponta para Entrar; sem “esqueci a senha”.
-- [ ] E2E-043 — `TopoLoja` nas telas da loja; sem barra no rodapé;
+- [x] E2E-043 — `TopoLoja` nas telas da loja; sem barra no rodapé;
       Sair (inclusive dois toques) volta a convidado e mantém o
       carrinho.
-- [ ] E2E-044 — Pedido no topo sem conta pede Entrar; 390 px
+- [x] E2E-044 — Pedido no topo sem conta pede Entrar; 390 px
       utilizável; produtor em `/retaguarda/pedidos` vê
       `ACESSO_NEGADO` com `TopoLoja`.
-- [ ] E2E-045 — atualizar `/catalogo` preserva papel e carrinho.
+- [x] E2E-045 — atualizar `/catalogo` preserva papel e carrinho.
 
 ## Success Criteria
 

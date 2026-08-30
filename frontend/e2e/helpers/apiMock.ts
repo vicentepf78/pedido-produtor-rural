@@ -186,6 +186,52 @@ export async function mockarApis(page: Page) {
   let usuarioAtual = "alfa";
 
   let sessaoAtiva = false;
+  const emailsCadastrados = new Set(["produtor.alfa@example.com"]);
+  let cadastros = 0;
+
+  function visaoSessao() {
+    if (!sessaoAtiva) {
+      return { autenticado: false };
+    }
+    if (usuarioAtual === "operador") {
+      return {
+        autenticado: true,
+        idUsuario: "usr-operador",
+        nome: "Operador Demonstracao",
+        email: "operador.revenda@example.com",
+        papeis: ["OPERADOR_REVENDA"],
+      };
+    }
+    if (usuarioAtual === "beta") {
+      return {
+        autenticado: true,
+        idUsuario: "usr-beta",
+        nome: "Produtor Beta",
+        email: "produtor.beta@example.com",
+        papeis: ["PRODUTOR"],
+      };
+    }
+    if (usuarioAtual === "novo") {
+      return {
+        autenticado: true,
+        idUsuario: "usr-novo",
+        nome: "Produtor Novo",
+        email: "produtor.novo@example.com",
+        papeis: ["PRODUTOR"],
+      };
+    }
+    return {
+      autenticado: true,
+      idUsuario: "usr-alfa",
+      nome: "Produtor Alfa",
+      email: "produtor.alfa@example.com",
+      papeis: ["PRODUTOR"],
+    };
+  }
+
+  await page.route("**/api/v1/autenticacao/sessao", async (rota) => {
+    await rota.fulfill({ json: visaoSessao() });
+  });
 
   await page.route("**/api/v1/autenticacao/saida", async (rota) => {
     sessaoAtiva = false;
@@ -193,10 +239,40 @@ export async function mockarApis(page: Page) {
   });
 
   await page.route("**/api/v1/autenticacao/cadastro", async (rota) => {
+    const corpo = rota.request().postDataJSON() as { nome?: string; email?: string; senha?: string };
+    if (corpo.email && emailsCadastrados.has(corpo.email)) {
+      await rota.fulfill({
+        status: 409,
+        json: {
+          codigo: "EMAIL_DUPLICADO",
+          mensagem: "Este e-mail já está cadastrado. Entre com sua senha ou use outro e-mail.",
+        },
+      });
+      return;
+    }
+    cadastros += 1;
+    if (cadastros > 1 && corpo.email === emailsCadastrados.values().next().value) {
+      await rota.fulfill({
+        status: 409,
+        json: {
+          codigo: "EMAIL_DUPLICADO",
+          mensagem: "Este e-mail já está cadastrado. Entre com sua senha ou use outro e-mail.",
+        },
+      });
+      return;
+    }
+    if (corpo.email) {
+      emailsCadastrados.add(corpo.email);
+    }
     sessaoAtiva = true;
     usuarioAtual = "novo";
     await rota.fulfill({
-      json: { idUsuario: "usr-novo", nome: "Produtor Novo", papeis: ["PRODUTOR"] },
+      json: {
+        idUsuario: "usr-novo",
+        nome: corpo.nome ?? "Produtor Novo",
+        email: corpo.email ?? "produtor.novo@example.com",
+        papeis: ["PRODUTOR"],
+      },
     });
   });
 
@@ -223,6 +299,7 @@ export async function mockarApis(page: Page) {
         json: {
           idUsuario: "usr-operador",
           nome: "Operador Demonstracao",
+          email: corpo.email,
           papeis: ["OPERADOR_REVENDA"],
         },
       });
@@ -233,6 +310,7 @@ export async function mockarApis(page: Page) {
       json: {
         idUsuario: usuarioAtual === "beta" ? "usr-beta" : "usr-alfa",
         nome: usuarioAtual === "beta" ? "Produtor Beta" : "Produtor Alfa",
+        email: corpo.email,
         papeis: ["PRODUTOR"],
       },
     });
