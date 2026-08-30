@@ -104,7 +104,7 @@ test.describe("Identidade e TopoLoja", () => {
     await page.locator('[data-od-id="btn-auth-submit"]').click();
     await expect(page).toHaveURL(/\/retaguarda\/pedidos$/);
     await expect(page.locator('[data-od-id="operator-top-bar"]')).toBeVisible();
-    await expect(page.getByText("Pedidos da revenda")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Pedidos da revenda" })).toBeVisible();
     await expect(page.locator('[data-od-id="user-name"]')).toBeVisible();
     await expect(page.locator('[data-od-id="btn-sair"]')).toBeVisible();
     await expect(page.locator('[data-od-id="nav-catalogo"]')).toHaveCount(0);
@@ -205,6 +205,6 @@ test.describe("Identidade e TopoLoja", () => {
     await page.goto("/catalogo");
     await page.reload();
     await expect(page.locator('[data-od-id="operator-top-bar"]')).toBeVisible();
-    await expect(page.getByText("Pedidos da revenda")).toBeVisible();
+    await expect(page.getByRole("link", { name: "Pedidos da revenda" })).toBeVisible();
   });
 });

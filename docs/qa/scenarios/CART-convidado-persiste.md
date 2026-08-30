@@ -6,7 +6,7 @@ persona: Produtora no campo
 journey: J-convidado-retoma-carrinho
 expected: O carrinho sobrevive a recarregar a página via cookie chaveCarrinhoConvidado; mutação recusada preserva o último estado confirmado; logout de identidade não apaga o cookie
 entry_points: /carrinho; GET /api/v1/carrinhos/convidado; POST /api/v1/autenticacao/saida; cookie chaveCarrinhoConvidado
-qa_status: pass
+qa_status: untested
 bug_ids:
 fix_status:
 retest_status:

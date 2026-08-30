@@ -1,5 +1,5 @@
 ---
-status: pending
+status: completed
 title: Carrinho, checkout, pedidos e retaguarda no visual novo
 type: frontend
 complexity: high
@@ -242,30 +242,30 @@ Skills: `coding-guidelines`.
 
 Cases assigned from `_tests.md`, the test contract — read each ID's full definition there before writing tests.
 
-- [ ] E2E-029 — convidado monta o carrinho, altera, remove, converge
+- [x] E2E-029 — convidado monta o carrinho, altera, remove, converge
       duas alterações e mantém o mesmo preço unitário após Entrar.
-- [ ] E2E-031 — quantidade inválida, produto indisponível e mesma
+- [x] E2E-031 — quantidade inválida, produto indisponível e mesma
       linha ao adicionar de novo.
-- [ ] E2E-032 — cem linhas de fixture com totais legíveis.
-- [ ] E2E-037 — checkout com identidade, propriedade própria
+- [x] E2E-032 — cem linhas de fixture com totais legíveis.
+- [x] E2E-037 — checkout com identidade, propriedade própria
       (Fazenda Norte, não Sul) ou cadastro de “Fazenda Santa Luzia”
       no próprio checkout, e `DEPOSITO_PRINCIPAL`.
-- [ ] E2E-038 — dados obrigatórios, voltar preserva, sessão expirada e
+- [x] E2E-038 — dados obrigatórios, voltar preserva, sessão expirada e
       item inelegível.
-- [ ] E2E-039 — duas confirmações = um pedido; interrupção sem meio
+- [x] E2E-039 — duas confirmações = um pedido; interrupção sem meio
       termo.
-- [ ] E2E-040 — “Pedido recebido” + `ACEITA` em ≤1 s; refresh não
+- [x] E2E-040 — “Pedido recebido” + `ACEITA` em ≤1 s; refresh não
       duplica; reabrir o snapshot.
-- [ ] E2E-041 — lista visual de meus pedidos (vazia, povoada, muitos);
+- [x] E2E-041 — lista visual de meus pedidos (vazia, povoada, muitos);
       convidado pede Entrar (formulário já da task_02) e cancelar não
       vaza lista.
-- [ ] E2E-042 — pedido de outro produtor e endereço inexistente.
-- [ ] E2E-046 — lista da retaguarda no visual da loja, atualizar,
+- [x] E2E-042 — pedido de outro produtor e endereço inexistente.
+- [x] E2E-046 — lista da retaguarda no visual da loja, atualizar,
       outra empresa ausente, `ACEITA` estável.
-- [ ] E2E-047 — detalhe da retaguarda com snapshot imutável.
-- [ ] E2E-048 — `TopoOperador` sem atalhos de compra; Sair some a
+- [x] E2E-047 — detalhe da retaguarda com snapshot imutável.
+- [x] E2E-048 — `TopoOperador` sem atalhos de compra; Sair some a
       lista; operador não usa meus pedidos.
-- [ ] E2E-049 — produtor negado, lista vazia, deep link sem sessão e
+- [x] E2E-049 — produtor negado, lista vazia, deep link sem sessão e
       identificação falha.
 
 Sem UT/IT nesta tarefa — o backend já está na task_01.

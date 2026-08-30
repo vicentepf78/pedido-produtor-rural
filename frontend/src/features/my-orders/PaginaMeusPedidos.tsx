@@ -16,7 +16,7 @@ export function PaginaMeusPedidos() {
     if (!pronta) {
       return;
     }
-    if (!sessao.autenticado) {
+    if (!sessao.autenticado || !sessao.papeis.includes("PRODUTOR")) {
       setPedidos([]);
       setErro(null);
       setCarregando(false);
@@ -53,6 +53,7 @@ export function PaginaMeusPedidos() {
   }, [pronta, sessao]);
 
   const precisaEntrar = pronta && !sessao.autenticado;
+  const operador = sessao.autenticado && sessao.papeis.includes("OPERADOR_REVENDA");
 
   return (
     <>
@@ -61,7 +62,7 @@ export function PaginaMeusPedidos() {
       </header>
       <main className="screen-body" data-od-id="my-orders-body">
         {precisaEntrar && (
-          <section className="status-box" data-od-id="s7-pedidos-logged-out">
+          <section className="empty-state card" data-od-id="s7-pedidos-logged-out">
             <h2>Entre para ver seus pedidos</h2>
             <p>Seus pedidos ficam salvos na sua conta.</p>
             <Link className="btn btn-primary" to="/entrar?origem=/meus-pedidos" data-od-id="btn-pedidos-entrar">
@@ -69,9 +70,18 @@ export function PaginaMeusPedidos() {
             </Link>
           </section>
         )}
-        {!precisaEntrar && carregando && <p className="inline-info">Carregando pedidos…</p>}
-        {!precisaEntrar && erro && (
-          <div className="status-box" role="alert">
+        {operador && (
+          <section className="empty-state card" data-od-id="s7-operador">
+            <h2>Pedidos da revenda</h2>
+            <p>O operador inspeciona os pedidos em Pedidos da revenda.</p>
+            <Link className="btn btn-primary" to="/retaguarda/pedidos">
+              Pedidos da revenda
+            </Link>
+          </section>
+        )}
+        {!precisaEntrar && !operador && carregando && <p className="inline-info">Carregando pedidos…</p>}
+        {!precisaEntrar && !operador && erro && (
+          <div className="empty-state card" role="alert">
             <h2>Não foi possível carregar</h2>
             <p>{erro}</p>
             <Link className="btn btn-ghost" to="/entrar?origem=/meus-pedidos">
@@ -79,8 +89,8 @@ export function PaginaMeusPedidos() {
             </Link>
           </div>
         )}
-        {!precisaEntrar && !carregando && !erro && pedidos.length === 0 && (
-          <div className="status-box" data-od-id="s7-pedidos-empty">
+        {!precisaEntrar && !operador && !carregando && !erro && pedidos.length === 0 && (
+          <div className="empty-state card" data-od-id="s7-pedidos-empty">
             <h2>Nenhum pedido</h2>
             <p>Seus pedidos confirmados aparecerão aqui.</p>
             <Link className="btn btn-ghost" to="/catalogo">
@@ -89,6 +99,7 @@ export function PaginaMeusPedidos() {
           </div>
         )}
         {!precisaEntrar &&
+          !operador &&
           !carregando &&
           !erro &&
           pedidos.map((pedido) => (

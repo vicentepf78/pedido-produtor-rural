@@ -6,7 +6,7 @@ persona: Produtor após falha
 journey: J-produtor-pedido-rapido
 expected: Conta inválida ou propriedade/retirada ausente mostra erro em foco (aria-invalid) e mantém os dados já informados e o carrinho
 entry_points: /checkout; POST /api/v1/autenticacao/cadastro; POST /api/v1/autenticacao/entrada; POST /api/v1/pedidos; DADOS_CHECKOUT_OBRIGATORIOS; CREDENCIAIS_INVALIDAS; EMAIL_DUPLICADO; CARRINHO_VAZIO; NAO_AUTENTICADO
-qa_status: pass
+qa_status: untested
 bug_ids:
 fix_status:
 retest_status:

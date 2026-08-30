@@ -6,7 +6,7 @@ persona: Operador da revenda
 journey: J-operador-retaguarda
 expected: Operador sem pedidos vê estado vazio explícito; produtor autenticado em /retaguarda/pedidos recebe ACESSO_NEGADO e não vê a lista
 entry_points: /retaguarda/pedidos; GET /api/v1/retaguarda/pedidos; GET /api/v1/retaguarda/pedidos/{idPedido}; ACESSO_NEGADO
-qa_status: pass
+qa_status: untested
 bug_ids:
 fix_status:
 retest_status:

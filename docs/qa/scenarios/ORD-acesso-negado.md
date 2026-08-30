@@ -6,7 +6,7 @@ persona: Produtor rural
 journey: J-produtor-pedido-rapido
 expected: Link direto ao pedido de outro produtor mostra ACESSO_PEDIDO_NEGADO — “Você não pode visualizar este pedido.”
 entry_points: /pedidos/{idPedido}; GET /api/v1/pedidos/{idPedido}; ACESSO_PEDIDO_NEGADO
-qa_status: pass
+qa_status: untested
 bug_ids:
 fix_status:
 retest_status:

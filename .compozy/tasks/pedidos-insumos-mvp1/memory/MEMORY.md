@@ -2,9 +2,9 @@
 
 ## Current State
 
-- Phase B `task_03` implementada e verificada (Playwright catálogo 28/28, suíte 46/46).
-- Próxima ação esperada: Phase B `execute_task task=task_04`.
+- Phase B `task_04` concluída (carrinho, checkout, pedidos, retaguarda).
 - Branch de trabalho: `mvp-1`. Sem `--frontend` e sem `--stacked`.
+- Próxima ação esperada: `task_05` (qa-report).
 
 ## Shared Decisions
 
@@ -44,4 +44,8 @@
 - QA flag-only task_02: reset `AUTH-cadastro-e-sessao`; novos `AUTH-entrar-tela-propria`, `NAV-topo-loja`. Walk na Phase C.
 - `task_03` concluída: carrossel fechado, busca composta, Carregar mais, query persistente.
 - QA flag-only task_03: reset `CAT-produtor-descobre-produto`; novo `CAT-carrossel-e-carregar-mais`. Walk na Phase C.
-- `task_04` não reconstrói o catálogo S1 nem o topo/identidade.
+- `task_04` concluída: S2/S5–S7/S9–S11 no visual da loja; checkout pula Entrar se já for produtor; retaguarda sem login inline.
+- QA flag-only task_04: reset CART/CHK/ORD listados na tarefa; novo `RET-visual-loja`. Walk na Phase C.
+- Checkout pula Entrar quando `papeis` já inclui `PRODUTOR`; retaguarda sem sessão vai para `/entrar?origem=…`.
+- Mock de propriedades de Alfa usa Fazenda Norte (não Sul). Cadastro novo começa sem propriedade.
+- Título da retaguarda: “Pedidos da revenda”. GET `/pedidos` mock exige sessão e isola o dono.

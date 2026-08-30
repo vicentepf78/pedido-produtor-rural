@@ -47,13 +47,12 @@ function formatarQuando(iso?: string) {
 export function DetalhePedido({ pedido, criadoEm }: { pedido: VisaoPedido; criadoEm?: string }) {
   return (
     <main className="screen-body" data-od-id="order-detail-body">
-      <div
-        className="status-box status-box-solid"
-        data-od-id="confirmation-success"
-        style={{ marginBottom: "1rem" }}
-      >
-        <h2>Pedido recebido</h2>
+      <div className="card success-card" data-od-id="s6-pedido-recebido">
+        <h2 data-od-id="pedido-recebido-title">Pedido recebido</h2>
         <p>Obrigado! Seu pedido foi registrado.</p>
+        <div className="order-id" data-od-id="order-id">
+          {pedido.idPedido}
+        </div>
       </div>
 
       <dl className="detail-grid" data-od-id="order-meta-grid">

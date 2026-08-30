@@ -46,7 +46,7 @@ function formatarQuando(iso?: string) {
 
 export function DetalhePedidoRetaguarda({ pedido }: { pedido: VisaoPedidoRetaguarda }) {
   return (
-    <main className="screen-body" data-od-id="order-detail-body">
+    <main className="screen-body" data-od-id="s8-retaguarda-detalhe">
       <div className="readonly-banner" data-od-id="readonly-banner">
         Snapshot imutável do pedido — operador não pode editar.
       </div>

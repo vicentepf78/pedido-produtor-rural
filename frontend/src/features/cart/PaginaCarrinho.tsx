@@ -53,6 +53,7 @@ export function PaginaCarrinho() {
   }
 
   const checkoutBloqueado = carrinho.itens.length === 0 || Object.values(errosQtd).some(Boolean);
+  const vazio = !carregando && !erroRestore && carrinho.itens.length === 0;
 
   return (
     <>
@@ -66,7 +67,7 @@ export function PaginaCarrinho() {
           </p>
         )}
         {erroRestore && (
-          <div className="status-box" data-od-id="cart-restore-error" role="alert">
+          <div className="empty-state card" data-od-id="cart-restore-error" role="alert">
             <h2>Não foi possível restaurar</h2>
             <p>{erroRestore}</p>
             <button type="button" className="btn btn-ghost" onClick={() => void recarregar()}>
@@ -74,20 +75,24 @@ export function PaginaCarrinho() {
             </button>
           </div>
         )}
-        {!carregando && !erroRestore && carrinho.itens.length === 0 ? (
-          <div className="status-box" data-od-id="cart-empty">
+        {vazio && (
+          <section className="empty-state card" data-od-id="s2-carrinho-empty">
             <h2>Carrinho vazio</h2>
             <p>Adicione ao menos um produto antes do checkout.</p>
             <button type="button" className="btn btn-primary" onClick={() => navegar("/catalogo")}>
               Ir ao catálogo
             </button>
-          </div>
-        ) : (
-          <>
+          </section>
+        )}
+        {!vazio && !carregando && !erroRestore && (
+          <section className="card cart-card" data-od-id="s2-carrinho">
             {carrinho.itens.map((linha) => (
               <div key={linha.idProduto} className="cart-line" data-od-id={`cart-line-${linha.idProduto}`}>
-                <div className="cart-line-header">
+                <div className="cart-line-info">
                   <h2>{linha.nome}</h2>
+                  <p>
+                    Unitário: <span className="mono">{formatarDinheiro(linha.precoUnitario)}</span>
+                  </p>
                   <button
                     type="button"
                     className="btn btn-ghost btn-sm"
@@ -97,9 +102,6 @@ export function PaginaCarrinho() {
                     Remover
                   </button>
                 </div>
-                <p className="inline-info">
-                  Unitário: <span className="mono">{formatarDinheiro(linha.precoUnitario)}</span>
-                </p>
                 <div className="qty-row">
                   <label htmlFor={`qty-${linha.idProduto}`}>Qtd</label>
                   <input
@@ -123,13 +125,13 @@ export function PaginaCarrinho() {
                 )}
               </div>
             ))}
-            <div className="summary-panel" data-od-id="cart-summary">
+            <div className="cart-summary" data-od-id="cart-summary">
               <div className="summary-row total">
                 <span>Total do pedido</span>
                 <span className="mono">{formatarDinheiro(carrinho.total)}</span>
               </div>
             </div>
-          </>
+          </section>
         )}
       </main>
       <footer className="sticky-footer" data-od-id="cart-footer">

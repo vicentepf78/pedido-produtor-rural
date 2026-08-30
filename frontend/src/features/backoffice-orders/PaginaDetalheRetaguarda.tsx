@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { useSessao } from "../../estado/ProvedorSessao";
 import { isFalhaApi } from "../../infra/http";
 import { obterPedidoRetaguarda, type VisaoPedidoRetaguarda } from "./api";
 import { DetalhePedidoRetaguarda } from "./DetalhePedidoRetaguarda";
@@ -7,12 +8,23 @@ import { DetalhePedidoRetaguarda } from "./DetalhePedidoRetaguarda";
 export function PaginaDetalheRetaguarda() {
   const { idPedido } = useParams();
   const navegar = useNavigate();
+  const local = useLocation();
+  const { sessao, pronta } = useSessao();
   const [pedido, setPedido] = useState<VisaoPedidoRetaguarda | null>(null);
   const [erro, setErro] = useState<string | null>(null);
   const [negado, setNegado] = useState(false);
   const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {
+    if (!pronta) {
+      return;
+    }
+    if (!sessao.autenticado) {
+      setPedido(null);
+      setCarregando(false);
+      navegar(`/entrar?origem=${encodeURIComponent(local.pathname)}`, { replace: true });
+      return;
+    }
     let ativo = true;
     async function carregar() {
       if (!idPedido) {
@@ -21,6 +33,7 @@ export function PaginaDetalheRetaguarda() {
       setCarregando(true);
       setErro(null);
       setNegado(false);
+      setPedido(null);
       try {
         const visao = await obterPedidoRetaguarda(idPedido);
         if (ativo) {
@@ -30,10 +43,12 @@ export function PaginaDetalheRetaguarda() {
         if (!ativo) {
           return;
         }
+        if (isFalhaApi(falha) && falha.status === 401) {
+          navegar(`/entrar?origem=${encodeURIComponent(local.pathname)}`, { replace: true });
+          return;
+        }
         if (isFalhaApi(falha) && (falha.status === 403 || falha.codigo === "ACESSO_NEGADO")) {
           setNegado(true);
-        } else if (isFalhaApi(falha) && falha.status === 401) {
-          setErro("Entre ou crie uma conta para continuar.");
         } else {
           setErro(isFalhaApi(falha) ? falha.message : "Não foi possível carregar o pedido.");
         }
@@ -47,7 +62,7 @@ export function PaginaDetalheRetaguarda() {
     return () => {
       ativo = false;
     };
-  }, [idPedido]);
+  }, [pronta, sessao, idPedido, local.pathname, navegar]);
 
   return (
     <>
@@ -58,7 +73,7 @@ export function PaginaDetalheRetaguarda() {
           onClick={() => navegar("/retaguarda/pedidos")}
           data-od-id="order-detail-back"
         >
-          ← Pedidos do backoffice
+          ← Pedidos da revenda
         </button>
         <h1>{pedido?.idPedido ?? "Pedido"}</h1>
       </header>
@@ -69,7 +84,7 @@ export function PaginaDetalheRetaguarda() {
       )}
       {negado && (
         <main className="screen-body">
-          <div className="status-box" data-od-id="backoffice-denied" role="alert">
+          <div className="empty-state card" data-od-id="backoffice-denied" role="alert">
             <h2>Acesso negado</h2>
             <p>Somente o operador da revenda pode inspecionar os pedidos da retaguarda.</p>
             <Link className="btn btn-ghost" to="/catalogo">
@@ -80,7 +95,7 @@ export function PaginaDetalheRetaguarda() {
       )}
       {erro && !negado && (
         <main className="screen-body">
-          <div className="status-box" role="alert">
+          <div className="empty-state card" role="alert">
             <h2>Não foi possível carregar</h2>
             <p>{erro}</p>
           </div>

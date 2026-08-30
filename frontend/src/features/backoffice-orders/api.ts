@@ -1,4 +1,4 @@
-import { getJson, invalidarCsrf, mutarJson } from "../../infra/http";
+import { getJson } from "../../infra/http";
 
 export type ResumoPedidoRetaguarda = {
   idPedido: string;
@@ -35,10 +35,4 @@ export async function listarPedidosRetaguarda(): Promise<{ itens: ResumoPedidoRe
 
 export async function obterPedidoRetaguarda(idPedido: string): Promise<VisaoPedidoRetaguarda> {
   return getJson<VisaoPedidoRetaguarda>(`/api/v1/retaguarda/pedidos/${idPedido}`);
-}
-
-export async function entrarOperador(email: string, senha: string): Promise<{ papeis: string[] }> {
-  const resposta = await mutarJson<{ papeis: string[] }>("/api/v1/autenticacao/entrada", "POST", { email, senha });
-  invalidarCsrf();
-  return resposta;
 }

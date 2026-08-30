@@ -8,7 +8,7 @@ export function LayoutApp({ children }: { children: ReactNode }) {
   const operador = sessao.autenticado && sessao.papeis.includes("OPERADOR_REVENDA");
 
   return (
-    <div className="app-shell" data-od-id="app-shell">
+    <div className={`app-shell${operador ? " app-shell-wide" : ""}`} data-od-id="app-shell">
       <a className="skip-link" href="#conteudo-principal">
         Ir ao conteúdo
       </a>

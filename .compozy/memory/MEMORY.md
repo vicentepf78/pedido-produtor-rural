@@ -1,1 +1,2 @@
+- [checkout campo-nome-propriedade-timing-e2e](feedback_checkout.md) - seq 3360: assistant explica que o campo batia nos rótulos do Playwright e que passará a ser mostrado só depois da identificação
 - [pedidos-insumos-mvp1 estrutura-do-grafo-de-tarefas](project_pedidos_insumos_mvp1.md) - seq 229-231: bootstrap da spec pedidos-insumos-mvp1 concluído na branch mvp-1; grafo com 6 tarefas sem worker frontend e sem stacked PRs

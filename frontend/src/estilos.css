@@ -71,6 +71,7 @@ button, input, select {
 
 @media (min-width: 1440px) {
   .app-shell { max-width: 560px; }
+  .app-shell-wide { max-width: 960px; }
 }
 
 .screen-header {
@@ -189,11 +190,14 @@ button, input, select {
   cursor: pointer;
 }
 
-.card.form-card {
-  padding: 1.25rem 1rem;
+.card {
   border: 2px solid var(--border-strong);
   border-radius: var(--radius);
   background: var(--surface);
+}
+
+.card.form-card {
+  padding: 1.25rem 1rem;
 }
 
 .card.form-card h1 {
@@ -843,5 +847,106 @@ a.btn {
 
 .status-box-solid {
   border-style: solid;
+}
+
+.empty-state {
+  padding: 1.5rem 1.25rem;
+  text-align: center;
+}
+
+.empty-state h2 {
+  margin: 0 0 0.375rem;
+  font-size: 1.125rem;
+}
+
+.empty-state p {
+  margin: 0 0 1rem;
+  color: var(--muted);
+}
+
+.cart-card,
+.checkout-card,
+.table-card {
+  padding: 1rem;
+}
+
+.cart-line-info h2 {
+  margin: 0 0 0.25rem;
+  font-size: 0.9375rem;
+}
+
+.cart-line-info p {
+  margin: 0 0 0.375rem;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+.cart-summary {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--border-strong);
+}
+
+.checkout-section {
+  margin-bottom: 1.25rem;
+}
+
+.checkout-section:last-child {
+  margin-bottom: 0;
+}
+
+.success-card {
+  padding: 1.25rem 1rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.success-card h2 {
+  margin: 0 0 0.375rem;
+}
+
+.success-card p {
+  margin: 0 0 0.75rem;
+  color: var(--muted);
+}
+
+.success-card .order-id {
+  display: inline-block;
+  padding: 0.375rem 0.625rem;
+  border: 1px dashed var(--border-strong);
+  background: oklch(97% 0 0);
+}
+
+.table-card {
+  overflow: auto;
+}
+
+.backoffice-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.backoffice-table th,
+.backoffice-table td {
+  padding: 0.75rem 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.backoffice-table th {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+}
+
+.backoffice-table tbody tr {
+  cursor: pointer;
+}
+
+.backoffice-table tbody tr:hover {
+  background: oklch(97% 0 0);
 }
 

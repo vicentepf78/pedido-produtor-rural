@@ -6,7 +6,7 @@ persona: Produtor rural
 journey: J-produtor-pedido-rapido
 expected: Produtor entra ou cria conta só no checkout, escolhe propriedade própria e preferência de retirada, e confirma o pedido local
 entry_points: /checkout; GET /api/v1/autenticacao/csrf; POST /api/v1/autenticacao/cadastro; POST /api/v1/autenticacao/entrada; GET /api/v1/produtor/propriedades; POST /api/v1/pedidos
-qa_status: pass
+qa_status: untested
 bug_ids:
 fix_status:
 retest_status:
