@@ -1,86 +1,195 @@
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useCarrinho } from "../../estado/ProvedorCarrinho";
 import { isFalhaApi } from "../../infra/http";
-import { obterProduto, listarProdutos, type ItemProduto } from "./api";
 import { adicionarItem } from "../cart/api";
+import { obterProduto, listarProdutos, type ItemProduto } from "./api";
+import { BotaoCarregarMais } from "./BotaoCarregarMais";
 import { CartaoProduto } from "./CartaoProduto";
-import { aoTeclaAba } from "../../shell/tecladoAbas";
+import { CarrosselCategoria } from "./CarrosselCategoria";
+import { ControleTamanhoLista } from "./ControleTamanhoLista";
+import {
+  ATRASO_BUSCA_MS,
+  CATEGORIA_TODOS,
+  ehAbortado,
+  ehTamanhoPagina,
+  parseCategoria,
+  parseTamanhoPagina,
+  TAMANHO_PAGINA_PADRAO,
+  type CategoriaCarrossel,
+  type TamanhoPagina,
+} from "./categorias";
 
-const CATEGORIA_TODOS = "Todos";
-const ORDEM_CATEGORIAS = ["Sementes", "Fertilizantes", "Correção"];
-
-function ordenarCategorias(categorias: string[]): string[] {
-  const unicas = [...new Set(categorias.filter((c) => c !== "Defensivos"))];
-  const preferidas = ORDEM_CATEGORIAS.filter((c) => unicas.includes(c));
-  const demais = unicas.filter((c) => !ORDEM_CATEGORIAS.includes(c)).sort();
-  return [CATEGORIA_TODOS, ...preferidas, ...demais];
+function queryCatalogo(categoria: CategoriaCarrossel, consulta: string, tamanho: TamanhoPagina): string {
+  const params = new URLSearchParams();
+  if (categoria !== CATEGORIA_TODOS) {
+    params.set("categoria", categoria);
+  }
+  if (consulta) {
+    params.set("consulta", consulta);
+  }
+  if (tamanho !== TAMANHO_PAGINA_PADRAO) {
+    params.set("tamanhoPagina", String(tamanho));
+  }
+  const texto = params.toString();
+  return texto ? `?${texto}` : "";
 }
 
 export function PaginaCatalogo() {
   const { idProduto } = useParams();
+  const [params, setParams] = useSearchParams();
   const navegar = useNavigate();
   const { confirmar } = useCarrinho();
-  const [busca, setBusca] = useState("");
-  const [categoria, setCategoria] = useState(CATEGORIA_TODOS);
+
+  const categoria = parseCategoria(params.get("categoria"));
+  const consultaUrl = (params.get("consulta") ?? "").trim();
+  const tamanhoPagina = parseTamanhoPagina(params.get("tamanhoPagina"));
+
+  const [busca, setBusca] = useState(() => params.get("consulta") ?? "");
+  const consultaParam = params.get("consulta") ?? "";
   const [produtos, setProdutos] = useState<ItemProduto[]>([]);
+  const [total, setTotal] = useState(0);
+  const [paginaAtual, setPaginaAtual] = useState(1);
   const [carregando, setCarregando] = useState(true);
+  const [carregandoMais, setCarregandoMais] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [erroAdicionar, setErroAdicionar] = useState<string | null>(null);
   const [acessoNegado, setAcessoNegado] = useState(false);
   const [adicionando, setAdicionando] = useState<string | null>(null);
-  const [categorias, setCategorias] = useState<string[]>([CATEGORIA_TODOS]);
+  const [tentativa, setTentativa] = useState(0);
+  const [origemErro, setOrigemErro] = useState<"lista" | "mais" | null>(null);
+  const geracao = useRef(0);
+  const carregandoMaisRef = useRef(false);
 
   useEffect(() => {
-    let ativo = true;
+    setBusca(consultaParam);
+  }, [consultaParam]);
+
+  useEffect(() => {
+    const bruto = params.get("tamanhoPagina");
+    const categoriaBruta = params.get("categoria");
+    let sujo = false;
+    const proximo = new URLSearchParams(params);
+    if (bruto !== null && !ehTamanhoPagina(Number(bruto))) {
+      proximo.delete("tamanhoPagina");
+      sujo = true;
+    }
+    if (categoriaBruta && parseCategoria(categoriaBruta) === CATEGORIA_TODOS && categoriaBruta !== CATEGORIA_TODOS) {
+      proximo.delete("categoria");
+      sujo = true;
+    }
+    if (sujo) {
+      setParams(proximo, { replace: true });
+    }
+  }, [params, setParams]);
+
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      const estavel = busca.trim();
+      if (estavel === consultaUrl) {
+        return;
+      }
+      aplicarFiltros(categoria, estavel, tamanhoPagina);
+    }, ATRASO_BUSCA_MS);
+    return () => window.clearTimeout(id);
+  }, [busca, categoria, consultaUrl, tamanhoPagina]);
+
+  function aplicarFiltros(proximaCategoria: CategoriaCarrossel, proximaConsulta: string, proximoTamanho: TamanhoPagina) {
+    const destino = `/catalogo${queryCatalogo(proximaCategoria, proximaConsulta, proximoTamanho)}`;
+    if (idProduto) {
+      navegar(destino);
+      return;
+    }
+    setParams(new URLSearchParams(queryCatalogo(proximaCategoria, proximaConsulta, proximoTamanho).replace(/^\?/, "")), {
+      replace: true,
+    });
+  }
+
+  useEffect(() => {
+    const esta = ++geracao.current;
+    const ac = new AbortController();
     async function carregar() {
-      setCarregando(true);
       setErro(null);
+      setOrigemErro(null);
       setAcessoNegado(false);
+      setCarregando(true);
       try {
         if (idProduto) {
-          const detalhe = await obterProduto(idProduto);
-          if (ativo) {
-            setProdutos([detalhe]);
+          const detalhe = await obterProduto(idProduto, ac.signal);
+          if (esta !== geracao.current) {
+            return;
           }
+          setProdutos([detalhe]);
+          setTotal(1);
+          setPaginaAtual(1);
           return;
         }
-        const consulta = busca.trim().length === 0 ? undefined : busca.trim();
-        const pagina = await listarProdutos(consulta);
-        if (ativo) {
-          setProdutos(pagina.itens);
-          if (consulta === undefined && pagina.itens.length > 0) {
-            setCategorias(ordenarCategorias(pagina.itens.map((p) => p.categoria)));
-          }
+        const pagina = await listarProdutos(
+          { consulta: consultaUrl, categoria, pagina: 1, tamanhoPagina },
+          ac.signal,
+        );
+        if (esta !== geracao.current) {
+          return;
         }
+        setProdutos(pagina.itens);
+        setTotal(pagina.total);
+        setPaginaAtual(1);
       } catch (falha) {
-        if (!ativo) {
+        if (esta !== geracao.current || ehAbortado(falha)) {
           return;
         }
         if (idProduto && isFalhaApi(falha) && falha.codigo === "PRODUTO_NAO_ELEGIVEL") {
           setAcessoNegado(true);
           setProdutos([]);
+          setTotal(0);
         } else {
+          setOrigemErro("lista");
           setErro("Verifique sua conexão e tente novamente.");
         }
       } finally {
-        if (ativo) {
+        if (esta === geracao.current) {
           setCarregando(false);
         }
       }
     }
     void carregar();
     return () => {
-      ativo = false;
+      ac.abort();
     };
-  }, [busca, idProduto]);
+  }, [categoria, consultaUrl, tamanhoPagina, idProduto, tentativa]);
 
-  const filtrados = useMemo(() => {
-    if (categoria === CATEGORIA_TODOS) {
-      return produtos;
+  async function carregarMais() {
+    if (carregandoMaisRef.current || produtos.length >= total) {
+      return;
     }
-    return produtos.filter((p) => p.categoria === categoria);
-  }, [produtos, categoria]);
+    carregandoMaisRef.current = true;
+    setCarregandoMais(true);
+    setErro(null);
+    setOrigemErro(null);
+    const proxima = paginaAtual + 1;
+    try {
+      const pagina = await listarProdutos({
+        consulta: consultaUrl,
+        categoria,
+        pagina: proxima,
+        tamanhoPagina,
+      });
+      setProdutos((atuais) => {
+        const vistos = new Set(atuais.map((item) => item.id));
+        return [...atuais, ...pagina.itens.filter((item) => !vistos.has(item.id))];
+      });
+      setPaginaAtual(proxima);
+      setTotal(pagina.total);
+    } catch (falha) {
+      if (!ehAbortado(falha)) {
+        setOrigemErro("mais");
+        setErro("Verifique sua conexão e tente novamente.");
+      }
+    } finally {
+      carregandoMaisRef.current = false;
+      setCarregandoMais(false);
+    }
+  }
 
   async function adicionar(produto: ItemProduto) {
     setAdicionando(produto.id);
@@ -94,13 +203,25 @@ export function PaginaCatalogo() {
     }
   }
 
-  function limparBusca() {
+  function limparFiltros() {
     setBusca("");
-    setCategoria(CATEGORIA_TODOS);
-    if (idProduto) {
-      navegar("/catalogo");
-    }
+    aplicarFiltros(CATEGORIA_TODOS, "", TAMANHO_PAGINA_PADRAO);
   }
+
+  function tentarDeNovo() {
+    setErro(null);
+    if (origemErro === "mais") {
+      void carregarMais();
+      return;
+    }
+    setTentativa((n) => n + 1);
+  }
+
+  const filtrosAtivos = categoria !== CATEGORIA_TODOS || consultaUrl.length > 0 || busca.trim().length > 0;
+  const queryAtual = queryCatalogo(categoria, consultaUrl, tamanhoPagina);
+  const temMais = !idProduto && produtos.length > 0 && produtos.length < total;
+  const mostrarEsqueleto = carregando && produtos.length === 0 && !acessoNegado;
+  const vazio = !carregando && !erro && !acessoNegado && produtos.length === 0;
 
   return (
     <>
@@ -109,45 +230,39 @@ export function PaginaCatalogo() {
         <p className="inline-info">Insumos para o produtor rural</p>
       </header>
       <main className="screen-body" data-od-id="catalog-body">
-        <div className="search-row">
-          <input
-            type="search"
-            aria-label="Buscar por nome"
-            placeholder="Buscar por nome"
-            value={busca}
-            onChange={(evento) => {
-              setBusca(evento.target.value);
-              if (idProduto) {
-                navegar("/catalogo");
-              }
-            }}
-            data-od-id="catalog-search"
-          />
-        </div>
+        {!idProduto && (
+          <>
+            <CarrosselCategoria
+              categoria={categoria}
+              onEscolher={(proxima) => aplicarFiltros(proxima, busca.trim(), tamanhoPagina)}
+            />
+            <div className="toolbar" data-od-id="catalog-toolbar">
+              <div className="search-row search-field" data-od-id="search-field">
+                <input
+                  type="search"
+                  aria-label="Buscar por nome"
+                  placeholder="Buscar por nome"
+                  value={busca}
+                  onChange={(evento) => setBusca(evento.target.value)}
+                  data-od-id="catalog-search"
+                />
+              </div>
+              <ControleTamanhoLista
+                valor={tamanhoPagina}
+                onMudar={(proximo) => aplicarFiltros(categoria, busca.trim(), proximo)}
+              />
+            </div>
+            {filtrosAtivos && !vazio && !acessoNegado && (
+              <div className="filter-actions">
+                <button type="button" className="btn btn-ghost" data-od-id="btn-limpar-filtros" onClick={limparFiltros}>
+                  Limpar filtros
+                </button>
+              </div>
+            )}
+          </>
+        )}
 
-        <div className="category-tabs" role="tablist" aria-label="Categorias" data-od-id="catalog-categories">
-          {categorias.map((cat) => (
-            <button
-              key={cat}
-              type="button"
-              role="tab"
-              className="cat-tab"
-              aria-selected={categoria === cat}
-              aria-controls="catalog-painel"
-              tabIndex={categoria === cat ? 0 : -1}
-              onClick={() => setCategoria(cat)}
-              onKeyDown={(evento) => aoTeclaAba(evento, categorias, categoria, setCategoria)}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-
-        <p className="notice" data-od-id="regulated-notice">
-          Produtos regulados não aparecem neste catálogo do MVP0.
-        </p>
-
-        {carregando && (
+        {mostrarEsqueleto && (
           <div data-od-id="catalog-loading" aria-live="polite">
             <div className="skeleton skeleton-card" />
             <div className="skeleton skeleton-card" />
@@ -160,7 +275,7 @@ export function PaginaCatalogo() {
           <div className="status-box" data-od-id="catalog-error" role="alert">
             <h2>Não foi possível carregar</h2>
             <p>{erro}</p>
-            <button type="button" className="btn btn-ghost" onClick={limparBusca}>
+            <button type="button" className="btn btn-ghost" onClick={tentarDeNovo}>
               Tentar novamente
             </button>
           </div>
@@ -169,19 +284,19 @@ export function PaginaCatalogo() {
         {acessoNegado && (
           <div className="status-box" data-od-id="catalog-denied" role="alert">
             <h2>Acesso negado</h2>
-            <p>Este produto está oculto ou você não tem permissão para visualizá-lo.</p>
-            <button type="button" className="btn btn-ghost" onClick={() => navegar("/catalogo")}>
+            <p>Este produto não pode ser pedido nesta loja.</p>
+            <Link to={`/catalogo${queryAtual}`} className="btn btn-ghost">
               Voltar ao catálogo
-            </button>
+            </Link>
           </div>
         )}
 
-        {!carregando && !erro && !acessoNegado && filtrados.length === 0 && (
+        {vazio && (
           <div className="status-box" data-od-id="catalog-empty">
             <h2>Nenhum resultado</h2>
-            <p>Não encontramos produtos para “{busca || "busca atual"}”.</p>
-            <button type="button" className="btn btn-primary" data-od-id="clear-search-btn" onClick={limparBusca}>
-              Limpar busca
+            <p>Não encontramos produtos para este recorte.</p>
+            <button type="button" className="btn btn-primary" data-od-id="btn-limpar-filtros" onClick={limparFiltros}>
+              Limpar filtros
             </button>
           </div>
         )}
@@ -192,16 +307,29 @@ export function PaginaCatalogo() {
           </p>
         )}
 
-        {!carregando && !erro && !acessoNegado && filtrados.length > 0 && (
-          <div id="catalog-painel" role="tabpanel" data-od-id="catalog-results">
-            {filtrados.map((produto) => (
-              <CartaoProduto
-                key={produto.id}
-                produto={produto}
-                adicionando={adicionando === produto.id}
-                onAdicionar={adicionar}
-              />
-            ))}
+        {!acessoNegado && produtos.length > 0 && (
+          <div id="catalog-painel" data-od-id="catalog-results">
+            {idProduto && (
+              <p className="filter-actions">
+                <Link to={`/catalogo${queryAtual}`} className="btn btn-ghost">
+                  Voltar ao catálogo
+                </Link>
+              </p>
+            )}
+            <div className={idProduto ? undefined : "product-grid"} data-od-id="product-grid">
+              {produtos.map((produto) => (
+                <CartaoProduto
+                  key={produto.id}
+                  produto={produto}
+                  adicionando={adicionando === produto.id}
+                  onAdicionar={adicionar}
+                  hrefDetalhe={
+                    idProduto ? undefined : `/catalogo/${produto.id}${queryCatalogo(categoria, busca.trim() || consultaUrl, tamanhoPagina)}`
+                  }
+                />
+              ))}
+            </div>
+            <BotaoCarregarMais visivel={temMais} carregando={carregandoMais} onCarregar={() => void carregarMais()} />
           </div>
         )}
       </main>

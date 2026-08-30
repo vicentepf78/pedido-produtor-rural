@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { formatarDinheiro } from "../../infra/http";
 import type { ItemProduto } from "./api";
 
@@ -6,9 +7,10 @@ type Props = {
   produto: ItemProduto;
   onAdicionar: (produto: ItemProduto) => void;
   adicionando?: boolean;
+  hrefDetalhe?: string;
 };
 
-export function CartaoProduto({ produto, onAdicionar, adicionando }: Props) {
+export function CartaoProduto({ produto, onAdicionar, adicionando, hrefDetalhe }: Props) {
   const [imagemQuebrada, setImagemQuebrada] = useState(false);
   useEffect(() => {
     setImagemQuebrada(false);
@@ -29,7 +31,15 @@ export function CartaoProduto({ produto, onAdicionar, adicionando }: Props) {
         )}
       </div>
       <div className="product-meta">
-        <h2>{produto.nome}</h2>
+        <h2>
+          {hrefDetalhe ? (
+            <Link to={hrefDetalhe} data-od-id={`product-link-${produto.id}`}>
+              {produto.nome}
+            </Link>
+          ) : (
+            produto.nome
+          )}
+        </h2>
         <p>{produto.descricaoCurta}</p>
         <div className="price-row">
           <span className="unit-price">{formatarDinheiro(produto.precoUnitario)}</span>

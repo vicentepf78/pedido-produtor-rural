@@ -2,8 +2,8 @@
 
 ## Current State
 
-- Phase B `task_02` implementada e verificada (Playwright 20/20).
-- Próxima ação esperada: Phase B `execute_task task=task_03`.
+- Phase B `task_03` implementada e verificada (Playwright catálogo 28/28, suíte 46/46).
+- Próxima ação esperada: Phase B `execute_task task=task_04`.
 - Branch de trabalho: `mvp-1`. Sem `--frontend` e sem `--stacked`.
 
 ## Shared Decisions
@@ -19,6 +19,8 @@
 - Destino pós-Entrar: `resolverDestinoAposEntrada`; operador ignora `origem` da loja.
 - Sair no topo é dois toques e não apaga o carrinho de convidado.
 - `eng-ui-screenshot` não está instalado neste repo; não inventar pacote visual substituto.
+- Query do catálogo S1: `categoria`, `consulta`, `tamanhoPagina`. `pagina` não entra na URL.
+- Mock e2e de catálogo lista o recorte quando `consulta` está em branco e pagina os 30 SKUs semeados.
 
 ## Shared Learnings
 
@@ -40,4 +42,6 @@
 - `task_01` concluída: catálogo paginado, `GET /sessao`, cadastro/entrada com `email`+`papeis`.
 - `task_02` concluída: TopoLoja, `/entrar` `/cadastro`, destino por papel, TopoOperador mínimo.
 - QA flag-only task_02: reset `AUTH-cadastro-e-sessao`; novos `AUTH-entrar-tela-propria`, `NAV-topo-loja`. Walk na Phase C.
-- `task_03` herda o fundo do catálogo do MVP 0; não mexer no topo/identidade desta tarefa.
+- `task_03` concluída: carrossel fechado, busca composta, Carregar mais, query persistente.
+- QA flag-only task_03: reset `CAT-produtor-descobre-produto`; novo `CAT-carrossel-e-carregar-mais`. Walk na Phase C.
+- `task_04` não reconstrói o catálogo S1 nem o topo/identidade.

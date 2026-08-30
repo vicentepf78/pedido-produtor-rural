@@ -1,4 +1,5 @@
 import { getJson } from "../../infra/http";
+import { CATEGORIA_TODOS, TAMANHO_PAGINA_PADRAO, type CategoriaCarrossel, type TamanhoPagina } from "./categorias";
 
 export type ItemProduto = {
   id: string;
@@ -18,14 +19,31 @@ export type PaginaProdutos = {
   total: number;
 };
 
-export async function listarProdutos(consulta?: string): Promise<PaginaProdutos> {
-  const params = new URLSearchParams({ pagina: "1", tamanhoPagina: "30" });
-  if (consulta !== undefined) {
-    params.set("consulta", consulta);
+export type ConsultaCatalogo = {
+  consulta?: string;
+  categoria?: CategoriaCarrossel;
+  pagina?: number;
+  tamanhoPagina?: TamanhoPagina;
+};
+
+export async function listarProdutos(
+  consulta: ConsultaCatalogo = {},
+  signal?: AbortSignal,
+): Promise<PaginaProdutos> {
+  const params = new URLSearchParams({
+    pagina: String(consulta.pagina ?? 1),
+    tamanhoPagina: String(consulta.tamanhoPagina ?? TAMANHO_PAGINA_PADRAO),
+  });
+  const termo = consulta.consulta?.trim();
+  if (termo) {
+    params.set("consulta", termo);
   }
-  return getJson<PaginaProdutos>(`/api/v1/catalogo/produtos?${params.toString()}`);
+  if (consulta.categoria && consulta.categoria !== CATEGORIA_TODOS) {
+    params.set("categoria", consulta.categoria);
+  }
+  return getJson<PaginaProdutos>(`/api/v1/catalogo/produtos?${params.toString()}`, { signal });
 }
 
-export async function obterProduto(id: string): Promise<ItemProduto> {
-  return getJson<ItemProduto>(`/api/v1/catalogo/produtos/${id}`);
+export async function obterProduto(id: string, signal?: AbortSignal): Promise<ItemProduto> {
+  return getJson<ItemProduto>(`/api/v1/catalogo/produtos/${id}`, { signal });
 }

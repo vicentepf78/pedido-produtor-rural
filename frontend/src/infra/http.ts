@@ -30,8 +30,8 @@ async function csrf(): Promise<string> {
   return tokenCsrf;
 }
 
-export async function getJson<T>(caminho: string): Promise<T> {
-  const resposta = await fetch(caminho, { credentials: "include" });
+export async function getJson<T>(caminho: string, init?: { signal?: AbortSignal }): Promise<T> {
+  const resposta = await fetch(caminho, { credentials: "include", signal: init?.signal });
   return ler(resposta);
 }
 

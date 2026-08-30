@@ -1,5 +1,5 @@
 ---
-status: pending
+status: completed
 title: Carrossel, busca composta e Carregar mais
 type: frontend
 complexity: high
@@ -82,25 +82,26 @@ Evidence for each row: `.compozy/tasks/pedidos-insumos-mvp1/evidence/visual/task
 
 ## Subtasks
 
-- [ ] 3.1 Substituir as abas derivadas dos produtos pelo carrossel
+- [x] 3.1 Substituir as abas derivadas dos produtos pelo carrossel
       fechado Todos / Sementes / Fertilizantes / Correção, com foto de
       demonstração, rótulo, card marcado e deslocamento horizontal.
-- [ ] 3.2 Enviar categoria e busca compostas a
+- [x] 3.2 Enviar categoria e busca compostas a
       `GET /api/v1/catalogo/produtos` e recarregar a primeira página a
       cada mudança estável de filtro.
-- [ ] 3.3 Exibir Limpar filtros quando categoria ≠ Todos ou busca
+- [x] 3.3 Exibir Limpar filtros quando categoria ≠ Todos ou busca
       preenchida; restaurar Todos, busca vazia e o conjunto elegível.
-- [ ] 3.4 Entregar o controle de tamanho 10 / 15 / 30 / 50 e recomeçar
+- [x] 3.4 Entregar o controle de tamanho 10 / 15 / 30 / 50 e recomeçar
       a lista ao trocar o valor.
-- [ ] 3.5 Entregar Carregar mais por `pagina`, sem scroll infinito, sem
+- [x] 3.5 Entregar Carregar mais por `pagina`, sem scroll infinito, sem
       duplicar item e sem o botão no fim da lista ou no vazio.
-- [ ] 3.6 Preservar categoria, busca e tamanho ao abrir o detalhe e
+- [x] 3.6 Preservar categoria, busca e tamanho ao abrir o detalhe e
       voltar a `/catalogo`.
-- [ ] 3.7 Cobrir vazio, foto de categoria ausente, erro com tentar de
+- [x] 3.7 Cobrir vazio, foto de categoria ausente, erro com tentar de
       novo e deep link `PRODUTO_NAO_ELEGIVEL`.
-- [ ] 3.8 Implementar E2E-001–E2E-028.
-- [ ] 3.9 Gerar o pacote de evidência visual de cada linha VC-01–VC-07.
-- [ ] 3.10 Resetar os cenários QA desta fatia para `untested`.
+- [x] 3.8 Implementar E2E-001–E2E-028.
+- [x] 3.9 Gerar o pacote de evidência visual de cada linha VC-01–VC-07.
+      (`eng-ui-screenshot` ausente — companion omitido, sem bundle inventado)
+- [x] 3.10 Resetar os cenários QA desta fatia para `untested`.
 
 ## Implementation Details
 
@@ -199,21 +200,21 @@ Padrões e interfaces: `_spec.md` Parte II (`ConsultaCatalogo`,
 
 Cases assigned from `_tests.md`, the test contract — read each ID's full definition there before writing tests.
 
-- [ ] E2E-001, E2E-002, E2E-003 — carrossel com as quatro categorias,
+- [x] E2E-001, E2E-002, E2E-003 — carrossel com as quatro categorias,
       Fertilizantes marcado, sem Defensivos nem produto regulamentado.
-- [ ] E2E-004, E2E-005, E2E-006, E2E-007 — foto de categoria ausente,
+- [x] E2E-004, E2E-005, E2E-006, E2E-007 — foto de categoria ausente,
       categoria vazia, toques rápidos, overflow horizontal com controle.
-- [ ] E2E-008, E2E-009, E2E-010, E2E-011 — convidado ou sessão expirada,
+- [x] E2E-008, E2E-009, E2E-010, E2E-011 — convidado ou sessão expirada,
       deep link `PRODUTO_NAO_ELEGIVEL`, interrupção ao trocar categoria,
       conjunto fechado de quatro categorias.
-- [ ] E2E-012, E2E-013, E2E-014, E2E-015, E2E-016 — busca composta,
+- [x] E2E-012, E2E-013, E2E-014, E2E-015, E2E-016 — busca composta,
       Limpar filtros, texto hostil, busca em branco, estado vazio.
-- [ ] E2E-017, E2E-018, E2E-019, E2E-020 — três blocos 10+10+10, reset
+- [x] E2E-017, E2E-018, E2E-019, E2E-020 — três blocos 10+10+10, reset
       ao mudar tamanho (busca permanece ao trocar categoria), Carregar
       mais duplicado, dois textos em sequência.
-- [ ] E2E-021, E2E-022, E2E-023 — volta do detalhe com filtros, primeira
+- [x] E2E-021, E2E-022, E2E-023 — volta do detalhe com filtros, primeira
       visita (Todos, busca vazia, tamanho 10), controle 10 / 15 / 30 / 50.
-- [ ] E2E-024, E2E-025, E2E-026, E2E-027, E2E-028 — tamanho 50 no
+- [x] E2E-024, E2E-025, E2E-026, E2E-027, E2E-028 — tamanho 50 no
       conjunto de 30, último bloco parcial, interrupção ao carregar
       mais, tamanho inválido, recorte vazio sem Carregar mais.
 

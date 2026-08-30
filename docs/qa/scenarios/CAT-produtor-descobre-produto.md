@@ -16,4 +16,4 @@ last_report: docs/qa/reports/2026-08-30-pedidos-insumos-mvp0.md
 overlaps: CAT-produto-indisponivel-ou-regulado
 ---
 
-Catálogo S1 mobile-first. Sem aba Defensivos. Pesquisa sem correspondência mostra “Nenhum resultado” e “Limpar busca”. Planejado para CH-pedido-rapido-money.
+Catálogo S1 mobile-first. Sem aba Defensivos. Pesquisa sem correspondência mostra “Nenhum resultado” e “Limpar filtros”. Planejado para CH-pedido-rapido-money. Walk deferred to Phase C.

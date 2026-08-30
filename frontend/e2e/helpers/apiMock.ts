@@ -35,7 +35,62 @@ export const DK697 = {
 
 export const REGULADO_ID = "10000000-0000-4000-8000-000000000099";
 
-const CATALOGO = [AURORA, UREIA, DK697];
+const MENSAGEM_INELEGIVEL = "Este produto não pode ser pedido nesta loja.";
+const TAMANHOS_VALIDOS = new Set([10, 15, 30, 50]);
+const CATEGORIAS_VALIDAS = new Set(["Sementes", "Fertilizantes", "Correção"]);
+
+function item(
+  id: string,
+  nome: string,
+  categoria: string,
+  descricaoCurta: string,
+  unidade: string,
+  precoUnitario: string,
+  disponivel: boolean,
+  urlImagem: string | null = null,
+) {
+  return { id, nome, categoria, descricaoCurta, unidade, precoUnitario, disponivel, urlImagem };
+}
+
+const CATALOGO = [
+  AURORA,
+  DK697,
+  item("10000000-0000-4000-8000-000000000003", "Semente de soja BRS 538", "Sementes", "Ciclo médio para o Cerrado.", "sc 40 kg", "540.00", true),
+  item("10000000-0000-4000-8000-000000000004", "Semente de soja Intacta 25 kg", "Sementes", "Cultivar com proteção a lagartas.", "Saco", "710.00", true, "/media/produtos/soja.svg"),
+  item("10000000-0000-4000-8000-000000000005", "Semente de trigo BRS 264", "Sementes", "Trigo de sequeiro para o Cerrado.", "sc 40 kg", "380.00", true),
+  item("10000000-0000-4000-8000-000000000006", "Semente de feijão carioca 20 kg", "Sementes", "Variedade de mesa, ciclo curto.", "Saco", "420.00", true),
+  item("10000000-0000-4000-8000-000000000007", "Semente de sorgo granífero 10 kg", "Sementes", "Opção de safrinha em áreas de milho.", "Saco", "195.00", true),
+  item("10000000-0000-4000-8000-000000000008", "Semente de milho pipoca 5 kg", "Sementes", "Híbrido para consumo interno.", "Saco", "86.00", true),
+  item("10000000-0000-4000-8000-000000000009", "Semente de braquiária 10 kg", "Sementes", "Formação de pastagem em solo médio.", "Saco", "240.00", true),
+  item("10000000-0000-4000-8000-000000000010", "Semente de capim mombaça 5 kg", "Sementes", "Forrageira de alta produção de massa.", "Saco", "175.00", true),
+  item("10000000-0000-4000-8000-000000000011", "Semente de crotalária 10 kg", "Sementes", "Adubação verde e cobertura de solo.", "Saco", "132.00", true),
+  item("10000000-0000-4000-8000-000000000012", "Semente de aveia preta 20 kg", "Sementes", "Cobertura de inverno e pastejo.", "Saco", "210.00", true),
+  UREIA,
+  item("10000000-0000-4000-8000-000000000014", "Fertilizante NPK 20-05-20", "Fertilizantes", "Formulação balanceada para cobertura.", "sc 50 kg", "215.00", true, "/media/produtos/npk.svg"),
+  item("10000000-0000-4000-8000-000000000015", "Fertilizante NPK 04-14-08", "Fertilizantes", "Fórmula de plantio para grãos.", "sc 50 kg", "198.00", true),
+  item("10000000-0000-4000-8000-000000000016", "Fertilizante NPK 20-00-20", "Fertilizantes", "Cobertura nitrogenada e potássica.", "sc 50 kg", "205.00", true),
+  item("10000000-0000-4000-8000-000000000017", "Sulfato de amônio 21%", "Fertilizantes", "Fonte de nitrogênio e enxofre.", "sc 50 kg", "156.00", true),
+  item("10000000-0000-4000-8000-000000000018", "Cloreto de potássio 60%", "Fertilizantes", "Fonte de potássio para grãos.", "sc 50 kg", "268.00", true),
+  item("10000000-0000-4000-8000-000000000019", "Superfosfato simples", "Fertilizantes", "Fósforo e enxofre para correção.", "sc 50 kg", "142.00", true),
+  item("10000000-0000-4000-8000-000000000020", "Superfosfato triplo", "Fertilizantes", "Alta concentração de fósforo.", "sc 50 kg", "189.00", true),
+  item("10000000-0000-4000-8000-000000000021", "MAP 11-52-00", "Fertilizantes", "Fosfato monoamônico para plantio.", "sc 50 kg", "312.00", true),
+  item("10000000-0000-4000-8000-000000000022", "Nitrato de cálcio", "Fertilizantes", "Nitrogênio nítrico com cálcio.", "sc 25 kg", "224.00", true),
+  item("10000000-0000-4000-8000-000000000023", "Fertilizante foliar 10 L", "Fertilizantes", "Complemento nutricional via folha.", "Galão", "98.00", true),
+  item("10000000-0000-4000-8000-000000000024", "Organomineral 25 kg", "Fertilizantes", "Mistura orgânica para solo.", "Saco", "76.00", true),
+  item("10000000-0000-4000-8000-000000000025", "Calcário dolomítico 50 kg", "Correção", "Correção de acidez com magnésio.", "sc 50 kg", "28.00", true),
+  item("10000000-0000-4000-8000-000000000026", "Calcário calcítico 50 kg", "Correção", "Correção de acidez com cálcio.", "sc 50 kg", "26.00", true),
+  item("10000000-0000-4000-8000-000000000027", "Gesso agrícola 40 kg", "Correção", "Fornece cálcio e enxofre ao perfil.", "sc 40 kg", "34.00", true),
+  item("10000000-0000-4000-8000-000000000028", "Fosfato natural 50 kg", "Correção", "Fonte de fósforo de liberação lenta.", "sc 50 kg", "48.00", true),
+  item("10000000-0000-4000-8000-000000000029", "Enxofre agrícola 25 kg", "Correção", "Elementar para correção de deficiência.", "Saco", "62.00", true),
+  item("10000000-0000-4000-8000-000000000030", "Cálcio e magnésio 20 kg", "Correção", "Complemento de bases no solo.", "Saco", "55.00", true),
+];
+
+export type OpcoesMock = {
+  categoriaVazia?: string;
+};
+
+export const NOMES_SEMENTES = CATALOGO.filter((p) => p.categoria === "Sementes").map((p) => p.nome);
+export const NOMES_FERTILIZANTES = CATALOGO.filter((p) => p.categoria === "Fertilizantes").map((p) => p.nome);
 
 type Linha = {
   idProduto: string;
@@ -49,8 +104,10 @@ function dinheiro(valor: number): string {
   return valor.toFixed(2);
 }
 
-export async function mockarApis(page: Page) {
+export async function mockarApis(page: Page, opcoes: OpcoesMock = {}) {
   const linhas: Linha[] = [];
+  let falharProximaListagem = false;
+  const atrasosCategoria = new Map<string, number>();
 
   await page.route("**/api/v1/autenticacao/csrf", async (rota) => {
     await rota.fulfill({ json: { token: "csrf-teste" } });
@@ -62,7 +119,7 @@ export async function mockarApis(page: Page) {
     if (id === REGULADO_ID) {
       await rota.fulfill({
         status: 404,
-        json: { codigo: "PRODUTO_NAO_ELEGIVEL", mensagem: "Este produto não pode ser pedido no MVP0." },
+        json: { codigo: "PRODUTO_NAO_ELEGIVEL", mensagem: MENSAGEM_INELEGIVEL },
       });
       return;
     }
@@ -70,7 +127,7 @@ export async function mockarApis(page: Page) {
     if (!produto) {
       await rota.fulfill({
         status: 404,
-        json: { codigo: "PRODUTO_NAO_ELEGIVEL", mensagem: "Este produto não pode ser pedido no MVP0." },
+        json: { codigo: "PRODUTO_NAO_ELEGIVEL", mensagem: MENSAGEM_INELEGIVEL },
       });
       return;
     }
@@ -83,15 +140,54 @@ export async function mockarApis(page: Page) {
       await rota.fallback();
       return;
     }
-    const consulta = url.searchParams.get("consulta");
-    let itens = CATALOGO;
-    if (consulta !== null && consulta.trim() === "") {
-      itens = [];
-    } else if (consulta) {
-      const termo = consulta.toLowerCase();
-      itens = CATALOGO.filter((item) => item.nome.toLowerCase().includes(termo));
+    if (falharProximaListagem) {
+      falharProximaListagem = false;
+      await rota.abort("failed");
+      return;
     }
-    await rota.fulfill({ json: { itens, pagina: 1, tamanhoPagina: 30, total: itens.length } });
+    const tamanhoBruto = url.searchParams.get("tamanhoPagina");
+    const tamanhoPagina = tamanhoBruto === null ? 10 : Number(tamanhoBruto);
+    if (!TAMANHOS_VALIDOS.has(tamanhoPagina)) {
+      await rota.fulfill({
+        status: 400,
+        json: { codigo: "TAMANHO_PAGINA_INVALIDO", mensagem: "Escolha 10, 15, 30 ou 50 itens por página." },
+      });
+      return;
+    }
+    const pagina = Math.max(1, Number(url.searchParams.get("pagina") ?? "1") || 1);
+    const categoria = url.searchParams.get("categoria");
+    if (categoria && categoria !== "Todos" && !CATEGORIAS_VALIDAS.has(categoria)) {
+      await rota.fulfill({
+        status: 400,
+        json: { codigo: "CATEGORIA_INVALIDA", mensagem: "Categoria não disponível nesta loja." },
+      });
+      return;
+    }
+    const atraso = categoria ? atrasosCategoria.get(categoria) : undefined;
+    if (atraso) {
+      await new Promise((resolver) => setTimeout(resolver, atraso));
+    }
+    let itens = CATALOGO.slice();
+    if (opcoes.categoriaVazia && categoria === opcoes.categoriaVazia) {
+      itens = [];
+    } else if (categoria && categoria !== "Todos") {
+      itens = itens.filter((p) => p.categoria === categoria);
+    }
+    const consulta = url.searchParams.get("consulta");
+    if (consulta && consulta.trim() !== "") {
+      const termo = consulta.toLowerCase();
+      itens = itens.filter((p) => p.nome.toLowerCase().includes(termo));
+    }
+    const total = itens.length;
+    const inicio = (pagina - 1) * tamanhoPagina;
+    await rota.fulfill({
+      json: {
+        itens: itens.slice(inicio, inicio + tamanhoPagina),
+        pagina,
+        tamanhoPagina,
+        total,
+      },
+    });
   });
 
   await page.route("**/api/v1/carrinhos/convidado/itens/**", async (rota) => {
@@ -498,6 +594,15 @@ export async function mockarApis(page: Page) {
     autenticarComo(papel: "alfa" | "beta" | "operador") {
       sessaoAtiva = true;
       usuarioAtual = papel;
+    },
+    expirarSessao() {
+      sessaoAtiva = false;
+    },
+    falharProximaListagem() {
+      falharProximaListagem = true;
+    },
+    atrasarCategoria(categoria: string, ms: number) {
+      atrasosCategoria.set(categoria, ms);
     },
     ultimoPedido() {
       return pedidos.at(-1);
