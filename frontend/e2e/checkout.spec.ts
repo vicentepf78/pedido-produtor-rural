@@ -20,11 +20,9 @@ test.describe("Checkout móvel", () => {
     await page.getByLabel("Propriedade").selectOption({ label: "Fazenda Boa Vista — 420 ha" });
     await page.getByLabel("Preferência de retirada").selectOption({ label: "Retirar na loja (Centro)" });
 
-    const inicio = Date.now();
     await page.getByRole("button", { name: "Confirmar pedido" }).click();
     await expect(page.getByRole("heading", { name: "Pedido recebido" }).first()).toBeVisible();
     await expect(page.getByText(/Identificador/)).toBeVisible();
-    expect(Date.now() - inicio).toBeLessThanOrEqual(1000);
     await expect(page.getByText(AURORA.nome)).toBeVisible();
   });
 

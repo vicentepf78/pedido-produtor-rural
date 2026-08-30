@@ -10,7 +10,10 @@ export function LayoutApp({ children }: { children: ReactNode }) {
 
   return (
     <div className="app-shell" data-od-id="app-shell">
-      {children}
+      <a className="skip-link" href="#conteudo-principal">
+        Ir ao conteúdo
+      </a>
+      <div id="conteudo-principal">{children}</div>
       {!ocultarNav && (
         <nav className="bottom-nav" aria-label="Navegação principal" data-od-id="bottom-nav">
           <NavLink to="/catalogo" className="nav-btn" data-od-id="nav-catalog">

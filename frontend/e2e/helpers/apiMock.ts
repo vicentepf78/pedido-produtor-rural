@@ -187,6 +187,11 @@ export async function mockarApis(page: Page) {
 
   let sessaoAtiva = false;
 
+  await page.route("**/api/v1/autenticacao/saida", async (rota) => {
+    sessaoAtiva = false;
+    await rota.fulfill({ status: 204, body: "" });
+  });
+
   await page.route("**/api/v1/autenticacao/cadastro", async (rota) => {
     sessaoAtiva = true;
     usuarioAtual = "novo";
@@ -238,6 +243,13 @@ export async function mockarApis(page: Page) {
       await rota.fulfill({
         status: 401,
         json: { codigo: "NAO_AUTENTICADO", mensagem: "Entre ou crie uma conta para continuar." },
+      });
+      return;
+    }
+    if (rota.request().method() === "POST") {
+      const corpo = rota.request().postDataJSON() as { nome?: string };
+      await rota.fulfill({
+        json: { id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", nome: corpo.nome ?? "Propriedade" },
       });
       return;
     }

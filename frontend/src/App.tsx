@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Link, Navigate, Route, Routes } from "react-router-dom";
 import { ProvedorCarrinho } from "./estado/ProvedorCarrinho";
 import { LayoutApp } from "./shell/LayoutApp";
 import { PaginaCatalogo } from "./features/catalog/PaginaCatalogo";
@@ -24,6 +24,20 @@ export function App() {
             <Route path="/meus-pedidos" element={<PaginaMeusPedidos />} />
             <Route path="/retaguarda/pedidos/:idPedido" element={<PaginaDetalheRetaguarda />} />
             <Route path="/retaguarda/pedidos" element={<PaginaPedidosRetaguarda />} />
+            <Route
+              path="*"
+              element={
+                <main className="screen-body">
+                  <div className="status-box" role="alert">
+                    <h1>Página não encontrada</h1>
+                    <p>Este endereço não existe nesta loja.</p>
+                    <Link className="btn btn-primary" to="/catalogo">
+                      Ir ao catálogo
+                    </Link>
+                  </div>
+                </main>
+              }
+            />
           </Routes>
         </LayoutApp>
       </ProvedorCarrinho>

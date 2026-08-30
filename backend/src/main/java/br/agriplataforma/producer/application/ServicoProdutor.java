@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class ServicoProdutor implements ConsultaPropriedades {
+public class ServicoProdutor implements ConsultaPropriedades, ComandoPropriedades {
 
 	private final ConsultaIdentidade consultaIdentidade;
 	private final RepositorioProdutor repositorioProdutor;
@@ -56,6 +56,17 @@ public class ServicoProdutor implements ConsultaPropriedades {
 	@Transactional
 	public UUID idProdutorDoAutenticado() {
 		return exigirProdutor().id();
+	}
+
+	@Override
+	@Transactional
+	public ResumoPropriedade registrar(String nome) {
+		String nomeEfetivo = nome == null ? "" : nome.trim();
+		if (nomeEfetivo.isEmpty()) {
+			throw new ExcecaoProdutor("DADOS_CHECKOUT_OBRIGATORIOS", "Escolha uma propriedade e a preferência de retirada.");
+		}
+		Produtor produtor = exigirProdutor();
+		return resumo(repositorioPropriedade.save(Propriedade.nova(produtor.idTenant(), produtor.id(), nomeEfetivo)));
 	}
 
 	private Produtor exigirProdutor() {

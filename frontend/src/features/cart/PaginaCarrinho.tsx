@@ -6,7 +6,7 @@ import { alterarQuantidade, removerItem } from "./api";
 
 export function PaginaCarrinho() {
   const navegar = useNavigate();
-  const { carrinho, confirmar } = useCarrinho();
+  const { carrinho, carregando, erroRestore, confirmar, recarregar } = useCarrinho();
   const [errosQtd, setErrosQtd] = useState<Record<string, string>>({});
   const [rascunhos, setRascunhos] = useState<Record<string, string>>({});
 
@@ -60,7 +60,21 @@ export function PaginaCarrinho() {
         <h1>Carrinho</h1>
       </header>
       <main className="screen-body" data-od-id="cart-body">
-        {carrinho.itens.length === 0 ? (
+        {carregando && (
+          <p className="inline-info" data-od-id="cart-loading">
+            Carregando carrinho…
+          </p>
+        )}
+        {erroRestore && (
+          <div className="status-box" data-od-id="cart-restore-error" role="alert">
+            <h2>Não foi possível restaurar</h2>
+            <p>{erroRestore}</p>
+            <button type="button" className="btn btn-ghost" onClick={() => void recarregar()}>
+              Tentar novamente
+            </button>
+          </div>
+        )}
+        {!carregando && !erroRestore && carrinho.itens.length === 0 ? (
           <div className="status-box" data-od-id="cart-empty">
             <h2>Carrinho vazio</h2>
             <p>Adicione ao menos um produto antes do checkout.</p>

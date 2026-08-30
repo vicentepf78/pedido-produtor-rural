@@ -46,12 +46,7 @@ export function PaginaPedidosRetaguarda() {
     evento.preventDefault();
     setErroEntrada(null);
     try {
-      const sessao = await entrarOperador(email, senha);
-      if (!sessao.papeis.includes("OPERADOR_REVENDA")) {
-        setNegado(true);
-        setPedirEntrada(false);
-        return;
-      }
+      await entrarOperador(email, senha);
       await carregar();
     } catch (falha) {
       setErroEntrada(isFalhaApi(falha) ? falha.message : "E-mail ou senha inválidos.");
@@ -111,6 +106,9 @@ export function PaginaPedidosRetaguarda() {
           <div className="status-box" role="alert">
             <h2>Não foi possível carregar</h2>
             <p>{erro}</p>
+            <button type="button" className="btn btn-ghost" onClick={() => void carregar()}>
+              Tentar novamente
+            </button>
           </div>
         )}
         {!carregando && !erro && !negado && !pedirEntrada && pedidos.length === 0 && (

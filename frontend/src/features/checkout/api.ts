@@ -42,6 +42,15 @@ export async function listarPropriedades(): Promise<ResumoPropriedade[]> {
   return pagina.itens;
 }
 
+export async function criarPropriedade(nome: string): Promise<ResumoPropriedade> {
+  return mutarJson<ResumoPropriedade>("/api/v1/produtor/propriedades", "POST", { nome });
+}
+
+export async function sair(): Promise<void> {
+  await mutarJson("/api/v1/autenticacao/saida", "POST");
+  invalidarCsrf();
+}
+
 export async function confirmarPedido(
   idPropriedade: string,
   preferenciaRetirada: string,

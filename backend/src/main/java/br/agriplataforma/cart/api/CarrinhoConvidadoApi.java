@@ -114,10 +114,10 @@ public class CarrinhoConvidadoApi {
 			try {
 				return new BigDecimal(texto.trim());
 			} catch (NumberFormatException excecao) {
-				return new BigDecimal("0.5");
+				return null;
 			}
 		}
-		return new BigDecimal("0.5");
+		return null;
 	}
 
 	private static RespostaCarrinho resposta(VisaoCarrinho visao) {

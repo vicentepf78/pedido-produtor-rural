@@ -1,8 +1,10 @@
 package br.agriplataforma.order.application;
 
+import br.agriplataforma.cart.application.ComandoCarrinho;
 import br.agriplataforma.cart.application.ConsultaCarrinho;
 import br.agriplataforma.cart.application.VisaoCarrinho;
 import br.agriplataforma.catalog.application.ConsultaCatalogo;
+import br.agriplataforma.catalog.application.ProdutoParaCarrinho;
 import br.agriplataforma.identity.application.ConsultaIdentidade;
 import br.agriplataforma.identity.application.Papel;
 import br.agriplataforma.identity.application.UsuarioAutenticado;
@@ -41,6 +43,7 @@ public class ServicoPedido implements ComandoPedido, ConsultaPedidoRetaguarda {
 	private final ConsultaIdentidade consultaIdentidade;
 	private final ConsultaPropriedades consultaPropriedades;
 	private final ConsultaCarrinho consultaCarrinho;
+	private final ComandoCarrinho comandoCarrinho;
 	private final ConsultaCatalogo consultaCatalogo;
 	private final RepositorioPedido repositorioPedido;
 	private final RepositorioItemPedido repositorioItens;
@@ -51,6 +54,7 @@ public class ServicoPedido implements ComandoPedido, ConsultaPedidoRetaguarda {
 			ConsultaIdentidade consultaIdentidade,
 			ConsultaPropriedades consultaPropriedades,
 			ConsultaCarrinho consultaCarrinho,
+			ComandoCarrinho comandoCarrinho,
 			ConsultaCatalogo consultaCatalogo,
 			RepositorioPedido repositorioPedido,
 			RepositorioItemPedido repositorioItens,
@@ -59,6 +63,7 @@ public class ServicoPedido implements ComandoPedido, ConsultaPedidoRetaguarda {
 		this.consultaIdentidade = consultaIdentidade;
 		this.consultaPropriedades = consultaPropriedades;
 		this.consultaCarrinho = consultaCarrinho;
+		this.comandoCarrinho = comandoCarrinho;
 		this.consultaCatalogo = consultaCatalogo;
 		this.repositorioPedido = repositorioPedido;
 		this.repositorioItens = repositorioItens;
@@ -77,7 +82,7 @@ public class ServicoPedido implements ComandoPedido, ConsultaPedidoRetaguarda {
 			throw new ExcecaoPedido(DADOS_CHECKOUT, MSG_DADOS);
 		}
 		UUID idProdutor = consultaPropriedades.idProdutorDoAutenticado();
-		String chave = chaveEfetiva(comando, usuario, idProdutor);
+		String chave = chaveEfetiva(comando);
 		Pedido existente = transacao.execute(status -> repositorioPedido
 				.findByIdTenantAndIdProdutorAndChaveIdempotencia(usuario.idTenant(), idProdutor, chave)
 				.orElse(null));
@@ -85,8 +90,15 @@ public class ServicoPedido implements ComandoPedido, ConsultaPedidoRetaguarda {
 			aceitarSePendente(existente);
 			return confirmacao(recarregar(existente.id()));
 		}
-		Pedido novo = transacao.execute(
-				status -> persistirNovo(comando, usuario, idProdutor, propriedade, retirada, chave));
+		Pedido novo;
+		try {
+			novo = transacao.execute(
+					status -> persistirNovo(comando, usuario, idProdutor, propriedade, retirada, chave));
+		} catch (DataIntegrityViolationException duplicado) {
+			novo = transacao.execute(status -> repositorioPedido
+					.findByIdTenantAndIdProdutorAndChaveIdempotencia(usuario.idTenant(), idProdutor, chave)
+					.orElseThrow(() -> duplicado));
+		}
 		aceitarSePendente(novo);
 		return confirmacao(recarregar(novo.id()));
 	}
@@ -134,6 +146,7 @@ public class ServicoPedido implements ComandoPedido, ConsultaPedidoRetaguarda {
 	@Override
 	@Transactional(readOnly = true)
 	public PaginaPedido<ResumoPedidoRetaguarda> listarPorTenant(UUID idTenant, int pagina, int tamanhoPagina) {
+		exigirOperador(idTenant);
 		int paginaEfetiva = pagina < 1 ? 1 : pagina;
 		int tamanhoEfetivo = tamanhoPagina < 1 ? 25 : Math.min(tamanhoPagina, 100);
 		Page<Pedido> resultado = repositorioPedido.findByIdTenant(
@@ -153,6 +166,7 @@ public class ServicoPedido implements ComandoPedido, ConsultaPedidoRetaguarda {
 	@Override
 	@Transactional(readOnly = true)
 	public VisaoPedidoRetaguarda obterPorTenant(UUID idTenant, UUID idPedido) {
+		exigirOperador(idTenant);
 		Pedido pedido = repositorioPedido
 				.findByIdAndIdTenant(idPedido, idTenant)
 				.orElseThrow(() -> new ExcecaoPedido("PEDIDO_NAO_ENCONTRADO", "Pedido não encontrado."));
@@ -190,32 +204,24 @@ public class ServicoPedido implements ComandoPedido, ConsultaPedidoRetaguarda {
 				retirada,
 				total,
 				chave);
-		try {
-			repositorioPedido.save(pedido);
-			repositorioPedido.flush();
-			List<ItemPedido> linhas = new ArrayList<>();
-			for (VisaoCarrinho.ItemVisaoCarrinho item : carrinho.itens()) {
-				String unidade = consultaCatalogo
-						.obterProdutoVisivel(usuario.idTenant(), item.idProduto())
-						.map(produto -> produto.unidade() == null ? "" : produto.unidade())
-						.orElse("");
-				linhas.add(ItemPedido.novo(
-						pedido.id(),
-						item.idProduto(),
-						item.nome(),
-						unidade,
-						item.quantidade(),
-						item.precoUnitario().setScale(2, RoundingMode.HALF_UP),
-						item.totalLinha().setScale(2, RoundingMode.HALF_UP)));
-			}
-			repositorioItens.saveAll(linhas);
-			consultaCarrinho.esvaziar(comando.chaveProprietario());
-			return pedido;
-		} catch (DataIntegrityViolationException duplicado) {
-			return repositorioPedido
-					.findByIdTenantAndIdProdutorAndChaveIdempotencia(usuario.idTenant(), idProdutor, chave)
-					.orElseThrow(() -> duplicado);
+		repositorioPedido.save(pedido);
+		repositorioPedido.flush();
+		List<ItemPedido> linhas = new ArrayList<>();
+		for (VisaoCarrinho.ItemVisaoCarrinho item : carrinho.itens()) {
+			ProdutoParaCarrinho produto = consultaCatalogo.exigirProdutoPedivel(usuario.idTenant(), item.idProduto());
+			String unidade = produto.unidade() == null ? "" : produto.unidade();
+			linhas.add(ItemPedido.novo(
+					pedido.id(),
+					item.idProduto(),
+					item.nome(),
+					unidade,
+					item.quantidade(),
+					item.precoUnitario().setScale(2, RoundingMode.HALF_UP),
+					item.totalLinha().setScale(2, RoundingMode.HALF_UP)));
 		}
+		repositorioItens.saveAll(linhas);
+		comandoCarrinho.esvaziar(comando.chaveProprietario());
+		return pedido;
 	}
 
 	private void aceitarSePendente(Pedido pedido) {
@@ -271,16 +277,22 @@ public class ServicoPedido implements ComandoPedido, ConsultaPedidoRetaguarda {
 		return usuario;
 	}
 
+	private void exigirOperador(UUID idTenant) {
+		UsuarioAutenticado usuario = consultaIdentidade.exigirAutenticado();
+		if (usuario.papel() != Papel.OPERADOR_REVENDA || !usuario.idTenant().equals(idTenant)) {
+			throw new ExcecaoPedido("ACESSO_NEGADO", "Você não tem permissão para este recurso.");
+		}
+	}
+
 	private static ConfirmacaoPedido confirmacao(Pedido pedido) {
 		return new ConfirmacaoPedido(pedido.id(), pedido.situacao(), pedido.confirmacao(), MENSAGEM_RECEBIDO);
 	}
 
-	private static String chaveEfetiva(CriarPedido comando, UsuarioAutenticado usuario, UUID idProdutor) {
+	private static String chaveEfetiva(CriarPedido comando) {
 		if (comando.chaveIdempotencia() != null && !comando.chaveIdempotencia().isBlank()) {
 			return comando.chaveIdempotencia().trim();
 		}
-		return "auto:" + usuario.id() + ":" + idProdutor + ":" + comando.chaveProprietario() + ":"
-				+ comando.idPropriedade() + ":" + comando.preferenciaRetirada();
+		return UUID.randomUUID().toString();
 	}
 
 	private static ExcecaoPedido acessoNegado() {

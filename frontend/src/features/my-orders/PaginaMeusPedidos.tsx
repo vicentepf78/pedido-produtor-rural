@@ -52,6 +52,9 @@ export function PaginaMeusPedidos() {
           <div className="status-box" role="alert">
             <h2>Não foi possível carregar</h2>
             <p>{erro}</p>
+            <button type="button" className="btn btn-ghost" onClick={() => navegar("/checkout")}>
+              Ir ao checkout
+            </button>
           </div>
         )}
         {!carregando && !erro && pedidos.length === 0 && (

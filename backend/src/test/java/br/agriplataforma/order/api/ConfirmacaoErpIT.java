@@ -150,7 +150,7 @@ class ConfirmacaoErpIT {
 		HttpResponse<String> resposta = cliente.send(builder.build(), HttpResponse.BodyHandlers.ofString());
 		assertThat(resposta.statusCode()).isEqualTo(200);
 		String corpo = resposta.body();
-		String token = corpo.substring(corpo.indexOf(":\"") + 2, corpo.lastIndexOf('"'));
+		String token = br.agriplataforma.ApoioCsrf.token(corpo);
 		String cookie = resposta.headers().allValues("Set-Cookie").stream()
 				.filter(valor -> valor.startsWith("XSRF-TOKEN="))
 				.map(valor -> valor.split(";", 2)[0])

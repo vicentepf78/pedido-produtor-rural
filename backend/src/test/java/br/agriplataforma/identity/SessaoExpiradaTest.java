@@ -14,6 +14,7 @@ import br.agriplataforma.identity.application.Papel;
 import br.agriplataforma.identity.application.UsuarioAutenticado;
 import br.agriplataforma.identity.infrastructure.ConfiguracaoSeguranca;
 import br.agriplataforma.producer.api.PropriedadeApi;
+import br.agriplataforma.producer.application.ComandoPropriedades;
 import br.agriplataforma.producer.application.ConsultaPropriedades;
 import jakarta.servlet.http.Cookie;
 import java.util.List;
@@ -51,6 +52,9 @@ class SessaoExpiradaTest {
 
 	@MockitoBean
 	ConsultaPropriedades consultaPropriedades;
+
+	@MockitoBean
+	ComandoPropriedades comandoPropriedades;
 
 	@Test
 	void ut019_sessaoExpiradaExigeAutenticacaoEPreservaCarrinhoConvidado() throws Exception {

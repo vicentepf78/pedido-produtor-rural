@@ -18,5 +18,5 @@ test-integration:
 test-e2e-web:
 	@if [ -d frontend/e2e ]; then cd frontend && npm test; else echo "No E2E web tests in the foundation slice."; fi
 
-gate: check-spec test test-integration
+gate: check-spec test test-integration test-e2e-web
 	@echo "Specification and application gates passed for $(SLUG)."

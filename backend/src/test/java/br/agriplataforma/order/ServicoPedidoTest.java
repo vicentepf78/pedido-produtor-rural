@@ -8,7 +8,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import br.agriplataforma.cart.application.ComandoCarrinho;
 import br.agriplataforma.cart.application.ConsultaCarrinho;
+import br.agriplataforma.catalog.application.ProdutoParaCarrinho;
 import br.agriplataforma.cart.application.VisaoCarrinho;
 import br.agriplataforma.catalog.application.ConsultaCatalogo;
 import br.agriplataforma.catalog.application.ResumoProduto;
@@ -42,6 +44,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.SimpleTransactionStatus;
 
@@ -70,6 +73,9 @@ class ServicoPedidoTest {
 	ConsultaCarrinho consultaCarrinho;
 
 	@Mock
+	ComandoCarrinho comandoCarrinho;
+
+	@Mock
 	ConsultaCatalogo consultaCatalogo;
 
 	@Mock
@@ -96,6 +102,7 @@ class ServicoPedidoTest {
 				consultaIdentidade,
 				consultaPropriedades,
 				consultaCarrinho,
+				comandoCarrinho,
 				consultaCatalogo,
 				repositorioPedido,
 				repositorioItens,
@@ -104,6 +111,9 @@ class ServicoPedidoTest {
 		autenticar(ALFA, PRODUTOR_ALFA);
 		when(consultaPropriedades.buscarPropria(FAZENDA_NORTE))
 				.thenReturn(Optional.of(new ResumoPropriedade(FAZENDA_NORTE, "Fazenda Norte")));
+		when(consultaCatalogo.exigirProdutoPedivel(TENANT, AURORA))
+				.thenReturn(new ProdutoParaCarrinho(
+						AURORA, "Semente de milho Aurora 20 kg", "Saco", new BigDecimal("620.00")));
 		when(consultaCatalogo.obterProdutoVisivel(TENANT, AURORA))
 				.thenReturn(Optional.of(new ResumoProduto(
 						AURORA,
@@ -142,7 +152,7 @@ class ServicoPedidoTest {
 		assertThat(confirmacao.mensagem()).isEqualTo("Pedido recebido");
 		assertThat(pedidoPersistido.nomePropriedade()).isEqualTo("Fazenda Norte");
 		assertThat(pedidoPersistido.preferenciaRetirada()).isEqualTo(RETIRADA);
-		verify(consultaCarrinho).esvaziar(CHAVE_CARRINHO);
+		verify(comandoCarrinho).esvaziar(CHAVE_CARRINHO);
 	}
 
 	@Test
@@ -187,6 +197,28 @@ class ServicoPedidoTest {
 		assertThat(segunda.idPedido()).isEqualTo(primeira.idPedido());
 		verify(repositorioPedido).save(any());
 		verify(gatewayErp).aceitar(any(PedidoLocal.class));
+	}
+
+	@Test
+	void ut018_violacaoDeUnicidadeRecuperaOPedidoExistente() {
+		Pedido existente = Pedido.novo(
+				TENANT,
+				PRODUTOR_ALFA,
+				FAZENDA_NORTE,
+				"Fazenda Norte",
+				"Alfa",
+				RETIRADA,
+				new BigDecimal("1240.00"),
+				CHAVE_IDEMP);
+		when(repositorioPedido.findByIdTenantAndIdProdutorAndChaveIdempotencia(any(), any(), any()))
+				.thenReturn(Optional.empty())
+				.thenReturn(Optional.of(existente));
+		when(repositorioPedido.save(any(Pedido.class))).thenThrow(new DataIntegrityViolationException("uk"));
+		when(repositorioPedido.findById(existente.id())).thenReturn(Optional.of(existente));
+
+		ConfirmacaoPedido confirmacao = servico.criar(comandoValido());
+
+		assertThat(confirmacao.idPedido()).isEqualTo(existente.id());
 	}
 
 	@Test

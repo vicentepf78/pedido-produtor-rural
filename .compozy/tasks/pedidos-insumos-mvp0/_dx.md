@@ -148,11 +148,33 @@ GET /api/v1/produtor/propriedades
 
 Somente o produtor autenticado vê as próprias propriedades, delimitadas ao tenant configurado.
 
+### Registrar propriedade do produtor autenticado
+
+```http
+POST /api/v1/produtor/propriedades
+Content-Type: application/json
+
+{
+  "nome": "Fazenda Santa Luzia"
+}
+```
+
+```json
+{
+  "id": "prop_01J8F71VTX5R",
+  "nome": "Fazenda Santa Luzia"
+}
+```
+
+Conta recém-cadastrada começa sem propriedades. O checkout coleta o nome e registra a primeira
+propriedade antes de `POST /api/v1/pedidos`.
+
 ### Confirmar um pedido
 
 ```http
 POST /api/v1/pedidos
 Content-Type: application/json
+Idempotency-Key: 9f3e2c1a-4b5d-6e7f-8a9b-0c1d2e3f4a5b
 
 {
   "idPropriedade": "prop_01J8F71VTX5R",
@@ -241,6 +263,15 @@ GET /api/v1/retaguarda/pedidos?pagina=1&tamanhoPagina=25
 }
 ```
 
+### Detalhe de um pedido para o operador do revendedor
+
+```http
+GET /api/v1/retaguarda/pedidos/{idPedido}
+```
+
+A resposta segue o snapshot do pedido (itens, preços, propriedade, retirada, total e confirmação)
+acrescido de `nomeProdutor`. Produtor autenticado recebe `403` `ACESSO_NEGADO`.
+
 ## Erros
 
 | Condição | Resposta |
@@ -255,3 +286,4 @@ GET /api/v1/retaguarda/pedidos?pagina=1&tamanhoPagina=25
 | E-mail já cadastrado | `EMAIL_DUPLICADO`: “Este e-mail já está cadastrado. Entre com sua senha ou use outro e-mail.” |
 | Credenciais inválidas | `CREDENCIAIS_INVALIDAS`: “E-mail ou senha inválidos.” |
 | Sessão ausente ou expirada | `NAO_AUTENTICADO`: “Entre ou crie uma conta para continuar.” |
+| Operador sem permissão ou produtor na retaguarda | `ACESSO_NEGADO`: “Você não tem permissão para este recurso.” |

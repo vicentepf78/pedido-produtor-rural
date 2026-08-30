@@ -27,6 +27,10 @@ public class Propriedade {
 		this.nome = nome;
 	}
 
+	public static Propriedade nova(UUID idTenant, UUID idProdutor, String nome) {
+		return new Propriedade(UUID.randomUUID(), idTenant, idProdutor, nome);
+	}
+
 	public UUID id() {
 		return id;
 	}

@@ -5,11 +5,14 @@ import { FalhaApi, formatarDinheiro, isFalhaApi } from "../../infra/http";
 import {
   cadastrar,
   confirmarPedido,
+  criarPropriedade,
   entrar,
   listarPropriedades,
+  sair,
   type ResumoPropriedade,
 } from "./api";
 import { OPCOES_RETIRADA } from "./opcoes";
+import { aoTeclaAba } from "../../shell/tecladoAbas";
 
 const RASCUNHO = "checkout-rascunho";
 
@@ -20,6 +23,7 @@ type Rascunho = {
   nome: string;
   email: string;
   idPropriedade: string;
+  nomePropriedade: string;
   preferenciaRetirada: string;
 };
 
@@ -27,12 +31,12 @@ function lerRascunho(): Rascunho {
   try {
     const bruto = sessionStorage.getItem(RASCUNHO);
     if (bruto) {
-      return JSON.parse(bruto) as Rascunho;
+      return { nomePropriedade: "", ...(JSON.parse(bruto) as Rascunho) };
     }
   } catch {
     /* ignore */
   }
-  return { modo: "login", nome: "", email: "", idPropriedade: "", preferenciaRetirada: "" };
+  return { modo: "login", nome: "", email: "", idPropriedade: "", nomePropriedade: "", preferenciaRetirada: "" };
 }
 
 type Erros = Partial<Record<"name" | "email" | "password" | "propertyId" | "pickupId" | "form", string>>;
@@ -96,10 +100,14 @@ export function PaginaCheckout() {
     return proximo;
   }
 
-  function validarCheckout(): Erros {
+  function validarCheckout(lista: ResumoPropriedade[]): Erros {
     const proximo: Erros = {};
-    if (!rascunho.idPropriedade) {
-      proximo.propertyId = "Selecione uma propriedade.";
+    if (lista.length > 0) {
+      if (!rascunho.idPropriedade) {
+        proximo.propertyId = "Selecione uma propriedade.";
+      }
+    } else if (!rascunho.nomePropriedade.trim()) {
+      proximo.propertyId = "Informe o nome da propriedade.";
     }
     if (!rascunho.preferenciaRetirada) {
       proximo.pickupId = "Selecione a preferência de retirada.";
@@ -107,12 +115,12 @@ export function PaginaCheckout() {
     return proximo;
   }
 
-  function focarPrimeiro(proximo: Erros) {
+  function focarPrimeiro(proximo: Erros, temPropriedades: boolean) {
     const ordem: Array<[keyof Erros, string]> = [
       ["name", "auth-name"],
       ["email", "auth-email"],
       ["password", "auth-password"],
-      ["propertyId", "checkout-property"],
+      ["propertyId", temPropriedades ? "checkout-property" : "checkout-property-nome"],
       ["pickupId", "checkout-pickup"],
     ];
     for (const [campo, id] of ordem) {
@@ -127,7 +135,7 @@ export function PaginaCheckout() {
     const identidade = validarIdentidade();
     if (Object.keys(identidade).length > 0) {
       setErros(identidade);
-      focarPrimeiro(identidade);
+      focarPrimeiro(identidade, propriedades.length > 0);
       return;
     }
     if (carrinho.itens.length === 0) {
@@ -136,24 +144,32 @@ export function PaginaCheckout() {
     }
     setEnviando(true);
     try {
+      let lista = propriedades;
       if (!autenticado) {
         if (rascunho.modo === "register") {
           await cadastrar(rascunho.nome.trim(), rascunho.email.trim(), senha);
         } else {
           await entrar(rascunho.email.trim(), senha);
         }
-        const itens = await listarPropriedades();
-        setPropriedades(itens);
+        lista = await listarPropriedades();
+        setPropriedades(lista);
         setAutenticado(true);
       }
-      const checkout = validarCheckout();
+      const checkout = validarCheckout(lista);
       if (Object.keys(checkout).length > 0) {
         setErros(checkout);
-        focarPrimeiro(checkout);
+        focarPrimeiro(checkout, lista.length > 0);
         return;
       }
+      let idPropriedade = rascunho.idPropriedade;
+      if (!idPropriedade && rascunho.nomePropriedade.trim()) {
+        const criada = await criarPropriedade(rascunho.nomePropriedade.trim());
+        idPropriedade = criada.id;
+        setPropriedades([criada]);
+        atualizar({ idPropriedade: criada.id });
+      }
       const confirmacao = await confirmarPedido(
-        rascunho.idPropriedade,
+        idPropriedade,
         rascunho.preferenciaRetirada,
         chaveIdempotencia.current,
       );
@@ -192,7 +208,7 @@ export function PaginaCheckout() {
         proximo.pickupId = "Selecione a preferência de retirada.";
       }
       setErros(proximo);
-      focarPrimeiro(proximo);
+      focarPrimeiro(proximo, propriedades.length > 0);
       return;
     }
     if (falha.codigo === "CARRINHO_VAZIO") {
@@ -203,13 +219,41 @@ export function PaginaCheckout() {
   }
 
   const checkoutDisponivel = carrinho.itens.length > 0 && !enviando;
+  const modos = ["login", "register"] as const;
+
+  async function encerrarSessao() {
+    await sair();
+    setAutenticado(false);
+    setPropriedades([]);
+  }
 
   return (
     <>
       <header className="screen-header" data-od-id="checkout-header">
         <h1>Checkout</h1>
+        {autenticado && (
+          <button type="button" className="btn btn-ghost btn-sm" data-od-id="checkout-sair" onClick={() => void encerrarSessao()}>
+            Sair
+          </button>
+        )}
       </header>
       <main className="screen-body" data-od-id="checkout-body">
+        {carrinho.itens.length === 0 && (
+          <div className="status-box" data-od-id="checkout-empty">
+            <h2>Carrinho vazio</h2>
+            <p>Adicione ao menos um produto antes do checkout.</p>
+            <button type="button" className="btn btn-ghost" onClick={() => navegar("/catalogo")}>
+              Ir ao catálogo
+            </button>
+          </div>
+        )}
+        <form
+          id="checkout-form"
+          onSubmit={(evento) => {
+            evento.preventDefault();
+            void confirmar();
+          }}
+        >
         <h2 className="section-title">Identificação</h2>
         <div role="tablist" aria-label="Modo de identificação" className="ident-tabs">
           {(
@@ -224,12 +268,16 @@ export function PaginaCheckout() {
               className="cat-tab"
               role="tab"
               aria-selected={rascunho.modo === modo}
+              aria-controls="identificacao-painel"
+              tabIndex={rascunho.modo === modo ? 0 : -1}
               onClick={() => atualizar({ modo })}
+              onKeyDown={(evento) => aoTeclaAba(evento, [...modos], rascunho.modo, (proximo) => atualizar({ modo: proximo as Modo }))}
             >
               {rotulo}
             </button>
           ))}
         </div>
+        <div id="identificacao-painel" role="tabpanel">
 
         {rascunho.modo === "register" && (
           <div className="field">
@@ -240,11 +288,12 @@ export function PaginaCheckout() {
               autoComplete="name"
               value={rascunho.nome}
               aria-invalid={Boolean(erros.name)}
+              aria-describedby={erros.name ? "auth-name-erro" : undefined}
               onChange={(evento) => atualizar({ nome: evento.target.value })}
               data-od-id="checkout-name"
             />
             {erros.name && (
-              <p className="inline-error" role="alert">
+              <p id="auth-name-erro" className="inline-error" role="alert">
                 {erros.name}
               </p>
             )}
@@ -259,11 +308,12 @@ export function PaginaCheckout() {
             autoComplete="email"
             value={rascunho.email}
             aria-invalid={Boolean(erros.email)}
+            aria-describedby={erros.email ? "auth-email-erro" : undefined}
             onChange={(evento) => atualizar({ email: evento.target.value })}
             data-od-id="checkout-email"
           />
           {erros.email && (
-            <p className="inline-error" role="alert">
+            <p id="auth-email-erro" className="inline-error" role="alert">
               {erros.email}
             </p>
           )}
@@ -277,14 +327,16 @@ export function PaginaCheckout() {
             autoComplete={rascunho.modo === "login" ? "current-password" : "new-password"}
             value={senha}
             aria-invalid={Boolean(erros.password)}
+            aria-describedby={erros.password ? "auth-password-erro" : undefined}
             onChange={(evento) => setSenha(evento.target.value)}
             data-od-id="checkout-password"
           />
           {erros.password && (
-            <p className="inline-error" role="alert">
+            <p id="auth-password-erro" className="inline-error" role="alert">
               {erros.password}
             </p>
           )}
+        </div>
         </div>
 
         <h2 className="section-title">Propriedade e retirada</h2>
@@ -294,7 +346,8 @@ export function PaginaCheckout() {
           <select
             id="checkout-property"
             value={rascunho.idPropriedade}
-            aria-invalid={Boolean(erros.propertyId)}
+            aria-invalid={Boolean(erros.propertyId) && propriedades.length > 0}
+            aria-describedby={erros.propertyId ? "checkout-property-erro" : undefined}
             onChange={(evento) => atualizar({ idPropriedade: evento.target.value })}
             data-od-id="checkout-property"
           >
@@ -305,8 +358,20 @@ export function PaginaCheckout() {
               </option>
             ))}
           </select>
+          {propriedades.length === 0 && (
+            <input
+              id="checkout-property-nome"
+              type="text"
+              placeholder="Nome da propriedade"
+              value={rascunho.nomePropriedade}
+              aria-invalid={Boolean(erros.propertyId)}
+              aria-describedby={erros.propertyId ? "checkout-property-erro" : undefined}
+              onChange={(evento) => atualizar({ nomePropriedade: evento.target.value })}
+              data-od-id="checkout-property-nome"
+            />
+          )}
           {erros.propertyId && (
-            <p className="inline-error" role="alert">
+            <p id="checkout-property-erro" className="inline-error" role="alert">
               {erros.propertyId}
             </p>
           )}
@@ -318,6 +383,7 @@ export function PaginaCheckout() {
             id="checkout-pickup"
             value={rascunho.preferenciaRetirada}
             aria-invalid={Boolean(erros.pickupId)}
+            aria-describedby={erros.pickupId ? "checkout-pickup-erro" : undefined}
             onChange={(evento) => atualizar({ preferenciaRetirada: evento.target.value })}
             data-od-id="checkout-pickup"
           >
@@ -329,7 +395,7 @@ export function PaginaCheckout() {
             ))}
           </select>
           {erros.pickupId && (
-            <p className="inline-error" role="alert">
+            <p id="checkout-pickup-erro" className="inline-error" role="alert">
               {erros.pickupId}
             </p>
           )}
@@ -355,16 +421,18 @@ export function PaginaCheckout() {
             <span className="mono">{formatarDinheiro(carrinho.total)}</span>
           </div>
         </div>
+        </form>
       </main>
       <footer className="sticky-footer" data-od-id="checkout-footer">
         <button
-          type="button"
+          type="submit"
+          form="checkout-form"
           className="btn btn-primary btn-block"
           data-od-id="confirm-order-btn"
           disabled={!checkoutDisponivel}
-          onClick={() => void confirmar()}
+          aria-busy={enviando}
         >
-          Confirmar pedido
+          {enviando ? "Confirmando…" : "Confirmar pedido"}
         </button>
       </footer>
     </>

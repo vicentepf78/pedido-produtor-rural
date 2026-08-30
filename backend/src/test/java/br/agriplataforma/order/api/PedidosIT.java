@@ -85,7 +85,34 @@ class PedidosIT {
 		HttpResponse<String> listaBeta = get(beta, "/api/v1/pedidos");
 		assertThat(listaBeta.statusCode()).isEqualTo(200);
 		assertThat(listaBeta.body()).doesNotContain(idPedido);
+
+		HttpResponse<String> listaAlfa = get(alfa, "/api/v1/pedidos");
+		assertThat(contarOcorrencias(listaAlfa.body(), idPedido)).isEqualTo(1);
+		HttpResponse<String> refresh = postPedido(
+				alfa,
+				cookieCarrinho,
+				null,
+				"{\"idPropriedade\":\"%s\",\"preferenciaRetirada\":\"DEPOSITO_PRINCIPAL\"}"
+						.formatted(FAZENDA_NORTE));
+		assertThat(refresh.statusCode()).isEqualTo(400);
+		assertThat(refresh.body()).contains("\"codigo\":\"CARRINHO_VAZIO\"");
+		HttpResponse<String> listaDepois = get(alfa, "/api/v1/pedidos");
+		assertThat(contarOcorrencias(listaDepois.body(), idPedido)).isEqualTo(1);
 	}
+
+	@Test
+	void it004_carrinhoVazioRecusaCheckout() throws Exception {
+		Sessao sessao = autenticar("produtor.alfa@example.com");
+		HttpResponse<String> vazio = postPedido(
+				sessao,
+				"chaveCarrinhoConvidado=vazio-it004",
+				UUID.randomUUID().toString(),
+				"{\"idPropriedade\":\"%s\",\"preferenciaRetirada\":\"DEPOSITO_PRINCIPAL\"}"
+						.formatted(FAZENDA_NORTE));
+		assertThat(vazio.statusCode()).isEqualTo(400);
+		assertThat(vazio.body()).contains("\"codigo\":\"CARRINHO_VAZIO\"");
+	}
+
 
 	private String adicionarAurora(Sessao sessao) throws Exception {
 		Csrf csrf = csrf(sessao.cookie());
@@ -105,15 +132,15 @@ class PedidosIT {
 	private HttpResponse<String> postPedido(Sessao sessao, String cookieCarrinho, String chave, String corpo)
 			throws Exception {
 		Csrf csrf = csrf(sessao.cookie() + "; " + cookieCarrinho);
-		return cliente.send(
-				HttpRequest.newBuilder(uri("/api/v1/pedidos"))
-						.header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
-						.header("X-XSRF-TOKEN", csrf.token())
-						.header("Idempotency-Key", chave)
-						.header("Cookie", csrf.cookie() + "; " + sessao.cookie() + "; " + cookieCarrinho)
-						.POST(HttpRequest.BodyPublishers.ofString(corpo))
-						.build(),
-				HttpResponse.BodyHandlers.ofString());
+		HttpRequest.Builder builder = HttpRequest.newBuilder(uri("/api/v1/pedidos"))
+				.header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+				.header("X-XSRF-TOKEN", csrf.token())
+				.header("Cookie", csrf.cookie() + "; " + sessao.cookie() + "; " + cookieCarrinho)
+				.POST(HttpRequest.BodyPublishers.ofString(corpo));
+		if (chave != null && !chave.isBlank()) {
+			builder.header("Idempotency-Key", chave);
+		}
+		return cliente.send(builder.build(), HttpResponse.BodyHandlers.ofString());
 	}
 
 	private HttpResponse<String> get(Sessao sessao, String caminho) throws Exception {
@@ -145,7 +172,7 @@ class PedidosIT {
 		HttpResponse<String> resposta = cliente.send(builder.build(), HttpResponse.BodyHandlers.ofString());
 		assertThat(resposta.statusCode()).isEqualTo(200);
 		String corpo = resposta.body();
-		String token = corpo.substring(corpo.indexOf(":\"") + 2, corpo.lastIndexOf('"'));
+		String token = br.agriplataforma.ApoioCsrf.token(corpo);
 		String cookie = resposta.headers().allValues("Set-Cookie").stream()
 				.filter(valor -> valor.startsWith("XSRF-TOKEN="))
 				.map(valor -> valor.split(";", 2)[0])

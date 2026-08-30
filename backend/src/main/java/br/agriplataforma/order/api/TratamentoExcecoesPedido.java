@@ -12,7 +12,7 @@ class TratamentoExcecoesPedido {
 	@ExceptionHandler(ExcecaoPedido.class)
 	ResponseEntity<ErroApi> tratar(ExcecaoPedido excecao) {
 		HttpStatus status = switch (excecao.codigo()) {
-			case "ACESSO_PEDIDO_NEGADO" -> HttpStatus.FORBIDDEN;
+			case "ACESSO_PEDIDO_NEGADO", "ACESSO_NEGADO" -> HttpStatus.FORBIDDEN;
 			case "PEDIDO_NAO_ENCONTRADO" -> HttpStatus.NOT_FOUND;
 			default -> HttpStatus.BAD_REQUEST;
 		};

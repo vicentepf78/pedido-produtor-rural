@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class ServicoCarrinho implements ConsultaCarrinho {
+public class ServicoCarrinho implements ConsultaCarrinho, ComandoCarrinho {
 
 	private final RepositorioCarrinho repositorioCarrinho;
 	private final RepositorioItemCarrinho repositorioItens;

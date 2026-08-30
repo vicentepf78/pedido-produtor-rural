@@ -55,6 +55,19 @@ class CadastroSessaoIT {
 				HttpResponse.BodyHandlers.ofString());
 		assertThat(propriedades.statusCode()).isEqualTo(200);
 		assertThat(propriedades.body()).contains("\"itens\":[]");
+
+		Csrf csrfDepois = csrf();
+		HttpResponse<String> criada = cliente.send(
+				HttpRequest.newBuilder(uri("/api/v1/produtor/propriedades"))
+						.header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+						.header("X-XSRF-TOKEN", csrfDepois.token())
+						.header("Cookie", csrfDepois.cookie() + "; sessao=" + valorCookie(setCookieSessao))
+						.POST(HttpRequest.BodyPublishers.ofString("{\"nome\":\"Sitio Novo Gama\"}"))
+						.build(),
+				HttpResponse.BodyHandlers.ofString());
+		assertThat(criada.statusCode()).isEqualTo(200);
+		assertThat(criada.body()).contains("Sitio Novo Gama");
+		assertThat(criada.body()).contains("\"id\"");
 	}
 
 	@Test
@@ -106,7 +119,7 @@ class CadastroSessaoIT {
 				HttpResponse.BodyHandlers.ofString());
 		assertThat(resposta.statusCode()).isEqualTo(200);
 		String corpo = resposta.body();
-		String token = corpo.substring(corpo.indexOf(":\"") + 2, corpo.lastIndexOf('"'));
+		String token = br.agriplataforma.ApoioCsrf.token(corpo);
 		String cookie = resposta.headers().allValues("Set-Cookie").stream()
 				.filter(valor -> valor.startsWith("XSRF-TOKEN="))
 				.map(valor -> valor.split(";", 2)[0])

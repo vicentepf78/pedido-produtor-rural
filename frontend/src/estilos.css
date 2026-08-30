@@ -42,6 +42,20 @@ button, input, select {
   outline-offset: 2px;
 }
 
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0.5rem;
+  z-index: 20;
+  padding: 0.5rem 0.75rem;
+  background: var(--surface);
+  color: var(--fg);
+}
+
+.skip-link:focus {
+  left: 0.5rem;
+}
+
 .app-shell {
   max-width: 430px;
   min-height: 100dvh;
@@ -313,6 +327,13 @@ button, input, select {
 @keyframes shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+    background: oklch(92% 0 0);
+  }
 }
 
 .skeleton-card {

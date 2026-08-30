@@ -5,6 +5,7 @@ import { isFalhaApi } from "../../infra/http";
 import { obterProduto, listarProdutos, type ItemProduto } from "./api";
 import { adicionarItem } from "../cart/api";
 import { CartaoProduto } from "./CartaoProduto";
+import { aoTeclaAba } from "../../shell/tecladoAbas";
 
 const CATEGORIA_TODOS = "Todos";
 const ORDEM_CATEGORIAS = ["Sementes", "Fertilizantes", "Correção"];
@@ -25,6 +26,7 @@ export function PaginaCatalogo() {
   const [produtos, setProdutos] = useState<ItemProduto[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
+  const [erroAdicionar, setErroAdicionar] = useState<string | null>(null);
   const [acessoNegado, setAcessoNegado] = useState(false);
   const [adicionando, setAdicionando] = useState<string | null>(null);
   const [categorias, setCategorias] = useState<string[]>([CATEGORIA_TODOS]);
@@ -82,10 +84,11 @@ export function PaginaCatalogo() {
 
   async function adicionar(produto: ItemProduto) {
     setAdicionando(produto.id);
+    setErroAdicionar(null);
     try {
       confirmar(await adicionarItem(produto.id, 1));
     } catch (falha) {
-      setErro(isFalhaApi(falha) ? falha.message : "Não foi possível adicionar.");
+      setErroAdicionar(isFalhaApi(falha) ? falha.message : "Não foi possível adicionar.");
     } finally {
       setAdicionando(null);
     }
@@ -130,7 +133,10 @@ export function PaginaCatalogo() {
               role="tab"
               className="cat-tab"
               aria-selected={categoria === cat}
+              aria-controls="catalog-painel"
+              tabIndex={categoria === cat ? 0 : -1}
               onClick={() => setCategoria(cat)}
+              onKeyDown={(evento) => aoTeclaAba(evento, categorias, categoria, setCategoria)}
             >
               {cat}
             </button>
@@ -180,8 +186,14 @@ export function PaginaCatalogo() {
           </div>
         )}
 
+        {erroAdicionar && (
+          <p className="inline-error" role="alert" data-od-id="catalog-add-error">
+            {erroAdicionar}
+          </p>
+        )}
+
         {!carregando && !erro && !acessoNegado && filtrados.length > 0 && (
-          <div data-od-id="catalog-results">
+          <div id="catalog-painel" role="tabpanel" data-od-id="catalog-results">
             {filtrados.map((produto) => (
               <CartaoProduto
                 key={produto.id}

@@ -2,7 +2,7 @@
 
 ## Current State
 
-- `task_01`–`task_05` concluídas. Próxima: Phase C `qa-report` (`task_06`).
+- `task_01`–`task_07` concluídas. Phase D rodada 1 SHIP. Próxima: Phase E.
 - Frontend pinado em Vite 6 (Node do host é 20.17).
 
 ## Shared Decisions
@@ -16,7 +16,7 @@
 - Desenvolvimento nesta branch: `mvp-0`.
 - Wireframes em `references/mvp0-pedidos-insumos.html`; não há tarefa de desenho.
 - Cookie de sessão: `sessao` (HttpOnly + Secure fora do perfil `local`). CSRF: `GET /api/v1/autenticacao/csrf` + cookie `XSRF-TOKEN` + header `X-XSRF-TOKEN`.
-- Superfície de identidade: `POST /api/v1/autenticacao/cadastro`, `POST /api/v1/autenticacao/entrada`, `POST /api/v1/autenticacao/saida`. Propriedades: `GET /api/v1/produtor/propriedades`.
+- Superfície de identidade: `POST /api/v1/autenticacao/cadastro`, `POST /api/v1/autenticacao/entrada`, `POST /api/v1/autenticacao/saida`. Propriedades: `GET` e `POST /api/v1/produtor/propriedades`.
 - Papéis: `PRODUTOR` e `OPERADOR_REVENDA`. Fixtures fictícias: `operador.revenda@example.com`, `produtor.alfa@example.com` (Fazenda Norte, Sitio Recanto), `produtor.beta@example.com` (Fazenda Sul). Senha só no código de teste.
 - Identidade não deve apagar o cookie `chaveCarrinhoConvidado`. Catálogo e carrinho de convidado são `permitAll` em `ConfiguracaoSeguranca`.
 - `UserDetailsServiceAutoConfiguration` está excluída (evita senha gerada em log).
@@ -45,11 +45,19 @@
 ## Open Risks
 
 - Nenhum bloqueio de toolchain (Java 21, Maven, Docker e Node disponíveis).
+- Sair no checkout após identidade (`BUG-20260830` remediado na rodada 1).
+- No mesmo tenant, caminhar Money antes da retaguarda esgota o estado vazio
+  da lista do operador.
 
 ## Open Questions
 
-- Nenhuma no bootstrap.
+- Nenhuma no bootstrap. Sair ficou no checkout após identidade.
 
 ## Handoffs
 
-- `task_06`: plano de QA; mock ERP e retaguarda já existem. Não reabrir checkout/Meus pedidos do produtor. Walk dos cenários `INT-mock-erp-aceita`, `ORD-backoffice-lista`, `ORD-backoffice-vazio-ou-negado` fica na Phase C.
+- `task_07` caminhou os quatro charters em 2026-08-30. Relatório:
+  `docs/qa/reports/2026-08-30-pedidos-insumos-mvp0.md`.
+- Não mintar `TC-*`, árvore `qa/` por rodada nem `verification-report.md`.
+  `ACESSO_NEGADO` e `GET /api/v1/retaguarda/pedidos/{id}` estão em `_dx.md`.
+- MCP browser do Cursor não manteve aba neste host; o walk de maior risco
+  usou Playwright contra o stack vivo (sem `apiMock`).
