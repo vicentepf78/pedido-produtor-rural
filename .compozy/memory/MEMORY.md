@@ -1,3 +1,4 @@
+- [cy-review-round modelo-revisor-diferente-do-implementador](feedback_cy_review_round.md) - seq 5744: assistant reenvia rodada 2 com outro modelo listado, explicitando 'sem revisar só com o modelo que implementou'
 - [memory-extractor what-not-to-save-ephemeral-plan](feedback_memory_extractor.md) - seq 4313: assistant anuncia subir backend/frontend e escrever script Playwright walk contra stack real, sem decisão ou preferência estável.
 - [cy-loop-tasks phase-detection-protocol](feedback_cy_loop_tasks.md) - seq 4048: assistant declara carregar skills canônicas, rodar detect-phase.py e executar só a ação impressa
 - [qa-report worker-dispatch-limitation](feedback_qa_report.md) - seq 3934: assistant planeja registrar que o worker Fable 5 não pôde ser despachado após make gate passar

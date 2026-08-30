@@ -1,9 +1,9 @@
 # cy-loop-tasks state.yaml -- managed by .agents/skills/cy-loop-tasks/scripts/update-state.py. Do not hand-edit.
 slug: "pedidos-insumos-mvp1"
 created_at: "2026-08-30T21:00:38Z"
-last_updated: "2026-08-30T23:04:12Z"
+last_updated: "2026-08-30T23:18:33Z"
 mode: "tasks"
-iteration: 8
+iteration: 10
 goal_signature: "ship pedidos-insumos-mvp1 end-to-end via cy-loop-tasks: every iteration runs .agents/skills/cy-loop-tasks/scripts/detect-phase.py and executes the printed action; every Phase B checkpoint runs its focused task validation then cy-final-verify before commit; continue until qa-report and qa-execution are complete, consecutive deep-review rounds reach SHIP, and required PR CI is green at the exact head"
 frontend_agent: null
 stacked: false
@@ -23,12 +23,12 @@ qa:
   execution_done: true
 
 review:
-  rounds: 1
+  rounds: 2
   last_verdict: "SHIP"
   ship: true
 
 verify:
-  last_run: "2026-08-30T23:04:12Z"
+  last_run: "2026-08-30T23:18:33Z"
   last_status: "PASS"
 
 delivery:
@@ -92,6 +92,20 @@ iterations:
     timestamp: "2026-08-30T23:04:12Z"
     phase: "D"
     action: "peer-review round 1 (SHIP)"
+    outcome: "completed"
+    memory_written: ["memory/peer-review.md", "memory/MEMORY.md"]
+    blockers: []
+  - n: 9
+    timestamp: "2026-08-30T23:09:13Z"
+    phase: "E"
+    action: "external blocker: GitHub API auth missing for draft PR and exact-head CI"
+    outcome: "blocked"
+    memory_written: ["memory/MEMORY.md"]
+    blockers: ["GitHub API auth missing: SSH pushed origin/mvp-1 at 39b2a3186d27fd6639e768a17fd3a33d0c3c6460; gh not logged in; GH_TOKEN/GITHUB_TOKEN unset; unauthenticated POST /pulls returned 401; interactive gh auth login cannot complete in-loop"]
+  - n: 10
+    timestamp: "2026-08-30T23:18:33Z"
+    phase: "D"
+    action: "peer-review round 2 (SHIP)"
     outcome: "completed"
     memory_written: ["memory/peer-review.md", "memory/MEMORY.md"]
     blockers: []

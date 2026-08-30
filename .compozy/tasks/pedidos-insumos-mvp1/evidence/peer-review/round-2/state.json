@@ -1,0 +1,9 @@
+{
+  "round": 2,
+  "verdict": "SHIP",
+  "base": "39b2a31",
+  "loop_base": "66e004c",
+  "spec": ".compozy/tasks/pedidos-insumos-mvp1",
+  "subagent": "codex",
+  "subagent_note": "gpt-5.6-sol-medium usage-limited; composer-2.5-fast + inherit"
+}

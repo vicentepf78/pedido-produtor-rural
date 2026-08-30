@@ -2,7 +2,7 @@
 
 ## Objective Snapshot
 
-Phase D rodada 1: deep-review no diff do loop vs `66e004c`, remediár findings/nits, gate, checkpoint.
+Phase D rodada 2 incremental: confirmar remediações D1 intactas após `--verify-fail` do blocker de Phase E; SHIP sem mudança de produto.
 
 ## Important Decisions
 
@@ -27,8 +27,15 @@ Phase D rodada 1: deep-review no diff do loop vs `66e004c`, remediár findings/n
 
 ## Ready for Next Run
 
-- `make gate` exit 0 após remediações (check-spec MVP1, Surefire 83, Failsafe 51, Playwright verde).
-- Detect seguinte esperado: `phase=E action=await_ci`.
+- Rodada 2 SHIP; detect seguinte esperado: `phase=E action=await_ci` após `--verify-pass`.
+- Phase E ainda precisa de `gh auth` / `GH_TOKEN` para draft PR e CI no HEAD.
+
+## Round 2
+
+- Verdict: SHIP
+- Findings: `evidence/peer-review/round-2/review.md`
+- Remediado: nenhum (código de produto inalterado; D1-01…D1-05 intactos)
+- Lane: `gpt-5.6-sol-medium` no limite; `composer-2.5-fast` + `inherit`
 
 ## Round 1
 

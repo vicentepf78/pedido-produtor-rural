@@ -2,8 +2,9 @@
 
 ## Current State
 
-- Phase D rodada 1 SHIP. Próximo detect: Phase E `await_ci`.
-- Branch de trabalho: `mvp-1`. Sem `--frontend` e sem `--stacked`.
+- Phase D rodada 2 SHIP (incremental). Próximo detect esperado: Phase E `await_ci`.
+- `origin/mvp-1` ainda em `39b2a31` até o checkpoint desta rodada; Phase E exige auth da API GitHub para draft PR.
+- Branch de trabalho: `mvp-1` (tracking `origin/mvp-1`). Sem `--frontend` e sem `--stacked`.
 
 ## Shared Decisions
 
@@ -35,12 +36,13 @@
 
 ## Open Risks
 
-- Nenhum bloqueio externo no bootstrap.
+- Phase E: sem credencial da API GitHub (`gh` sem login; `GH_TOKEN`/`GITHUB_TOKEN` unset; sem `~/.config/gh`, netrc ou credential helper). `git push -u origin HEAD` via SSH criou `origin/mvp-1` em `39b2a3186d27fd6639e768a17fd3a33d0c3c6460`. `gh pr create` pede `gh auth login`. POST anônimo em `/repos/vicentepf78/pedido-produtor-rural/pulls` retornou 401. `gh auth login` é interativo e não cabe no loop. Sem URL de PR, `update-state --ci-pending/--ci-pass` não fecha. Retomar com `gh auth login` ou `GH_TOKEN` e criar o draft `mvp-1` → `main`.
 
 ## Open Questions
 
 - Worker Fable 5 (`claude --permission-mode auto --model claude-fable-5` via herdr) não está instalado neste host. O `qa-report` foi produzido na sessão do orquestrador com a skill canônica, depois do `make gate` verde. Confirmar se rodadas futuras devem exigir o worker.
 - Phase D rodada 1: herdr/`claude` ausentes; lane `codex` via Task (`gpt-5.6-sol-medium`) + síntese local. Confirmar se rodadas seguintes exigem o worker.
+- Phase D rodada 2: `gpt-5.6-sol-medium` recusou por limite de uso; lanes `composer-2.5-fast` + `inherit`. Confirmar se o `codex` canônico continua obrigatório.
 
 ## Handoffs
 
