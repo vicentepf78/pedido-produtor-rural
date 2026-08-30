@@ -1,3 +1,12 @@
 export function PaginaCheckout() {
-  return <main><h1>Checkout</h1></main>;
+  return (
+    <>
+      <header className="screen-header">
+        <h1>Checkout</h1>
+      </header>
+      <main className="screen-body">
+        <p className="inline-info">Identifique-se na próxima etapa.</p>
+      </main>
+    </>
+  );
 }

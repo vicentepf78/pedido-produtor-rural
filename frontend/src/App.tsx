@@ -1,4 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { ProvedorCarrinho } from "./estado/ProvedorCarrinho";
+import { LayoutApp } from "./shell/LayoutApp";
 import { PaginaCatalogo } from "./features/catalog/PaginaCatalogo";
 import { PaginaCarrinho } from "./features/cart/PaginaCarrinho";
 import { PaginaCheckout } from "./features/checkout/PaginaCheckout";
@@ -8,14 +10,19 @@ import { PaginaPedidosRetaguarda } from "./features/backoffice-orders/PaginaPedi
 export function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Navigate to="/catalogo" replace />} />
-        <Route path="/catalogo" element={<PaginaCatalogo />} />
-        <Route path="/carrinho" element={<PaginaCarrinho />} />
-        <Route path="/checkout" element={<PaginaCheckout />} />
-        <Route path="/meus-pedidos" element={<PaginaMeusPedidos />} />
-        <Route path="/retaguarda/pedidos" element={<PaginaPedidosRetaguarda />} />
-      </Routes>
+      <ProvedorCarrinho>
+        <LayoutApp>
+          <Routes>
+            <Route path="/" element={<Navigate to="/catalogo" replace />} />
+            <Route path="/catalogo" element={<PaginaCatalogo />} />
+            <Route path="/catalogo/:idProduto" element={<PaginaCatalogo />} />
+            <Route path="/carrinho" element={<PaginaCarrinho />} />
+            <Route path="/checkout" element={<PaginaCheckout />} />
+            <Route path="/meus-pedidos" element={<PaginaMeusPedidos />} />
+            <Route path="/retaguarda/pedidos" element={<PaginaPedidosRetaguarda />} />
+          </Routes>
+        </LayoutApp>
+      </ProvedorCarrinho>
     </BrowserRouter>
   );
 }

@@ -2,7 +2,7 @@
 
 ## Current State
 
-- `task_01` e `task_02` concluídas. Próxima: `task_03`.
+- `task_01`–`task_03` concluídas. Próxima: `task_04` (checkout e pedido).
 - Frontend pinado em Vite 6 (Node do host é 20.17).
 
 ## Shared Decisions
@@ -18,8 +18,12 @@
 - Cookie de sessão: `sessao` (HttpOnly + Secure fora do perfil `local`). CSRF: `GET /api/v1/autenticacao/csrf` + cookie `XSRF-TOKEN` + header `X-XSRF-TOKEN`.
 - Superfície de identidade: `POST /api/v1/autenticacao/cadastro`, `POST /api/v1/autenticacao/entrada`, `POST /api/v1/autenticacao/saida`. Propriedades: `GET /api/v1/produtor/propriedades`.
 - Papéis: `PRODUTOR` e `OPERADOR_REVENDA`. Fixtures fictícias: `operador.revenda@example.com`, `produtor.alfa@example.com` (Fazenda Norte, Sitio Recanto), `produtor.beta@example.com` (Fazenda Sul). Senha só no código de teste.
-- Identidade não deve apagar o cookie `chaveCarrinhoConvidado`. Catálogo/carrinho (task_03) precisam de `permitAll` em `ConfiguracaoSeguranca`.
+- Identidade não deve apagar o cookie `chaveCarrinhoConvidado`. Catálogo e carrinho de convidado são `permitAll` em `ConfiguracaoSeguranca`.
 - `UserDetailsServiceAutoConfiguration` está excluída (evita senha gerada em log).
+- IDs de produto na API são UUID. Catálogo sem `consulta` lista visíveis; `consulta` em branco devolve vazio.
+- Cookie de convidado: `chaveCarrinhoConvidado` (HttpOnly, SameSite=Lax, Secure fora de `local`, Max-Age 30d), gravado na primeira mutação do carrinho.
+- Seed: 30 produtos não regulamentados + 1 regulamentado `10000000-0000-4000-8000-000000000099` (fora da listagem). Aurora: `10000000-0000-4000-8000-000000000001` a R$ 620,00.
+- Detalhe: `GET /api/v1/catalogo/produtos/{id}`. Mutações extras do carrinho: GET/PATCH/DELETE em `/api/v1/carrinhos/convidado`.
 
 ## Shared Learnings
 
@@ -30,6 +34,8 @@
 - O remoto `vicentepf78/pedido-produtor-rural` estava vazio no bootstrap.
 - O app desktop CompozyOS não está instalado; acompanhamento pela UI web do daemon.
 - O dock Tasks do CompozyOS não lista `task_NN.md`.
+- `eng-ui-screenshot` ausente: bundles visuais via Playwright (`VISUAL_TASK03=1`) + Pillow; revisão humana dos pares.
+- Abas do catálogo vêm do catálogo sem filtro e não desaparecem na busca vazia.
 
 ## Open Risks
 
@@ -41,4 +47,4 @@
 
 ## Handoffs
 
-- Próxima ação: `task_03` (catálogo e carrinho). Liberar rotas públicas e reutilizar `chaveCarrinhoConvidado` sem o identity apagá-lo.
+- `task_04`: checkout + pedido idempotente + Meus pedidos. Reutilizar `chaveCarrinhoConvidado` e CSRF.

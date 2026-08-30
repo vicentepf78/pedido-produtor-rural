@@ -50,6 +50,10 @@ public class ConfiguracaoSeguranca {
 								"/api/v1/autenticacao/entrada",
 								"/api/v1/autenticacao/saida")
 						.permitAll()
+						.requestMatchers("/api/v1/catalogo/**")
+						.permitAll()
+						.requestMatchers("/api/v1/carrinhos/convidado/**")
+						.permitAll()
 						.requestMatchers("/api/v1/produtor/**")
 						.hasAuthority("PRODUTOR")
 						.anyRequest()
